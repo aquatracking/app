@@ -1,0 +1,19 @@
+services:
+  mysql:
+    image: mysql:9.1
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      LANG: C.UTF-8
+    volumes:
+      - ./.docker/volumes/db:/var/lib/mysql
+  phpmyadmin:
+    image: phpmyadmin
+    links:
+      - mysql
+    ports:
+      - '8080:80'
+    environment:
+      PMA_HOST: mysql
