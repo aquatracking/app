@@ -12,3 +12,22 @@ body {
   height: 100%;
   width: 100%;
 }
+
+/* PrimeVue Panel no header */
+.no-header .p-panel-header {
+  display: none !important;
+}
+
+.no-header .p-panel-content {
+  padding-top: 1.125rem !important;
+}
+
+/* PrimeVue Stepper no background */
+.p-steppanel {
+  background-color: transparent !important;
+}
+
+/* PrimeVue SelectButton full width */
+.p-selectbutton.w-full .p-togglebutton {
+  width: 100%;
+}

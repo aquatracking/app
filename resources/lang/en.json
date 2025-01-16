@@ -1,9 +1,85 @@
 {
   "appName": "Aquatracking",
-  "greeting": "Welcome !",
+  "greeting": "Welcome {fullName} !",
+  "returnTo": "Return to",
   "pages": {
     "home": {
       "title": "Home"
+    },
+    "register": {
+      "title": "Register"
+    },
+    "login": {
+      "title": "Login"
+    },
+    "forgotPassword": {
+      "title": "Forgot password"
+    },
+    "resetPassword": {
+      "title": "Reset password"
     }
+  },
+  "auth": {
+    "alreadyRegistered": "Already have an account?",
+    "noAccount": "Don't have an account?",
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "forgotPassword": "Forgot your password?",
+    "sendResetMail": "Send reset link",
+    "resetPassword": "Reset password",
+    "logout": "Logout"
+  },
+  "notifications": {
+    "accountCreatedCheckEmail": "Account created successfully, check your email for the verification link",
+    "resetLinkSent": "If an account exists with this email address, a reset link has been sent.",
+    "passwordReset": "Password reset successfully",
+    "emailNotVerified": "Email not verified, check your inbox for the verification link",
+    "emailVerified": "Email verified successfully"
+  },
+  "email": {
+    "verifyYourEmail": {
+      "subject": "Verify your email address",
+      "text": "Hello {fullName},\n\nThank you for signing up on Aquatracking. To complete your registration, please click on the link below.\n\n{verificationLink}"
+    },
+    "resetYourPassword": {
+      "subject": "Reset your password",
+      "text": "Hello {fullName},\n\nYou have requested to reset your password. Please click on the link below to reset your password.\n\n{resetLink}"
+    },
+    "passwordResetConfirmation": {
+      "subject": "Password reset confirmation",
+      "text": "Hello {fullName},\n\nYour password has been reset successfully."
+    }
+  },
+  "fields": {
+    "email": "Email",
+    "password": "Password",
+    "fullName": "Full name",
+    "rememberMe": "Remember me",
+    "newPassword": "New password"
+  },
+  "validator": {
+    "shared": {
+      "fields": {
+        "email": "email",
+        "password": "password",
+        "fullName": "full name"
+      },
+      "messages": {
+        "required": "The {field} field is required.",
+        "minLength": "The {field} field must be at least {min} characters.",
+        "maxLength": "The {field} field must be at most {max} characters.",
+        "email": "The {field} field must be a valid email address.",
+        "email.database.unique": "This email address is already used."
+      }
+    }
+  },
+  "errors": {
+    "E_UNAUTHORIZED_ACCESS": "Unauthorized access",
+    "E_INVALID_CREDENTIALS": "Incorrect email or password",
+    "E_MISSING_EMAIL_VERIFICATION_TOKEN": "Missing verification token",
+    "E_INVALID_EMAIL_VERIFICATION_TOKEN_TRY_AGAIN": "Invalid or expired token, try to connect again for receiving a new one"
+  },
+  "validation": {
+    "invalidToken": "Invalid or expired token"
   }
 }

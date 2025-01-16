@@ -1,9 +1,85 @@
 {
   "appName": "Aquatracking",
-  "greeting": "Bienvenue !",
+  "greeting": "Bienvenue {fullName} !",
+  "returnTo": "Retour à",
   "pages": {
     "home": {
       "title": "Accueil"
+    },
+    "register": {
+      "title": "Inscription"
+    },
+    "login": {
+      "title": "Connexion"
+    },
+    "forgotPassword": {
+      "title": "Mot de passe oublié"
+    },
+    "resetPassword": {
+      "title": "Réinitialisation du mot de passe"
     }
+  },
+  "auth": {
+    "alreadyRegistered": "Vous avez déjà un compte ?",
+    "noAccount": "Vous n'avez pas de compte ?",
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire",
+    "forgotPassword": "Mot de passe oublié ?",
+    "sendResetMail": "Envoyer un lien de réinitialisation",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "logout": "Déconnexion"
+  },
+  "notifications": {
+    "accountCreatedCheckEmail": "Compte créé avec succès, vérifiez votre email pour le lien de vérification",
+    "resetLinkSent": "Si un compte existe avec cette adresse email, un lien de réinitialisation a été envoyé.",
+    "passwordReset": "Mot de passe réinitialisé avec succès",
+    "emailNotVerified": "Email non vérifié, vérifiez votre boîte de réception pour le lien de vérification",
+    "emailVerified": "Email vérifié avec succès"
+  },
+  "email": {
+    "verifyYourEmail": {
+      "subject": "Vérifiez votre adresse email",
+      "text": "Bonjour {fullName},\n\nMerci de vous être inscrit sur Aquatracking. Pour finaliser votre inscription, veuillez cliquer sur le lien ci-dessous.\n\n{verificationLink}"
+    },
+    "resetYourPassword": {
+      "subject": "Réinitialisez votre mot de passe",
+      "text": "Bonjour {fullName},\n\nVous avez demandé à réinitialiser votre mot de passe. Veuillez cliquer sur le lien ci-dessous pour réinitialiser votre mot de passe.\n\n{resetLink}"
+    },
+    "passwordResetConfirmation": {
+      "subject": "Confirmation de réinitialisation du mot de passe",
+      "text": "Bonjour {fullName},\n\nVotre mot de passe a été réinitialisé avec succès."
+    }
+  },
+  "fields": {
+    "email": "Email",
+    "password": "Mot de passe",
+    "fullName": "Nom",
+    "rememberMe": "Se souvenir de moi",
+    "newPassword": "Nouveau mot de passe"
+  },
+  "validator": {
+    "shared": {
+      "fields": {
+        "email": "email",
+        "password": "mot de passe",
+        "fullName": "nom"
+      },
+      "messages": {
+        "required": "Le champ {field} est requis.",
+        "minLength": "Le champs {field} doit contenir au moins {min} caractères.",
+        "maxLength": "Le champs {field} doit contenir au plus {max} caractères.",
+        "email": "Le champ {field} doit être une adresse email valide.",
+        "email.database.unique": "Cette adresse email est déjà utilisée."
+      }
+    }
+  },
+  "errors": {
+    "E_UNAUTHORIZED_ACCESS": "Accès non autorisé",
+    "E_INVALID_CREDENTIALS": "Email ou mot de passe incorrect",
+    "E_MISSING_EMAIL_VERIFICATION_TOKEN": "Token de vérification manquant",
+    "E_INVALID_EMAIL_VERIFICATION_TOKEN_TRY_AGAIN": "Token invalide ou expiré, essayez de vous connecter à nouveau pour en recevoir un nouveau"
+  },
+  "validation": {
+    "invalidToken": "Token invalide ou expiré"
   }
 }

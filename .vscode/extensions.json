@@ -1,7 +1,6 @@
 {
   "recommendations": [
     "jripouteau.adonis-extension-pack",
-    "vue.volar",
     "bradlc.vscode-tailwindcss",
     "csstools.postcss",
     "lokalise.i18n-ally"

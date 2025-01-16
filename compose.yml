@@ -17,3 +17,8 @@ services:
       - '8080:80'
     environment:
       PMA_HOST: mysql
+  maildev:
+    image: maildev/maildev
+    ports:
+      - '1080:1080'
+      - '1025:1025'
