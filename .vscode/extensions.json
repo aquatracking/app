@@ -3,6 +3,7 @@
     "jripouteau.adonis-extension-pack",
     "vue.volar",
     "bradlc.vscode-tailwindcss",
-    "csstools.postcss"
+    "csstools.postcss",
+    "lokalise.i18n-ally"
   ]
 }

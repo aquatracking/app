@@ -1,0 +1,9 @@
+{
+  "appName": "Aquatracking",
+  "greeting": "Welcome !",
+  "pages": {
+    "home": {
+      "title": "Home"
+    }
+  }
+}
