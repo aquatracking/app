@@ -13,14 +13,6 @@ const inertiaConfig = defineConfig({
   sharedData: {
     errors: (ctx) => ctx.inertia.always(() => ctx.session?.flashMessages.get('errors')),
   },
-
-  /**
-   * Options for the server-side rendering
-   */
-  ssr: {
-    enabled: true,
-    entrypoint: 'inertia/app/ssr.ts',
-  },
 })
 
 export default inertiaConfig

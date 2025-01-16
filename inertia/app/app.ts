@@ -7,7 +7,7 @@ import { updatePreset } from '@primevue/themes'
 import Aura from '@primevue/themes/aura'
 import PrimeVue from 'primevue/config'
 import type { DefineComponent } from 'vue'
-import { createSSRApp, h } from 'vue'
+import { createApp, h } from 'vue'
 import '../css/app.css'
 
 const appName = import.meta.env.VITE_APP_NAME || 'AdonisJS'
@@ -25,7 +25,7 @@ createInertiaApp({
   },
 
   setup({ el, App, props, plugin }) {
-    createSSRApp({ render: () => h(App, props) })
+    createApp({ render: () => h(App, props) })
       .use(plugin)
       .use(PrimeVue, {
         theme: {
