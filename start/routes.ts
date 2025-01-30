@@ -47,3 +47,6 @@ router
 
 const EmailVerificationController = () => import('#controllers/auth/email_verification_controller')
 router.get('auth/email/verify', [EmailVerificationController, 'verify']).as('auth.email.verify')
+
+const BiotopesController = () => import('#controllers/biotopes_controller')
+router.resource('biotopes', BiotopesController).use('*', middleware.auth())

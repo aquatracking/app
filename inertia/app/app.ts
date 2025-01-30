@@ -9,6 +9,8 @@ import PrimeVue from 'primevue/config'
 import type { DefineComponent } from 'vue'
 import { createApp, h } from 'vue'
 import { createI18n } from 'vue-i18n'
+
+import 'primeicons/primeicons.css'
 import '../css/app.css'
 
 import en from '../../resources/lang/en.json'

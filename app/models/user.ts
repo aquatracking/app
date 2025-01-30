@@ -7,6 +7,7 @@ import type { HasMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 import { randomUUID } from 'node:crypto'
 import UserToken from './user_token.js'
+import Biotope from './biotope.js'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -51,6 +52,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare emailVerificationToken: HasMany<typeof UserToken>
 
   static readonly rememberMeTokens = DbRememberMeTokensProvider.forModel(User)
+
+  @hasMany(() => Biotope)
+  declare biotopes: HasMany<typeof Biotope>
 
   @beforeCreate()
   static assignUuid(user: User) {
