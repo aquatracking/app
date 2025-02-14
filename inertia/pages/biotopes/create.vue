@@ -7,6 +7,7 @@ import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
 import Message from 'primevue/message'
 import Select from 'primevue/select'
+import SelectButton from 'primevue/selectbutton'
 import Step from 'primevue/step'
 import StepItem from 'primevue/stepitem'
 import StepPanel from 'primevue/steppanel'
@@ -23,6 +24,7 @@ const form = useForm({
   startedDate: new Date(),
   type: 'aquarium',
   volume: null,
+  saltwater: false,
 })
 
 function submit() {
@@ -190,6 +192,21 @@ function submit() {
                     {{ error }}
                   </Message>
                 </FloatLabel>
+
+                <SelectButton
+                  v-if="form.type === 'aquarium'"
+                  id="saltwater"
+                  name="saltwater"
+                  class="w-full"
+                  :invalid="!!form.errors.saltwater"
+                  v-model="form.saltwater"
+                  option-value="value"
+                  option-label="name"
+                  :options="[
+                    { name: $t('biotopes.aquarium.freshwater'), value: false },
+                    { name: $t('biotopes.aquarium.saltwater'), value: true },
+                  ]"
+                />
               </div>
 
               <div class="flex py-6 gap-2">

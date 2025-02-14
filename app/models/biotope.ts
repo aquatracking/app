@@ -28,6 +28,9 @@ export default class Biotope extends BaseModel {
   @column()
   declare archivedDate: Date | null
 
+  @column()
+  declare saltwater: boolean
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

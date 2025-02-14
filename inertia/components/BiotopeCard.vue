@@ -4,6 +4,9 @@ import Card from 'primevue/card'
 import Tag from 'primevue/tag'
 import { computed, toRefs } from 'vue'
 import { BiotopeDto } from '../../app/dto/biotope_dto'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   biotope: BiotopeDto
@@ -17,6 +20,23 @@ const biotopeImage = computed(() => {
   } else if (biotope.value.type === 'terrarium') {
     return '../../images/illustrations/terrarium.jpg'
   }
+})
+
+const subtitle = computed(() => {
+  const content = []
+  if (biotope.value.volume) {
+    content.push(`${biotope.value.volume}L`)
+  }
+
+  if (biotope.value.type === 'aquarium') {
+    if (biotope.value.saltwater) {
+      content.push(t('biotopes.aquarium.saltwater'))
+    } else {
+      content.push(t('biotopes.aquarium.freshwater'))
+    }
+  }
+
+  return content.join(' - ')
 })
 </script>
 <template>
@@ -32,7 +52,9 @@ const biotopeImage = computed(() => {
       <template #title>
         {{ biotope.name }}
       </template>
-      <template #subtitle v-if="biotope.volume"> {{ biotope.volume }}L </template>
+      <template #subtitle v-if="subtitle.length > 0">
+        {{ subtitle }}
+      </template>
       <template #content>
         <p class="m-0">
           {{ biotope.description }}

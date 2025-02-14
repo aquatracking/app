@@ -11,5 +11,6 @@ export const biotopeCreateValidator = vine.compile(
     }),
     volume: vine.number().min(1).nullable(),
     type: vine.enum(['aquarium', 'terrarium']),
+    saltwater: vine.boolean().optional(),
   })
 )

@@ -111,7 +111,9 @@
   },
   "biotopes": {
     "aquarium": {
-      "name": "Aquarium"
+      "name": "Aquarium",
+      "saltwater": "Eau de mer",
+      "freshwater": "Eau douce"
     },
     "terrarium": {
       "name": "Terrarium"
