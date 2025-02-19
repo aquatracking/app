@@ -6,6 +6,7 @@ import { createInertiaApp } from '@inertiajs/vue3'
 import { updatePreset } from '@primevue/themes'
 import Aura from '@primevue/themes/aura'
 import PrimeVue from 'primevue/config'
+import ConfirmationService from 'primevue/confirmationservice'
 import type { DefineComponent } from 'vue'
 import { createApp, h } from 'vue'
 import { createI18n } from 'vue-i18n'
@@ -49,6 +50,7 @@ createInertiaApp({
           fallbackLocale: 'en',
         })
       )
+      .use(ConfirmationService)
       .mount(el)
 
     updatePreset({

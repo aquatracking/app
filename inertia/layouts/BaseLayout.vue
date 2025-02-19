@@ -2,6 +2,7 @@
 import { Head, usePage } from '@inertiajs/vue3'
 import { PrimeVueLocaleOptions, usePrimeVue } from 'primevue/config'
 import { useI18n } from 'vue-i18n'
+import ConfirmDialog from 'primevue/confirmdialog'
 
 defineProps<{ title: string }>()
 
@@ -18,5 +19,8 @@ primevue.config.locale = messages.value[locale.value as string]?.primevue as
 </script>
 <template>
   <Head :title="title" />
+
+  <ConfirmDialog> </ConfirmDialog>
+
   <slot />
 </template>

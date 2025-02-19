@@ -1,6 +1,9 @@
 <script setup lang="ts">
+import { router } from '@inertiajs/vue3'
 import Button from 'primevue/button'
+import { useConfirm } from 'primevue/useconfirm'
 import { toRefs } from 'vue'
+import { useI18n } from 'vue-i18n'
 import PageContent from '~/components/PageContent.vue'
 import TitleBar from '~/components/TitleBar.vue'
 import { useBiotopeDetails } from '~/composables/use_biotope_details'
@@ -11,9 +14,27 @@ const props = defineProps<{
   biotope: BiotopeDto
 }>()
 
+const { t } = useI18n()
+
 const { biotope } = toRefs(props)
 
 const { subtitleItems } = useBiotopeDetails(biotope)
+
+const confirmDelete = useConfirm()
+
+function showDeleteDialog() {
+  confirmDelete.require({
+    header: t('dialogs.delete.title'),
+    message: t('dialogs.delete.message', { name: biotope.value.name }),
+    acceptClass: 'p-button-danger',
+    acceptLabel: t('dialogs.delete.accept'),
+    rejectClass: 'p-button-secondary',
+    rejectLabel: t('dialogs.delete.reject'),
+    accept: () => {
+      router.delete(`/biotopes/${biotope.value.id}`)
+    },
+  })
+}
 </script>
 
 <template>
@@ -32,6 +53,16 @@ const { subtitleItems } = useBiotopeDetails(biotope)
           </div>
         </template>
         <template #cta>
+          <Button
+            as="a"
+            :label="$t('pages.biotopes.delete.title')"
+            type="button"
+            @click="showDeleteDialog"
+            icon="pi pi-trash"
+            class="p-button-danger"
+            variant="outlined"
+          />
+
           <Button
             as="a"
             :label="$t('pages.biotopes.edit.title')"

@@ -61,5 +61,23 @@ export default class BiotopesController {
   /**
    * Delete record
    */
-  async destroy({ params }: HttpContext) {}
+  async destroy({ params, auth, response, session, i18n }: HttpContext) {
+    // Delete
+    const biotope = await auth
+      .getUserOrFail()
+      .related('biotopes')
+      .query()
+      .where('id', params.id)
+      .firstOrFail()
+
+    await biotope.delete()
+
+    session.flash('notification', {
+      type: 'success',
+      message: i18n.t('notifications.biotopeDeleted', { name: biotope.name }),
+    })
+
+    // Redirect
+    return response.redirect().toRoute('home')
+  }
 }

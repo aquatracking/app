@@ -36,6 +36,9 @@
       },
       "edit": {
         "title": "Modifier le biotope"
+      },
+      "delete": {
+        "title": "Supprimer le biotope"
       }
     }
   },
@@ -55,7 +58,9 @@
     "passwordReset": "Mot de passe réinitialisé avec succès",
     "emailNotVerified": "Email non vérifié, vérifiez votre boîte de réception pour le lien de vérification",
     "emailVerified": "Email vérifié avec succès",
-    "biotopeCreated": "Biotope {name} créé avec succès"
+    "biotopeCreated": "Biotope {name} créé avec succès",
+    "biotopeUpdated": "Biotope {name} mis à jour avec succès",
+    "biotopeDeleted": "Biotope {name} supprimé avec succès"
   },
   "email": {
     "verifyYourEmail": {
@@ -69,6 +74,14 @@
     "passwordResetConfirmation": {
       "subject": "Confirmation de réinitialisation du mot de passe",
       "text": "Bonjour {fullName},\n\nVotre mot de passe a été réinitialisé avec succès."
+    }
+  },
+  "dialogs": {
+    "delete": {
+      "title": "Supprimer",
+      "message": "Êtes-vous sûr de vouloir supprimer {name} ?",
+      "accept": "Confirmer",
+      "reject": "Annuler"
     }
   },
   "fields": {
