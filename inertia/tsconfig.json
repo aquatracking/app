@@ -9,5 +9,8 @@
       "~/*": ["./*"]
     }
   },
-  "include": ["./**/*.ts", "./**/*.vue"]
+  "include": ["./**/*.ts", "./**/*.vue"],
+  "vueCompilerOptions": {
+    "checkUnknownComponents": true
+  }
 }

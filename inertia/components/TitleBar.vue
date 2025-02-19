@@ -31,6 +31,9 @@ defineProps<{
         <div class="font-medium text-3xl text-surface-900 dark:text-surface-0">
           {{ title }}
         </div>
+        <div class="flex items-center text-surface-700 dark:text-surface-100 flex-wrap">
+          <slot name="subtitle" />
+        </div>
       </div>
       <div class="mt-4 lg:mt-0 flex gap-4">
         <slot name="cta" />

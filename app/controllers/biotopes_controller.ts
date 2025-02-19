@@ -35,7 +35,18 @@ export default class BiotopesController {
   /**
    * Show individual record
    */
-  async show({ params }: HttpContext) {}
+  async show({ params, inertia, auth }: HttpContext) {
+    const biotope = await auth
+      .getUserOrFail()
+      .related('biotopes')
+      .query()
+      .where('id', params.id)
+      .firstOrFail()
+
+    return inertia.render('biotopes/show', {
+      biotope: biotope.serialize(),
+    })
+  }
 
   /**
    * Edit individual record

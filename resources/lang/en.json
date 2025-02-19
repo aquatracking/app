@@ -26,8 +26,12 @@
         "title": "Create a biotope",
         "shortTitle": "Create",
         "steps": {
-          "informations": { "title": "Informations" },
-          "details": { "title": "Details" }
+          "informations": {
+            "title": "Informations"
+          },
+          "details": {
+            "title": "Details"
+          }
         }
       },
       "edit": {
@@ -117,7 +121,8 @@
     },
     "terrarium": {
       "name": "Terrarium"
-    }
+    },
+    "volume": "{volume}L"
   },
   "primevue": {
     "accept": "Yes",
