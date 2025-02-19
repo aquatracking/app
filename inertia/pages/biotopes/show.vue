@@ -4,6 +4,7 @@ import Button from 'primevue/button'
 import { useConfirm } from 'primevue/useconfirm'
 import { toRefs } from 'vue'
 import { useI18n } from 'vue-i18n'
+import ErrorAndNotificationDisplay from '~/components/ErrorAndNotificationDisplay.vue'
 import PageContent from '~/components/PageContent.vue'
 import TitleBar from '~/components/TitleBar.vue'
 import { useBiotopeDetails } from '~/composables/use_biotope_details'
@@ -72,6 +73,8 @@ function showDeleteDialog() {
           />
         </template>
       </TitleBar>
+
+      <ErrorAndNotificationDisplay />
 
       <p class="m-0">
         {{ biotope.description }}

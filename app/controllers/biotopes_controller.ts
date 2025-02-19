@@ -1,4 +1,5 @@
 import { biotopeCreateValidator } from '#validators/biotope_create_validator'
+import { biotopeUpdateValidator } from '#validators/biotope_update_validator'
 import type { HttpContext } from '@adonisjs/core/http'
 
 export default class BiotopesController {
@@ -51,12 +52,49 @@ export default class BiotopesController {
   /**
    * Edit individual record
    */
-  async edit({ params }: HttpContext) {}
+  async edit({ params, inertia, auth }: HttpContext) {
+    const biotope = await auth
+      .getUserOrFail()
+      .related('biotopes')
+      .query()
+      .where('id', params.id)
+      .firstOrFail()
+
+    return inertia.render('biotopes/edit', {
+      biotope: biotope.serialize(),
+    })
+  }
 
   /**
    * Handle form submission for the edit action
    */
-  async update({ params }: HttpContext) {}
+  async update({ params, auth, request, session, i18n, response }: HttpContext) {
+    const { name, description, volume, saltwater } =
+      await request.validateUsing(biotopeUpdateValidator)
+
+    const biotope = await auth
+      .getUserOrFail()
+      .related('biotopes')
+      .query()
+      .where('id', params.id)
+      .firstOrFail()
+
+    biotope.merge({
+      name,
+      description,
+      volume,
+      saltwater,
+    })
+
+    await biotope.save()
+
+    session.flash('notification', {
+      type: 'success',
+      message: i18n.t('notifications.biotopeUpdated', { name: biotope.name }),
+    })
+
+    return response.redirect().toRoute('biotopes.show', { id: biotope.id })
+  }
 
   /**
    * Delete record

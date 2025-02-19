@@ -35,7 +35,8 @@
         }
       },
       "edit": {
-        "title": "Modifier le biotope"
+        "title": "Modifier le biotope",
+        "shortTitle": "Modifier"
       },
       "delete": {
         "title": "Supprimer le biotope"
