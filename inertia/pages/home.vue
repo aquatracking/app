@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3'
-import Button from 'primevue/button'
-import NavigationLayout from '~/layouts/NavigationLayout.vue'
-import { UserDto } from '../../app/dto/user_dto'
-import { BiotopeDto } from '../../app/dto/biotope_dto'
 import BiotopeCard from '~/components/BiotopeCard.vue'
-import TitleBar from '~/components/TitleBar.vue'
-import PageContent from '~/components/PageContent.vue'
 import ErrorAndNotificationDisplay from '~/components/ErrorAndNotificationDisplay.vue'
+import PageContent from '~/components/PageContent.vue'
+import TitleBar from '~/components/TitleBar.vue'
+import { Button } from '~/components/ui/button'
+import NavigationLayout from '~/layouts/NavigationLayout.vue'
+import { BiotopeDto } from '../../app/dto/biotope_dto'
+import { UserDto } from '../../app/dto/user_dto'
+import { Plus } from 'lucide-vue-next'
 
 defineProps<{
   user: UserDto
@@ -17,23 +18,21 @@ defineProps<{
 
 <template>
   <NavigationLayout :title="$t('pages.home.title')">
-    <div class="flex lg:flex-row flex-col gap-4 bg-surface-0 dark:bg-surface-900">
+    <div class="flex lg:flex-row flex-col gap-4 bg-accent">
       <div class="flex-1 flex items-center">
         <div class="py-6 pt-12 lg:py-12 px-6 md:px-12 lg:px-20">
-          <h1
-            class="text-3xl lg:text-5xl font-bold text-surface-900 dark:text-surface-0 mb-4 lg:leading-normal"
-          >
+          <h1 class="text-3xl lg:text-5xl font-bold text-accent-foreground mb-4 lg:leading-normal">
             {{ $t('appName') }}<br />
-            <span class="text-primary dark:text-primary">{{
-              $t('greeting', { fullName: user.fullName })
-            }}</span>
+            <span class="text-primary">{{ $t('greeting', { fullName: user.fullName }) }}</span>
           </h1>
-          <p class="text-surface-700 dark:text-surface-200 leading-normal mb-8">
+          <p class="text-accent-foreground leading-normal mb-8">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
             incididunt ut labore et dolore magna aliqua.
           </p>
           <div class="flex items-center gap-6">
-            <Button :label="$t('auth.logout')" type="button" @click="router.post('/auth/logout')" />
+            <Button type="button" @click="router.post('/auth/logout')">
+              {{ $t('auth.logout') }}
+            </Button>
           </div>
         </div>
       </div>
@@ -44,13 +43,10 @@ defineProps<{
 
       <TitleBar :title="$t('pages.biotopes.title')">
         <template #cta>
-          <Button
-            as="a"
-            :label="$t('pages.biotopes.create.title')"
-            type="button"
-            href="/biotopes/create"
-            icon="pi pi-plus"
-          />
+          <Button as="a" type="button" href="/biotopes/create">
+            <Plus class="w-4 h-4 mr-2" />
+            {{ $t('pages.biotopes.create.title') }}
+          </Button>
         </template>
       </TitleBar>
 

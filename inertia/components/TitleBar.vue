@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from '~/components/ui/breadcrumb'
 
 defineProps<{
   title: string
@@ -8,27 +14,20 @@ defineProps<{
 </script>
 <template>
   <div>
-    <ul class="list-none p-0 m-0 flex items-center font-medium mb-4" v-if="breadcrumb">
-      <template v-for="(item, index) in breadcrumb" :key="index">
-        <li>
-          <Link
-            class="no-underline leading-normal cursor-pointer text-surface-500 dark:text-surface-300 aria-selected:text-surface-900 dark:aria-selected:text-surface-0"
-            :aria-current="index === breadcrumb.length - 1 ? 'page' : undefined"
-            :aria-selected="index === breadcrumb.length - 1"
-            :href="item.href"
-          >
-            {{ item.label }}
-          </Link>
-        </li>
-        <li class="px-2" v-if="index < breadcrumb.length - 1">
-          <i class="pi pi-angle-right text-surface-500 dark:text-surface-300 leading-normal" />
-        </li>
-      </template>
-    </ul>
+    <Breadcrumb v-if="breadcrumb" class="mb-2">
+      <BreadcrumbList>
+        <template v-for="(item, index) in breadcrumb" :key="index">
+          <BreadcrumbItem>
+            <BreadcrumbLink :href="item.href"> {{ item.label }} </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator v-if="index < breadcrumb.length - 1" />
+        </template>
+      </BreadcrumbList>
+    </Breadcrumb>
 
-    <div class="flex items-start flex-col lg:justify-between lg:flex-row">
+    <div class="flex items-center flex-col lg:justify-between lg:flex-row">
       <div>
-        <div class="font-medium text-3xl text-surface-900 dark:text-surface-0">
+        <div class="text-3xl font-bold tracking-tight">
           {{ title }}
         </div>
         <div class="flex items-center text-surface-700 dark:text-surface-100 flex-wrap">
