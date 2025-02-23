@@ -1,17 +1,23 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3'
-import Button from 'primevue/button'
-import FloatLabel from 'primevue/floatlabel'
-import InputNumber from 'primevue/inputnumber'
-import InputText from 'primevue/inputtext'
-import Message from 'primevue/message'
-import SelectButton from 'primevue/selectbutton'
-import Textarea from 'primevue/textarea'
 import ErrorAndNotificationDisplay from '~/components/ErrorAndNotificationDisplay.vue'
 import PageContent from '~/components/PageContent.vue'
 import TitleBar from '~/components/TitleBar.vue'
+import { Input, InputError } from '~/components/ui/input'
+import { Label } from '~/components/ui/label'
+import {
+  NumberField,
+  NumberFieldContent,
+  NumberFieldDecrement,
+  NumberFieldIncrement,
+  NumberFieldInput,
+} from '~/components/ui/number-field'
+import { Switch } from '~/components/ui/switch'
+import { Textarea } from '~/components/ui/textarea'
 import NavigationLayout from '~/layouts/NavigationLayout.vue'
 import { BiotopeDto } from '../../../app/dto/biotope_dto'
+import { Button } from '~/components/ui/button'
+import { Save } from 'lucide-vue-next'
 
 const props = defineProps<{
   biotope: BiotopeDto
@@ -19,7 +25,7 @@ const props = defineProps<{
 
 const form = useForm({
   name: props.biotope.name,
-  description: props.biotope.description,
+  description: props.biotope.description as string | undefined,
   volume: props.biotope.volume,
   saltwater: props.biotope.type === 'aquarium' ? Boolean(props.biotope.saltwater) : false,
 })
@@ -48,93 +54,54 @@ function submit() {
       <ErrorAndNotificationDisplay />
 
       <form @submit.prevent="submit">
-        <div class="flex flex-col gap-8 pt-6 max-w-4xl">
-          <FloatLabel>
-            <InputText
-              id="name"
-              type="text"
-              name="name"
-              class="w-full"
-              :invalid="!!form.errors.name"
-              v-model="form.name"
-            />
-            <label for="name">
+        <div class="grid gap-4 max-w-4xl">
+          <div class="grid gap-2">
+            <Label for="name" :invalid="!!form.errors.name">
               {{ $t('fields.name') }}
-            </label>
-            <Message
-              v-for="error in form.errors.name ?? []"
-              severity="error"
-              variant="simple"
-              size="small"
-              class="pt-1"
-            >
+            </Label>
+            <Input id="name" name="name" type="text" v-model="form.name" />
+            <InputError v-for="error in form.errors.name ?? []">
               {{ error }}
-            </Message>
-          </FloatLabel>
+            </InputError>
+          </div>
 
-          <FloatLabel>
-            <Textarea
-              id="description"
-              name="description"
-              class="w-full"
-              auto-resize
-              :rows="5"
-              :invalid="!!form.errors.description"
-              v-model="form.description"
-            />
-            <label for="description">
+          <div class="grid gap-2">
+            <Label for="description" :invalid="!!form.errors.description">
               {{ $t('fields.description') }}
-            </label>
-            <Message
-              v-for="error in form.errors.description ?? []"
-              severity="error"
-              variant="simple"
-              size="small"
-              class="pt-1"
-            >
+            </Label>
+            <Textarea id="description" name="description" type="text" v-model="form.description" />
+            <InputError v-for="error in form.errors.description ?? []">
               {{ error }}
-            </Message>
-          </FloatLabel>
+            </InputError>
+          </div>
 
-          <FloatLabel>
-            <InputNumber
-              id="volume"
-              name="volume"
-              suffix="L"
-              class="w-full"
-              :invalid="!!form.errors.volume"
-              v-model="form.volume"
-            />
-            <label for="volume"> {{ $t('fields.volume') }}</label>
-            <Message
-              v-for="error in form.errors.volume ?? []"
-              severity="error"
-              variant="simple"
-              size="small"
-              class="pt-1"
-            >
+          <NumberField id="volume" name="volume" v-model="form.volume">
+            <Label>
+              {{ $t('fields.volume') }}
+            </Label>
+            <NumberFieldContent>
+              <NumberFieldDecrement />
+              <NumberFieldInput />
+              <NumberFieldIncrement />
+            </NumberFieldContent>
+            <InputError v-for="error in form.errors.volume ?? []">
               {{ error }}
-            </Message>
-          </FloatLabel>
+            </InputError>
+          </NumberField>
 
-          <SelectButton
-            v-if="biotope.type === 'aquarium'"
-            id="saltwater"
-            name="saltwater"
-            class="w-full"
-            :invalid="!!form.errors.saltwater"
-            v-model="form.saltwater"
-            option-value="value"
-            option-label="name"
-            :options="[
-              { name: $t('biotopes.aquarium.freshwater'), value: false },
-              { name: $t('biotopes.aquarium.saltwater'), value: true },
-            ]"
-          />
+          <div class="flex items-center space-x-2" v-if="biotope.type === 'aquarium'">
+            <Switch id="saltwater" v-model="form.saltwater" />
+            <Label for="saltwater">
+              {{ $t('biotopes.aquarium.saltwater') }}
+            </Label>
+          </div>
         </div>
 
         <div class="flex py-6 gap-2">
-          <Button :label="$t('pages.biotopes.edit.title')" icon="pi pi-save" type="submit" />
+          <Button icon="pi pi-save" type="submit">
+            <Save class="w-4 h-4 mr-2" />
+            {{ $t('pages.biotopes.edit.title') }}
+          </Button>
         </div>
       </form>
     </PageContent>
