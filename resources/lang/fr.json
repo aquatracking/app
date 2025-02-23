@@ -20,10 +20,12 @@
       "description": "Connectez-vous à votre compte"
     },
     "forgotPassword": {
-      "title": "Mot de passe oublié"
+      "title": "Mot de passe oublié",
+      "description": "Entrez votre adresse email pour recevoir un lien de réinitialisation"
     },
     "resetPassword": {
-      "title": "Réinitialisation du mot de passe"
+      "title": "Réinitialisation du mot de passe",
+      "description": "Entrez votre nouveau mot de passe"
     },
     "biotopes": {
       "title": "Biotopes",
@@ -54,8 +56,8 @@
     "signIn": "Se connecter",
     "signUp": "S'inscrire",
     "forgotPassword": "Mot de passe oublié ?",
-    "sendResetMail": "Envoyer un lien de réinitialisation",
-    "resetPassword": "Réinitialiser le mot de passe",
+    "sendResetMail": "Envoyer",
+    "resetPassword": "Réinitialiser",
     "logout": "Déconnexion"
   },
   "notifications": {
@@ -162,9 +164,33 @@
     "dateFormat": "dd/mm/yy",
     "dateIs": "La date est",
     "dateIsNot": "La date n'est pas",
-    "dayNames": ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"],
-    "dayNamesMin": ["dim", "lun", "mar", "mer", "jeu", "ven", "sam"],
-    "dayNamesShort": ["dim", "lundi", "mardi", "mercr", "jeudi", "vendr", "sam"],
+    "dayNames": [
+      "dimanche",
+      "lundi",
+      "mardi",
+      "mercredi",
+      "jeudi",
+      "vendredi",
+      "samedi"
+    ],
+    "dayNamesMin": [
+      "dim",
+      "lun",
+      "mar",
+      "mer",
+      "jeu",
+      "ven",
+      "sam"
+    ],
+    "dayNamesShort": [
+      "dim",
+      "lundi",
+      "mardi",
+      "mercr",
+      "jeudi",
+      "vendr",
+      "sam"
+    ],
     "emptyFilterMessage": "Aucun résultat trouvé",
     "emptyMessage": "Aucune option disponible",
     "emptySearchMessage": "Aucun résultat trouvé",
@@ -172,7 +198,17 @@
     "endsWith": "Se termine par",
     "equals": "Égal à",
     "fileChosenMessage": "{0} fichiers",
-    "fileSizeTypes": ["o", "Ko", "Mo", "Go", "To", "Po", "Eo", "Zo", "Yo"],
+    "fileSizeTypes": [
+      "o",
+      "Ko",
+      "Mo",
+      "Go",
+      "To",
+      "Po",
+      "Eo",
+      "Zo",
+      "Yo"
+    ],
     "filter": "Filtre",
     "firstDayOfWeek": 1,
     "gt": "Supérieur à",

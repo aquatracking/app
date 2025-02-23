@@ -20,10 +20,12 @@
       "description": "Login to your account"
     },
     "forgotPassword": {
-      "title": "Forgot password"
+      "title": "Forgot password",
+      "description": "Enter your email address to receive a reset link"
     },
     "resetPassword": {
-      "title": "Reset password"
+      "title": "Reset password",
+      "description": "Enter your new password"
     },
     "biotopes": {
       "title": "Biotopes",
@@ -54,8 +56,8 @@
     "signIn": "Sign in",
     "signUp": "Sign up",
     "forgotPassword": "Forgot your password?",
-    "sendResetMail": "Send reset link",
-    "resetPassword": "Reset password",
+    "sendResetMail": "Send",
+    "resetPassword": "Reset",
     "logout": "Logout"
   },
   "notifications": {
@@ -162,9 +164,33 @@
     "dateFormat": "mm/dd/yy",
     "dateIs": "Date is",
     "dateIsNot": "Date is not",
-    "dayNames": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-    "dayNamesMin": ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
-    "dayNamesShort": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    "dayNames": [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ],
+    "dayNamesMin": [
+      "Su",
+      "Mo",
+      "Tu",
+      "We",
+      "Th",
+      "Fr",
+      "Sa"
+    ],
+    "dayNamesShort": [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ],
     "emptyFilterMessage": "No results found",
     "emptyMessage": "No available options",
     "emptySearchMessage": "No results found",
@@ -172,7 +198,17 @@
     "endsWith": "Ends with",
     "equals": "Equals",
     "fileChosenMessage": "{0} files",
-    "fileSizeTypes": ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"],
+    "fileSizeTypes": [
+      "B",
+      "KB",
+      "MB",
+      "GB",
+      "TB",
+      "PB",
+      "EB",
+      "ZB",
+      "YB"
+    ],
     "filter": "Filter",
     "firstDayOfWeek": 0,
     "gt": "Greater than",

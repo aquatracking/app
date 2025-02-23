@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AlertCircle } from 'lucide-vue-next'
+import { AlertCircle, CheckCircle, InfoIcon } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
 import { usePageErrorsBag } from '~/composables/use_page_errors_bag'
@@ -24,7 +24,9 @@ const errors = computed(() =>
     </Alert>
 
     <Alert :variant="notification.type === 'error' ? 'destructive' : 'default'" v-if="notification">
-      <AlertCircle class="w-4 h-4" />
+      <AlertCircle class="w-4 h-4" v-if="notification.type === 'error'" />
+      <CheckCircle class="w-4 h-4" v-else-if="notification.type === 'success'" />
+      <InfoIcon class="w-4 h-4" v-else />
       <AlertTitle>
         <template v-if="notification.type === 'error'">{{ $t('error') }}</template>
         <template v-else-if="notification.type === 'success'">{{ $t('success') }}</template>

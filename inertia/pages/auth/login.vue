@@ -76,7 +76,7 @@ function submit() {
                   {{ $t('fields.rememberMe') }}
                 </label>
               </div>
-              <Button type="submit" class="w-full">
+              <Button type="submit" class="w-full" :loading="form.processing">
                 {{ $t('auth.signIn') }}
               </Button>
             </div>
