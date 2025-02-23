@@ -4,6 +4,10 @@
   "returnTo": "Retour à",
   "back": "Retour",
   "next": "Suivant",
+  "error": "Erreur",
+  "success": "Succès",
+  "info": "Info",
+  "warning": "Attention",
   "pages": {
     "home": {
       "title": "Accueil"
@@ -12,7 +16,8 @@
       "title": "Inscription"
     },
     "login": {
-      "title": "Connexion"
+      "title": "Connexion",
+      "description": "Connectez-vous à votre compte"
     },
     "forgotPassword": {
       "title": "Mot de passe oublié"

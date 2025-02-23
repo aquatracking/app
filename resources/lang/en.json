@@ -4,6 +4,10 @@
   "returnTo": "Return to",
   "back": "Back",
   "next": "Next",
+  "error": "Error",
+  "success": "Success",
+  "info": "Info",
+  "warning": "Warning",
   "pages": {
     "home": {
       "title": "Home"
@@ -12,7 +16,8 @@
       "title": "Register"
     },
     "login": {
-      "title": "Login"
+      "title": "Login",
+      "description": "Login to your account"
     },
     "forgotPassword": {
       "title": "Forgot password"
