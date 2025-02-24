@@ -98,7 +98,7 @@ function submit() {
         </div>
 
         <div class="flex py-6 gap-2">
-          <Button icon="pi pi-save" type="submit">
+          <Button type="submit">
             <Save class="w-4 h-4 mr-2" />
             {{ $t('pages.biotopes.edit.title') }}
           </Button>

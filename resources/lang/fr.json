@@ -8,6 +8,7 @@
   "success": "Succès",
   "info": "Info",
   "warning": "Attention",
+  "selectDate": "Choisir une date",
   "pages": {
     "home": {
       "title": "Accueil"
@@ -165,33 +166,9 @@
     "dateFormat": "dd/mm/yy",
     "dateIs": "La date est",
     "dateIsNot": "La date n'est pas",
-    "dayNames": [
-      "dimanche",
-      "lundi",
-      "mardi",
-      "mercredi",
-      "jeudi",
-      "vendredi",
-      "samedi"
-    ],
-    "dayNamesMin": [
-      "dim",
-      "lun",
-      "mar",
-      "mer",
-      "jeu",
-      "ven",
-      "sam"
-    ],
-    "dayNamesShort": [
-      "dim",
-      "lundi",
-      "mardi",
-      "mercr",
-      "jeudi",
-      "vendr",
-      "sam"
-    ],
+    "dayNames": ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"],
+    "dayNamesMin": ["dim", "lun", "mar", "mer", "jeu", "ven", "sam"],
+    "dayNamesShort": ["dim", "lundi", "mardi", "mercr", "jeudi", "vendr", "sam"],
     "emptyFilterMessage": "Aucun résultat trouvé",
     "emptyMessage": "Aucune option disponible",
     "emptySearchMessage": "Aucun résultat trouvé",
@@ -199,17 +176,7 @@
     "endsWith": "Se termine par",
     "equals": "Égal à",
     "fileChosenMessage": "{0} fichiers",
-    "fileSizeTypes": [
-      "o",
-      "Ko",
-      "Mo",
-      "Go",
-      "To",
-      "Po",
-      "Eo",
-      "Zo",
-      "Yo"
-    ],
+    "fileSizeTypes": ["o", "Ko", "Mo", "Go", "To", "Po", "Eo", "Zo", "Yo"],
     "filter": "Filtre",
     "firstDayOfWeek": 1,
     "gt": "Supérieur à",

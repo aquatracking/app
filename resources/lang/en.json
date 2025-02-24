@@ -8,6 +8,7 @@
   "success": "Success",
   "info": "Info",
   "warning": "Warning",
+  "selectDate": "Pick a date",
   "pages": {
     "home": {
       "title": "Home"
