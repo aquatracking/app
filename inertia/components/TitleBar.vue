@@ -6,6 +6,7 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from '~/components/ui/breadcrumb'
+import { Link } from '@inertiajs/vue3'
 
 defineProps<{
   title: string
@@ -18,7 +19,7 @@ defineProps<{
       <BreadcrumbList>
         <template v-for="(item, index) in breadcrumb" :key="index">
           <BreadcrumbItem>
-            <BreadcrumbLink :href="item.href"> {{ item.label }} </BreadcrumbLink>
+            <BreadcrumbLink :as="Link" :href="item.href"> {{ item.label }} </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator v-if="index < breadcrumb.length - 1" />
         </template>

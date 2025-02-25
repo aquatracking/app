@@ -20,6 +20,7 @@ import { Button } from '~/components/ui/button'
 import { useBiotopeDetails } from '~/composables/use_biotope_details'
 import NavigationLayout from '~/layouts/NavigationLayout.vue'
 import { BiotopeDto } from '../../../app/dto/biotope_dto'
+import { Link } from '@inertiajs/vue3'
 
 const props = defineProps<{
   biotope: BiotopeDto
@@ -77,7 +78,7 @@ function deleteBiotope() {
             </AlertDialogContent>
           </AlertDialog>
 
-          <Button as="a" :href="`/biotopes/${biotope.id}/edit`">
+          <Button :as="Link" :href="`/biotopes/${biotope.id}/edit`">
             <Edit2 class="w-4 h-4 mr-2" />
             {{ $t('pages.biotopes.edit.title') }}
           </Button>

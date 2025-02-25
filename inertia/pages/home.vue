@@ -9,6 +9,7 @@ import NavigationLayout from '~/layouts/NavigationLayout.vue'
 import { BiotopeDto } from '../../app/dto/biotope_dto'
 import { UserDto } from '../../app/dto/user_dto'
 import { Plus } from 'lucide-vue-next'
+import { Link } from '@inertiajs/vue3'
 
 defineProps<{
   user: UserDto
@@ -43,7 +44,7 @@ defineProps<{
 
       <TitleBar :title="$t('pages.biotopes.title')">
         <template #cta>
-          <Button as="a" type="button" href="/biotopes/create">
+          <Button :as="Link" href="/biotopes/create">
             <Plus class="w-4 h-4 mr-2" />
             {{ $t('pages.biotopes.create.title') }}
           </Button>
