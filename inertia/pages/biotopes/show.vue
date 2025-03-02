@@ -1,40 +1,37 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3'
-import Button from 'primevue/button'
-import { useConfirm } from 'primevue/useconfirm'
+import { Edit2, Trash } from 'lucide-vue-next'
 import { toRefs } from 'vue'
-import { useI18n } from 'vue-i18n'
 import ErrorAndNotificationDisplay from '~/components/ErrorAndNotificationDisplay.vue'
 import PageContent from '~/components/PageContent.vue'
 import TitleBar from '~/components/TitleBar.vue'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '~/components/ui/alert-dialog'
+import { Button } from '~/components/ui/button'
 import { useBiotopeDetails } from '~/composables/use_biotope_details'
 import NavigationLayout from '~/layouts/NavigationLayout.vue'
 import { BiotopeDto } from '../../../app/dto/biotope_dto'
+import { Link } from '@inertiajs/vue3'
 
 const props = defineProps<{
   biotope: BiotopeDto
 }>()
 
-const { t } = useI18n()
-
 const { biotope } = toRefs(props)
 
 const { subtitleItems } = useBiotopeDetails(biotope)
 
-const confirmDelete = useConfirm()
-
-function showDeleteDialog() {
-  confirmDelete.require({
-    header: t('dialogs.delete.title'),
-    message: t('dialogs.delete.message', { name: biotope.value.name }),
-    acceptClass: 'p-button-danger',
-    acceptLabel: t('dialogs.delete.accept'),
-    rejectClass: 'p-button-secondary',
-    rejectLabel: t('dialogs.delete.reject'),
-    accept: () => {
-      router.delete(`/biotopes/${biotope.value.id}`)
-    },
-  })
+function deleteBiotope() {
+  router.delete(`/biotopes/${biotope.value.id}`)
 }
 </script>
 
@@ -54,23 +51,37 @@ function showDeleteDialog() {
           </div>
         </template>
         <template #cta>
-          <Button
-            as="a"
-            :label="$t('pages.biotopes.delete.title')"
-            type="button"
-            @click="showDeleteDialog"
-            icon="pi pi-trash"
-            class="p-button-danger"
-            variant="outlined"
-          />
+          <AlertDialog>
+            <AlertDialogTrigger>
+              <Button variant="destructive">
+                <Trash class="w-4 h-4 mr-2" />
+                {{ $t('pages.biotopes.delete.title') }}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {{ $t('dialogs.delete.title') }}
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  {{ $t('dialogs.delete.message', { name: biotope.name }) }}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>
+                  {{ $t('dialogs.delete.reject') }}
+                </AlertDialogCancel>
+                <AlertDialogAction variant="destructive" @click="deleteBiotope">
+                  {{ $t('dialogs.delete.accept') }}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
-          <Button
-            as="a"
-            :label="$t('pages.biotopes.edit.title')"
-            type="button"
-            :href="`/biotopes/${biotope.id}/edit`"
-            icon="pi pi-pencil"
-          />
+          <Button :as="Link" :href="`/biotopes/${biotope.id}/edit`">
+            <Edit2 class="w-4 h-4 mr-2" />
+            {{ $t('pages.biotopes.edit.title') }}
+          </Button>
         </template>
       </TitleBar>
 

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3'
-import Button from 'primevue/button'
-import Checkbox from 'primevue/checkbox'
-import FloatLabel from 'primevue/floatlabel'
-import InputText from 'primevue/inputtext'
-import Message from 'primevue/message'
 import ErrorAndNotificationDisplay from '~/components/ErrorAndNotificationDisplay.vue'
+import { Button } from '~/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
+import { Checkbox } from '~/components/ui/checkbox'
+import { Input, InputError } from '~/components/ui/input'
+import { Label } from '~/components/ui/label'
 import Link from '~/components/ui/Link.vue'
 import BaseLayout from '~/layouts/BaseLayout.vue'
 
@@ -24,92 +24,68 @@ function submit() {
 <template>
   <BaseLayout :title="$t('pages.login.title')">
     <form @submit.prevent="submit">
-      <div class="bg-neutral-50 dark:bg-neutral-950 px-6 py-20 md:px-12 lg:px-20 h-screen">
-        <div
-          class="bg-surface-0 dark:bg-surface-900 p-6 shadow rounded-border max-w-xl mx-auto flex flex-col gap-8"
-        >
-          <div class="text-center">
-            <div class="text-3xl font-medium">{{ $t('pages.login.title') }}</div>
-          </div>
+      <div class="w-full h-screen flex items-center justify-center px-4">
+        <Card class="mx-auto max-w-sm w-full">
+          <CardHeader>
+            <CardTitle class="text-2xl">
+              {{ $t('pages.login.title') }}
+            </CardTitle>
+            <CardDescription>
+              {{ $t('pages.login.description') }}
+            </CardDescription>
+            <ErrorAndNotificationDisplay />
+          </CardHeader>
+          <CardContent>
+            <div class="grid gap-4">
+              <div class="grid gap-2">
+                <Label for="email" :invalid="!!form.errors.email">
+                  {{ $t('fields.email') }}
+                </Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="me@example.com"
+                  v-model="form.email"
+                />
+                <InputError v-for="error in form.errors.email ?? []">
+                  {{ error }}
+                </InputError>
+              </div>
+              <div class="grid gap-2">
+                <div class="flex items-center">
+                  <Label for="password" :invalid="!!form.errors.password">
+                    {{ $t('fields.password') }}
+                  </Label>
 
-          <ErrorAndNotificationDisplay />
-
-          <div class="flex flex-col gap-8">
-            <FloatLabel>
-              <InputText
-                id="email"
-                type="email"
-                name="email"
-                class="w-full"
-                :invalid="!!form.errors.email"
-                v-model="form.email"
-              />
-              <label for="email">
-                {{ $t('fields.email') }}
-              </label>
-              <Message
-                v-for="error in form.errors.email ?? []"
-                severity="error"
-                variant="simple"
-                size="small"
-                class="pt-1"
-              >
-                {{ error }}
-              </Message>
-            </FloatLabel>
-
-            <FloatLabel>
-              <InputText
-                id="password"
-                type="password"
-                name="password"
-                class="w-full"
-                :invalid="!!form.errors.password"
-                autocomplete="current-password"
-                v-model="form.password"
-              />
-              <label for="password">
-                {{ $t('fields.password') }}
-              </label>
-              <Message
-                v-for="error in form.errors.password ?? []"
-                severity="error"
-                variant="simple"
-                size="small"
-                class="pt-1"
-              >
-                {{ error }}
-              </Message>
-            </FloatLabel>
-
-            <div class="flex justify-between">
-              <div class="flex items-center gap-2">
-                <Checkbox id="rememberme" v-model="form.rememberMe" :binary="true" />
-                <label for="rememberme">
+                  <Link href="/auth/password/forgot" class="ml-auto inline-block text-sm underline">
+                    {{ $t('auth.forgotPassword') }}
+                  </Link>
+                </div>
+                <Input id="password" name="password" type="password" v-model="form.password" />
+                <InputError v-for="error in form.errors.password ?? []">
+                  {{ error }}
+                </InputError>
+              </div>
+              <div class="flex items-center space-x-2">
+                <Checkbox id="rememberme" v-model="form.rememberMe" />
+                <label
+                  for="rememberme"
+                  class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
                   {{ $t('fields.rememberMe') }}
                 </label>
               </div>
-              <Link href="/auth/password/forgot" class="font-medium">
-                {{ $t('auth.forgotPassword') }}
-              </Link>
+              <Button type="submit" class="w-full" :loading="form.processing">
+                {{ $t('auth.signIn') }}
+              </Button>
             </div>
-          </div>
-
-          <div class="text-center flex flex-col gap-4">
-            <Button
-              :label="$t('auth.signIn')"
-              icon="pi pi-user"
-              class="w-full"
-              type="submit"
-              :loading="form.processing"
-            />
-
-            <span class="text-surface-600 dark:text-surface-200 font-medium leading-normal">
+            <div class="mt-4 text-center text-sm">
               {{ $t('auth.noAccount') }}
               <Link href="/auth/register">{{ $t('auth.signUp') }}</Link>
-            </span>
-          </div>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </form>
   </BaseLayout>
