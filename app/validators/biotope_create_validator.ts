@@ -1,4 +1,5 @@
 import vine from '@vinejs/vine'
+import { BiotopeType } from '../constant.js'
 
 export const biotopeCreateValidator = vine.compile(
   vine.object({
@@ -6,7 +7,7 @@ export const biotopeCreateValidator = vine.compile(
     description: vine.string().maxLength(1000).nullable(),
     startedDate: vine.date(),
     volume: vine.number().min(1).nullable(),
-    type: vine.enum(['aquarium', 'terrarium']),
+    type: vine.enum(BiotopeType),
     saltwater: vine.boolean().optional(),
   })
 )

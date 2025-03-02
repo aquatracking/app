@@ -50,3 +50,6 @@ router.get('auth/email/verify', [EmailVerificationController, 'verify']).as('aut
 
 const BiotopesController = () => import('#controllers/biotopes_controller')
 router.resource('biotopes', BiotopesController).use('*', middleware.auth())
+
+const MeasuresController = () => import('#controllers/measures_controller')
+router.resource('biotopes.measures', MeasuresController).only(['store']).use('*', middleware.auth())

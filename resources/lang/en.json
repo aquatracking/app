@@ -9,6 +9,8 @@
   "info": "Info",
   "warning": "Warning",
   "selectDate": "Pick a date",
+  "cancel": "Cancel",
+  "create": "Create",
   "pages": {
     "home": {
       "title": "Home"
@@ -49,6 +51,11 @@
       },
       "delete": {
         "title": "Delete biotope"
+      },
+      "measures": {
+        "create": {
+          "title": "New measure"
+        }
       }
     }
   },
@@ -70,7 +77,8 @@
     "emailVerified": "Email verified successfully",
     "biotopeCreated": "Biotope {name} created successfully",
     "biotopeUpdated": "Biotope {name} updated successfully",
-    "biotopeDeleted": "Biotope {name} deleted successfully"
+    "biotopeDeleted": "Biotope {name} deleted successfully",
+    "measureCreated": "Measure created successfully"
   },
   "email": {
     "verifyYourEmail": {
@@ -104,7 +112,10 @@
     "description": "Description",
     "startedDate": "Start date",
     "type": "Type",
-    "volume": "Volume"
+    "volume": "Volume",
+    "measure": "Measure",
+    "measuredAt": "Measured at",
+    "value": "Value"
   },
   "validator": {
     "shared": {
@@ -146,6 +157,37 @@
       "name": "Terrarium"
     },
     "volume": "{volume}L"
+  },
+  "measures": {
+    "types": {
+      "temperature": {
+        "name": "Temperature"
+      },
+      "humidity": {
+        "name": "Humidity"
+      },
+      "luminosity": {
+        "name": "Luminosity"
+      },
+      "ph": {
+        "name": "PH"
+      },
+      "nitrite": {
+        "name": "Nitrites"
+      },
+      "nitrate": {
+        "name": "Nitrates"
+      },
+      "ammonia": {
+        "name": "Ammonia"
+      },
+      "gh": {
+        "name": "GH"
+      },
+      "kh": {
+        "name": "KH"
+      }
+    }
   },
   "timeAgo": {
     "just-now": "just now",

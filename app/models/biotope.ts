@@ -1,8 +1,10 @@
-import { BaseModel, beforeCreate, column, hasOne } from '@adonisjs/lucid/orm'
-import type { HasOne } from '@adonisjs/lucid/types/relations'
+import { BaseModel, beforeCreate, column, hasMany, hasOne } from '@adonisjs/lucid/orm'
+import type { HasMany, HasOne } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 import { randomUUID } from 'node:crypto'
 import User from './user.js'
+import { BiotopeType } from '../constant.js'
+import Measure from './measure.js'
 
 export default class Biotope extends BaseModel {
   static selfAssignPrimaryKey = true
@@ -17,7 +19,7 @@ export default class Biotope extends BaseModel {
   declare description: string | null
 
   @column()
-  declare type: 'aquarium' | 'terrarium'
+  declare type: (typeof BiotopeType)[number]
 
   @column()
   declare volume: number | null
@@ -45,6 +47,9 @@ export default class Biotope extends BaseModel {
     localKey: 'userId',
   })
   declare user: HasOne<typeof User>
+
+  @hasMany(() => Measure)
+  declare measures: HasMany<typeof Measure>
 
   @beforeCreate()
   static assignUuid(biotope: Biotope) {

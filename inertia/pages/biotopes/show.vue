@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { router } from '@inertiajs/vue3'
-import { Edit2, Trash } from 'lucide-vue-next'
+import { Link, router } from '@inertiajs/vue3'
+import { Edit2, Plus, Trash } from 'lucide-vue-next'
 import { toRefs } from 'vue'
+import CreateMeasureDialog from '~/components/dialogs/CreateMeasureDialog.vue'
 import ErrorAndNotificationDisplay from '~/components/ErrorAndNotificationDisplay.vue'
 import PageContent from '~/components/PageContent.vue'
 import TitleBar from '~/components/TitleBar.vue'
@@ -17,13 +18,18 @@ import {
   AlertDialogTrigger,
 } from '~/components/ui/alert-dialog'
 import { Button } from '~/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { useBiotopeDetails } from '~/composables/use_biotope_details'
 import NavigationLayout from '~/layouts/NavigationLayout.vue'
+import { MeasureType } from '../../../app/constant'
 import { BiotopeDto } from '../../../app/dto/biotope_dto'
-import { Link } from '@inertiajs/vue3'
+import { MeasureDto } from '../../../app/dto/measure_dto'
+import LocaleTimeAgo from '~/components/LocaleTimeAgo.vue'
 
 const props = defineProps<{
   biotope: BiotopeDto
+  measures: { type: MeasureType; last: MeasureDto }[]
+  availableMeasureTypes: MeasureType[]
 }>()
 
 const { biotope } = toRefs(props)
@@ -78,10 +84,17 @@ function deleteBiotope() {
             </AlertDialogContent>
           </AlertDialog>
 
-          <Button :as="Link" :href="`/biotopes/${biotope.id}/edit`">
+          <Button variant="secondary" :as="Link" :href="`/biotopes/${biotope.id}/edit`">
             <Edit2 class="w-4 h-4 mr-2" />
             {{ $t('pages.biotopes.edit.title') }}
           </Button>
+
+          <CreateMeasureDialog :biotope :availableMeasureTypes>
+            <Button variant="default">
+              <Plus class="w-4 h-4 mr-2" />
+              {{ $t('pages.biotopes.measures.create.title') }}
+            </Button>
+          </CreateMeasureDialog>
         </template>
       </TitleBar>
 
@@ -90,6 +103,22 @@ function deleteBiotope() {
       <p class="m-0">
         {{ biotope.description }}
       </p>
+
+      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card v-for="measure in measures" class="w-">
+          <CardHeader class="pb-2">
+            <CardTitle class="tracking-tight text-sm font-medium">
+              {{ $t(`measures.types.${measure.type.code}.name`) }}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div class="text-2xl font-bold">{{ measure.last.value }} {{ measure.type.unit }}</div>
+            <p class="text-xs text-muted-foreground first-letter:uppercase">
+              <LocaleTimeAgo :date="measure.last.measuredAt" />
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     </PageContent>
   </NavigationLayout>
 </template>
