@@ -146,5 +146,25 @@
       "name": "Terrarium"
     },
     "volume": "{volume}L"
+  },
+  "timeAgo": {
+    "just-now": "maintenant",
+    "ago": "il y a {0}",
+    "in": "dans {0}",
+    "last-month": "le mois dernier",
+    "next-month": "le mois prochain",
+    "month": "mois | mois",
+    "last-year": "l'année dernière",
+    "next-year": "l'année prochaine",
+    "year": "an | ans",
+    "yesterday": "hier",
+    "tomorrow": "demain",
+    "day": "jour | jours",
+    "last-week": "la semaine dernière",
+    "next-week": "la semaine prochaine",
+    "week": "semaine | semaines",
+    "hour": "heure | heures",
+    "minute": "minute | minutes",
+    "second": "seconde | secondes"
   }
 }
