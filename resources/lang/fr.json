@@ -9,6 +9,8 @@
   "info": "Info",
   "warning": "Attention",
   "selectDate": "Choisir une date",
+  "cancel": "Annuler",
+  "create": "Créer",
   "pages": {
     "home": {
       "title": "Accueil"
@@ -49,6 +51,11 @@
       },
       "delete": {
         "title": "Supprimer le biotope"
+      },
+      "measures": {
+        "create": {
+          "title": "Nouvelle mesure"
+        }
       }
     }
   },
@@ -70,7 +77,8 @@
     "emailVerified": "Email vérifié avec succès",
     "biotopeCreated": "Biotope {name} créé avec succès",
     "biotopeUpdated": "Biotope {name} mis à jour avec succès",
-    "biotopeDeleted": "Biotope {name} supprimé avec succès"
+    "biotopeDeleted": "Biotope {name} supprimé avec succès",
+    "measureCreated": "Mesure créée avec succès"
   },
   "email": {
     "verifyYourEmail": {
@@ -104,7 +112,10 @@
     "description": "Description",
     "startedDate": "Date de démarrage",
     "type": "Type",
-    "volume": "Volume"
+    "volume": "Volume",
+    "measure": "Mesure",
+    "measuredAt": "Mesuré le",
+    "value": "Valeur"
   },
   "validator": {
     "shared": {
@@ -146,5 +157,56 @@
       "name": "Terrarium"
     },
     "volume": "{volume}L"
+  },
+  "measures": {
+    "types": {
+      "temperature": {
+        "name": "Température"
+      },
+      "humidity": {
+        "name": "Humidité"
+      },
+      "luminosity": {
+        "name": "Luminosité"
+      },
+      "ph": {
+        "name": "PH"
+      },
+      "nitrite": {
+        "name": "Nitrites"
+      },
+      "nitrate": {
+        "name": "Nitrates"
+      },
+      "ammonia": {
+        "name": "Ammoniac"
+      },
+      "gh": {
+        "name": "GH"
+      },
+      "kh": {
+        "name": "KH"
+      }
+    }
+  },
+  "timeAgo": {
+    "just-now": "maintenant",
+    "ago": "il y a {0}",
+    "in": "dans {0}",
+    "last-month": "le mois dernier",
+    "next-month": "le mois prochain",
+    "month": "mois | mois",
+    "last-year": "l'année dernière",
+    "next-year": "l'année prochaine",
+    "year": "an | ans",
+    "yesterday": "hier",
+    "tomorrow": "demain",
+    "day": "jour | jours",
+    "last-week": "la semaine dernière",
+    "next-week": "la semaine prochaine",
+    "week": "semaine | semaines",
+    "hour": "heure | heures",
+    "minute": "minute | minutes",
+    "second": "seconde | secondes"
   }
 }

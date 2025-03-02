@@ -1,6 +1,7 @@
 import { biotopeCreateValidator } from '#validators/biotope_create_validator'
 import { biotopeUpdateValidator } from '#validators/biotope_update_validator'
 import type { HttpContext } from '@adonisjs/core/http'
+import { MeasureTypes } from '../constant.js'
 
 export default class BiotopesController {
   /**
@@ -44,8 +45,32 @@ export default class BiotopesController {
       .where('id', params.id)
       .firstOrFail()
 
+    const availableMeasureTypes = MeasureTypes.filter((type) =>
+      [...type.recommendedBiotopes].includes(biotope.type)
+    )
+
+    let measures = await Promise.all(
+      availableMeasureTypes.map(async (type) => {
+        const lastValue = await biotope
+          .related('measures')
+          .query()
+          .where('measureTypeCode', type.code)
+          .orderBy('measuredAt', 'desc')
+          .first()
+
+        return {
+          type,
+          last: lastValue,
+        }
+      })
+    )
+
+    measures = measures.filter((measure) => measure.last)
+
     return inertia.render('biotopes/show', {
       biotope: biotope.serialize(),
+      measures,
+      availableMeasureTypes,
     })
   }
 
