@@ -49,4 +49,12 @@ export default await Env.create(new URL('../', import.meta.url), {
   SMTP_SECURE: Env.schema.boolean(),
   SMTP_FROM_EMAIL: Env.schema.string({ format: 'email' }),
   SMTP_FROM_NAME: Env.schema.string(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring initial user
+  |----------------------------------------------------------
+  */
+  INITIAL_ADMIN_EMAIL: Env.schema.string.optional({ format: 'email' }),
+  INITIAL_ADMIN_PASSWORD: Env.schema.string.optional(),
 })
