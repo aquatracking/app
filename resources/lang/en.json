@@ -57,6 +57,11 @@
           "title": "New measure"
         }
       }
+    },
+    "admin": {
+      "users": {
+        "title": "Users"
+      }
     }
   },
   "auth": {
@@ -67,7 +72,11 @@
     "forgotPassword": "Forgot your password?",
     "sendResetMail": "Send",
     "resetPassword": "Reset",
-    "logout": "Logout"
+    "logout": "Logout",
+    "status": {
+      "verified": "Email verified",
+      "notVerified": "Email waiting for verification"
+    }
   },
   "notifications": {
     "accountCreatedCheckEmail": "Account created successfully, check your email for the verification link",
@@ -115,7 +124,12 @@
     "volume": "Volume",
     "measure": "Measure",
     "measuredAt": "Measured at",
-    "value": "Value"
+    "value": "Value",
+    "verified": "Verified",
+    "admin": "Admin",
+    "status": "Status",
+    "createdAt": "Created at",
+    "updatedAt": "Updated at"
   },
   "validator": {
     "shared": {
