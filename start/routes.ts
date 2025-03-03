@@ -53,3 +53,12 @@ router.resource('biotopes', BiotopesController).use('*', middleware.auth())
 
 const MeasuresController = () => import('#controllers/measures_controller')
 router.resource('biotopes.measures', MeasuresController).only(['store']).use('*', middleware.auth())
+
+router
+  .group(() => {
+    const AdminUsersController = () => import('#controllers/admin/users_controller')
+    router.resource('users', AdminUsersController).only(['index'])
+  })
+  .prefix('admin')
+  .use(middleware.auth())
+  .as('admin')

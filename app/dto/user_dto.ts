@@ -8,6 +8,7 @@ const userDtoSchema = vine.object({
   verified: vine.boolean(),
   createdAt: vine.date(),
   updatedAt: vine.date(),
+  isAdmin: vine.boolean(),
 })
 
 export const userDtoValidator = vine.compile(userDtoSchema)

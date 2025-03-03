@@ -11,6 +11,7 @@
   "selectDate": "Choisir une date",
   "cancel": "Annuler",
   "create": "Créer",
+
   "pages": {
     "home": {
       "title": "Accueil"
@@ -57,6 +58,11 @@
           "title": "Nouvelle mesure"
         }
       }
+    },
+    "admin": {
+      "users": {
+        "title": "Utilisateurs"
+      }
     }
   },
   "auth": {
@@ -67,7 +73,11 @@
     "forgotPassword": "Mot de passe oublié ?",
     "sendResetMail": "Envoyer",
     "resetPassword": "Réinitialiser",
-    "logout": "Déconnexion"
+    "logout": "Déconnexion",
+    "status": {
+      "verified": "Email vérifié",
+      "notVerified": "Email en attente de vérification"
+    }
   },
   "notifications": {
     "accountCreatedCheckEmail": "Compte créé avec succès, vérifiez votre email pour le lien de vérification",
@@ -115,7 +125,12 @@
     "volume": "Volume",
     "measure": "Mesure",
     "measuredAt": "Mesuré le",
-    "value": "Valeur"
+    "value": "Valeur",
+    "verified": "Vérifié",
+    "admin": "Admin",
+    "status": "Statut",
+    "createdAt": "Créé le",
+    "updatedAt": "Mis à jour le"
   },
   "validator": {
     "shared": {
