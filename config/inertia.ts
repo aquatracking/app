@@ -16,6 +16,7 @@ const inertiaConfig = defineConfig({
     notification: (ctx) => ctx.session?.flashMessages.get('notification'),
     locale: (ctx) => ctx.i18n.locale,
     user: (ctx) => ctx.auth.user,
+    queryParams: (ctx) => ctx.request.qs(),
   },
 })
 
