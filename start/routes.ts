@@ -58,7 +58,12 @@ router
   .group(() => {
     const AdminUsersController = () => import('#controllers/admin/users_controller')
     router.resource('users', AdminUsersController).only(['index'])
+
+    const AdminUsersInvitationController = () =>
+      import('#controllers/admin/user_invitations_controller')
+    router.resource('invitations', AdminUsersInvitationController).only(['store'])
   })
   .prefix('admin')
   .use(middleware.auth())
+  .use(middleware.admin())
   .as('admin')

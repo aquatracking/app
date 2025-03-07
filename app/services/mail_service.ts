@@ -48,4 +48,21 @@ export default class MailService {
         .text(i18n.t('email.passwordResetConfirmation.text', { fullName: user.fullName }))
     })
   }
+
+  async sendUserInvitation(email: string, token: string, locale: string = 'en') {
+    const i18n = i18nManager.locale(locale)
+
+    const invitationLink = Router.makeUrl('auth_register.index', undefined, {
+      qs: { invitationToken: token },
+      prefixUrl: env.get('BASE_URL').replace(/\/$/, ''),
+    })
+
+    await mail.sendLater((message) => {
+      message.to(email).subject(i18n.t('email.invitation.subject')).text(
+        i18n.t('email.invitation.text', {
+          invitationLink,
+        })
+      )
+    })
+  }
 }

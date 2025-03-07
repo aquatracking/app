@@ -11,7 +11,6 @@
   "selectDate": "Choisir une date",
   "cancel": "Annuler",
   "create": "Créer",
-
   "pages": {
     "home": {
       "title": "Accueil"
@@ -61,7 +60,10 @@
     },
     "admin": {
       "users": {
-        "title": "Utilisateurs"
+        "title": "Utilisateurs",
+        "invite": {
+          "title": "Inviter un utilisateur"
+        }
       }
     }
   },
@@ -88,7 +90,8 @@
     "biotopeCreated": "Biotope {name} créé avec succès",
     "biotopeUpdated": "Biotope {name} mis à jour avec succès",
     "biotopeDeleted": "Biotope {name} supprimé avec succès",
-    "measureCreated": "Mesure créée avec succès"
+    "measureCreated": "Mesure créée avec succès",
+    "invitationSent": "Invitation envoyée avec succès à {email}"
   },
   "email": {
     "verifyYourEmail": {
@@ -102,6 +105,10 @@
     "passwordResetConfirmation": {
       "subject": "Confirmation de réinitialisation du mot de passe",
       "text": "Bonjour {fullName},\n\nVotre mot de passe a été réinitialisé avec succès."
+    },
+    "invitation": {
+      "subject": "Invitation à rejoindre Aquatracking",
+      "text": "Bonjour,\n\nVous avez été invité à rejoindre Aquatracking. Pour créer un compte, veuillez cliquer sur le lien ci-dessous.\n\n{invitationLink}"
     }
   },
   "dialogs": {
@@ -130,7 +137,8 @@
     "admin": "Admin",
     "status": "Statut",
     "createdAt": "Créé le",
-    "updatedAt": "Mis à jour le"
+    "updatedAt": "Mis à jour le",
+    "expiresAt": "Expire le"
   },
   "validator": {
     "shared": {
@@ -157,7 +165,10 @@
     "E_UNAUTHORIZED_ACCESS": "Accès non autorisé",
     "E_INVALID_CREDENTIALS": "Email ou mot de passe incorrect",
     "E_MISSING_EMAIL_VERIFICATION_TOKEN": "Token de vérification manquant",
-    "E_INVALID_EMAIL_VERIFICATION_TOKEN_TRY_AGAIN": "Token invalide ou expiré, essayez de vous connecter à nouveau pour en recevoir un nouveau"
+    "E_INVALID_EMAIL_VERIFICATION_TOKEN_TRY_AGAIN": "Token invalide ou expiré, essayez de vous connecter à nouveau pour en recevoir un nouveau",
+    "E_EMAIL_ALREADY_USED": "Email déjà vérifié",
+    "E_INVITATION_REQUIRED": "Invitation requise",
+    "E_INVITATION_INVALID": "Invitation invalide ou expirée"
   },
   "validation": {
     "invalidToken": "Token invalide ou expiré"
@@ -223,5 +234,6 @@
     "hour": "heure | heures",
     "minute": "minute | minutes",
     "second": "seconde | secondes"
-  }
+  },
+  "send": "Envoyer"
 }

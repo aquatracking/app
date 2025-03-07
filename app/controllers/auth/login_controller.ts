@@ -1,6 +1,7 @@
 import User from '#models/user'
 import UserToken from '#models/user_token'
 import MailService from '#services/mail_service'
+import env from '#start/env'
 import { loginValidator } from '#validators/login_validator'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
@@ -13,7 +14,8 @@ export default class LoginController {
    * Display the login form
    */
   async index({ inertia }: HttpContext) {
-    return inertia.render('auth/login')
+    const requireInvitation = env.get('REQUIRE_INVITATION')
+    return inertia.render('auth/login', { requireInvitation: !!requireInvitation })
   }
 
   /**
