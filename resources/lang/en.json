@@ -62,7 +62,13 @@
       "users": {
         "title": "Users",
         "invite": {
-          "title": "Invite a user"
+          "title": "Invite a user",
+          "cancel": "Cancel",
+          "renew": "Renew"
+        },
+        "tabs": {
+          "accounts": "Accounts",
+          "invitations": "Invitations"
         }
       }
     }
@@ -78,7 +84,9 @@
     "logout": "Logout",
     "status": {
       "verified": "Email verified",
-      "notVerified": "Email waiting for verification"
+      "notVerified": "Email waiting for verification",
+      "invitationPending": "Pending",
+      "invitationExpired": "Expired"
     }
   },
   "notifications": {
@@ -91,7 +99,9 @@
     "biotopeUpdated": "Biotope {name} updated successfully",
     "biotopeDeleted": "Biotope {name} deleted successfully",
     "measureCreated": "Measure created successfully",
-    "invitationSent": "Invitation sent successfully to {email}"
+    "invitationSent": "Invitation sent successfully to {email}",
+    "invitationDeleted": "Invitation deleted successfully",
+    "invitationRenewed": "Invitation renewed successfully"
   },
   "email": {
     "verifyYourEmail": {
@@ -115,6 +125,12 @@
     "delete": {
       "title": "Delete",
       "message": "Are you sure you want to delete {name}?",
+      "accept": "Delete",
+      "reject": "Cancel"
+    },
+    "deleteInvitation": {
+      "title": "Delete invitation",
+      "message": "Are you sure you want to delete the invitation to {email}?",
       "accept": "Delete",
       "reject": "Cancel"
     }

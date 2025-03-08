@@ -62,7 +62,13 @@
       "users": {
         "title": "Utilisateurs",
         "invite": {
-          "title": "Inviter un utilisateur"
+          "title": "Inviter un utilisateur",
+          "cancel": "Annuler",
+          "renew": "Renouveler"
+        },
+        "tabs": {
+          "accounts": "Comptes",
+          "invitations": "Invitations"
         }
       }
     }
@@ -78,7 +84,9 @@
     "logout": "Déconnexion",
     "status": {
       "verified": "Email vérifié",
-      "notVerified": "Email en attente de vérification"
+      "notVerified": "Email en attente de vérification",
+      "invitationPending": "En attente",
+      "invitationExpired": "Expirée"
     }
   },
   "notifications": {
@@ -91,7 +99,9 @@
     "biotopeUpdated": "Biotope {name} mis à jour avec succès",
     "biotopeDeleted": "Biotope {name} supprimé avec succès",
     "measureCreated": "Mesure créée avec succès",
-    "invitationSent": "Invitation envoyée avec succès à {email}"
+    "invitationSent": "Invitation envoyée avec succès à {email}",
+    "invitationDeleted": "Invitation supprimée avec succès",
+    "invitationRenewed": "Invitation renouvelée avec succès"
   },
   "email": {
     "verifyYourEmail": {
@@ -115,6 +125,12 @@
     "delete": {
       "title": "Supprimer",
       "message": "Êtes-vous sûr de vouloir supprimer {name} ?",
+      "accept": "Supprimer",
+      "reject": "Annuler"
+    },
+    "deleteInvitation": {
+      "title": "Supprimer l'invitation",
+      "message": "Êtes-vous sûr de vouloir supprimer l'invitation envoyée à {email} ?",
       "accept": "Supprimer",
       "reject": "Annuler"
     }
@@ -166,7 +182,7 @@
     "E_INVALID_CREDENTIALS": "Email ou mot de passe incorrect",
     "E_MISSING_EMAIL_VERIFICATION_TOKEN": "Token de vérification manquant",
     "E_INVALID_EMAIL_VERIFICATION_TOKEN_TRY_AGAIN": "Token invalide ou expiré, essayez de vous connecter à nouveau pour en recevoir un nouveau",
-    "E_EMAIL_ALREADY_USED": "Email déjà vérifié",
+    "E_EMAIL_ALREADY_USED": "Cette adresse email est déjà utilisée",
     "E_INVITATION_REQUIRED": "Invitation requise",
     "E_INVITATION_INVALID": "Invitation invalide ou expirée"
   },

@@ -44,7 +44,7 @@ function submit() {
             <Label for="email" :invalid="!!form.errors.email">
               {{ $t('fields.email') }}
             </Label>
-            <Input id="email" name="value" type="email" v-model="form.email" />
+            <Input id="email" name="email" type="email" v-model="form.email" />
             <InputError v-for="error in form.errors.email ?? []">
               {{ error }}
             </InputError>

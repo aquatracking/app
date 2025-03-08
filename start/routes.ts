@@ -61,7 +61,7 @@ router
 
     const AdminUsersInvitationController = () =>
       import('#controllers/admin/user_invitations_controller')
-    router.resource('invitations', AdminUsersInvitationController).only(['store'])
+    router.resource('invitations', AdminUsersInvitationController).only(['store', 'destroy'])
   })
   .prefix('admin')
   .use(middleware.auth())
