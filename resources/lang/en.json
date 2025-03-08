@@ -57,6 +57,20 @@
           "title": "New measure"
         }
       }
+    },
+    "admin": {
+      "users": {
+        "title": "Users",
+        "invite": {
+          "title": "Invite a user",
+          "cancel": "Cancel",
+          "renew": "Renew"
+        },
+        "tabs": {
+          "accounts": "Accounts",
+          "invitations": "Invitations"
+        }
+      }
     }
   },
   "auth": {
@@ -67,7 +81,13 @@
     "forgotPassword": "Forgot your password?",
     "sendResetMail": "Send",
     "resetPassword": "Reset",
-    "logout": "Logout"
+    "logout": "Logout",
+    "status": {
+      "verified": "Email verified",
+      "notVerified": "Email waiting for verification",
+      "invitationPending": "Pending",
+      "invitationExpired": "Expired"
+    }
   },
   "notifications": {
     "accountCreatedCheckEmail": "Account created successfully, check your email for the verification link",
@@ -78,7 +98,10 @@
     "biotopeCreated": "Biotope {name} created successfully",
     "biotopeUpdated": "Biotope {name} updated successfully",
     "biotopeDeleted": "Biotope {name} deleted successfully",
-    "measureCreated": "Measure created successfully"
+    "measureCreated": "Measure created successfully",
+    "invitationSent": "Invitation sent successfully to {email}",
+    "invitationDeleted": "Invitation deleted successfully",
+    "invitationRenewed": "Invitation renewed successfully"
   },
   "email": {
     "verifyYourEmail": {
@@ -92,12 +115,22 @@
     "passwordResetConfirmation": {
       "subject": "Password reset confirmation",
       "text": "Hello {fullName},\n\nYour password has been reset successfully."
+    },
+    "invitation": {
+      "subject": "Invitation to join Aquatracking",
+      "text": "Hello,\n\nYou have been invited to join Aquatracking. Click on the link below to create your account.\n\n{invitationLink}"
     }
   },
   "dialogs": {
     "delete": {
       "title": "Delete",
       "message": "Are you sure you want to delete {name}?",
+      "accept": "Delete",
+      "reject": "Cancel"
+    },
+    "deleteInvitation": {
+      "title": "Delete invitation",
+      "message": "Are you sure you want to delete the invitation to {email}?",
       "accept": "Delete",
       "reject": "Cancel"
     }
@@ -115,7 +148,13 @@
     "volume": "Volume",
     "measure": "Measure",
     "measuredAt": "Measured at",
-    "value": "Value"
+    "value": "Value",
+    "verified": "Verified",
+    "admin": "Admin",
+    "status": "Status",
+    "createdAt": "Created at",
+    "updatedAt": "Updated at",
+    "expiresAt": "Expires at"
   },
   "validator": {
     "shared": {
@@ -142,7 +181,10 @@
     "E_UNAUTHORIZED_ACCESS": "Unauthorized access",
     "E_INVALID_CREDENTIALS": "Incorrect email or password",
     "E_MISSING_EMAIL_VERIFICATION_TOKEN": "Missing verification token",
-    "E_INVALID_EMAIL_VERIFICATION_TOKEN_TRY_AGAIN": "Invalid or expired token, try to connect again for receiving a new one"
+    "E_INVALID_EMAIL_VERIFICATION_TOKEN_TRY_AGAIN": "Invalid or expired token, try to connect again for receiving a new one",
+    "E_EMAIL_ALREADY_USED": "This email address is already used",
+    "E_INVITATION_REQUIRED": "Invitation required",
+    "E_INVITATION_INVALID": "Invalid or expired invitation"
   },
   "validation": {
     "invalidToken": "Invalid or expired token"
@@ -208,5 +250,6 @@
     "hour": "hour | hours",
     "minute": "minute | minutes",
     "second": "second | seconds"
-  }
+  },
+  "send": "Send"
 }

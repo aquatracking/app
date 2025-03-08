@@ -9,6 +9,10 @@ import { Label } from '~/components/ui/label'
 import Link from '~/components/ui/Link.vue'
 import BaseLayout from '~/layouts/BaseLayout.vue'
 
+defineProps<{
+  requireInvitation: boolean
+}>()
+
 const form = useForm({
   email: '',
   password: '',
@@ -80,7 +84,7 @@ function submit() {
                 {{ $t('auth.signIn') }}
               </Button>
             </div>
-            <div class="mt-4 text-center text-sm">
+            <div class="mt-4 text-center text-sm" v-if="!requireInvitation">
               {{ $t('auth.noAccount') }}
               <Link href="/auth/register">{{ $t('auth.signUp') }}</Link>
             </div>

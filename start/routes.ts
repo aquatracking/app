@@ -53,3 +53,17 @@ router.resource('biotopes', BiotopesController).use('*', middleware.auth())
 
 const MeasuresController = () => import('#controllers/measures_controller')
 router.resource('biotopes.measures', MeasuresController).only(['store']).use('*', middleware.auth())
+
+router
+  .group(() => {
+    const AdminUsersController = () => import('#controllers/admin/users_controller')
+    router.resource('users', AdminUsersController).only(['index'])
+
+    const AdminUsersInvitationController = () =>
+      import('#controllers/admin/user_invitations_controller')
+    router.resource('invitations', AdminUsersInvitationController).only(['store', 'destroy'])
+  })
+  .prefix('admin')
+  .use(middleware.auth())
+  .use(middleware.admin())
+  .as('admin')

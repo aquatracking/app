@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useForm } from '@inertiajs/vue3'
+import { useUrlSearchParams } from '@vueuse/core'
 import ErrorAndNotificationDisplay from '~/components/ErrorAndNotificationDisplay.vue'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
@@ -8,10 +9,15 @@ import { Label } from '~/components/ui/label'
 import Link from '~/components/ui/Link.vue'
 import BaseLayout from '~/layouts/BaseLayout.vue'
 
+const props = defineProps<{
+  email?: string
+}>()
+
 const form = useForm({
   fullName: '',
-  email: '',
+  email: props.email ?? '',
   password: '',
+  invitationToken: useUrlSearchParams().invitationToken,
 })
 
 function submit() {
@@ -59,6 +65,7 @@ function submit() {
                   id="email"
                   name="email"
                   type="email"
+                  :disabled="!!props.email"
                   placeholder="me@example.com"
                   v-model="form.email"
                 />

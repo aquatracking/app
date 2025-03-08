@@ -12,5 +12,6 @@ export const createRegisterValidator = vine.compile(
         return !user
       }),
     password: vine.string().minLength(8),
+    invitationToken: vine.string().optional(),
   })
 )
