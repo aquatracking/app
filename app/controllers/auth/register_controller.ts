@@ -6,6 +6,7 @@ import env from '#start/env'
 import { createRegisterValidator } from '#validators/register_validator'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
+import logger from '@adonisjs/core/services/logger'
 import vine from '@vinejs/vine'
 
 @inject()
@@ -85,6 +86,8 @@ export default class RegisterController {
 
     const token = await UserToken.generateEmailVerificationToken(user)
     await this.mailService.sendEmailVerification(user, token, i18n.locale)
+
+    logger.info(`Account created for user ${email} (${user.id})`)
 
     session.flash('notification', {
       type: 'success',

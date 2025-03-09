@@ -5,6 +5,7 @@ import env from '#start/env'
 import { loginValidator } from '#validators/login_validator'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
+import logger from '@adonisjs/core/services/logger'
 
 @inject()
 export default class LoginController {
@@ -25,6 +26,8 @@ export default class LoginController {
     const { email, password, rememberMe } = await request.validateUsing(loginValidator)
 
     const user = await User.verifyCredentials(email, password)
+
+    logger.info(`User ${email} (${user.id}) logged in`)
 
     if (!user.verified) {
       const token = await UserToken.generateEmailVerificationToken(user)

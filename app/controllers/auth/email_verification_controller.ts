@@ -1,5 +1,6 @@
 import UserToken from '#models/user_token'
 import type { HttpContext } from '@adonisjs/core/http'
+import logger from '@adonisjs/core/services/logger'
 import vine from '@vinejs/vine'
 
 export default class EmailVerificationController {
@@ -25,6 +26,8 @@ export default class EmailVerificationController {
       await user.save()
 
       await UserToken.deleteUserEmailVerificationTokens(user)
+
+      logger.info(`User ${user.email} (${user.id}) verified their email`)
 
       session.flash('notification', {
         type: 'success',
