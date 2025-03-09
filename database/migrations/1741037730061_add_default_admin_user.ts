@@ -2,6 +2,7 @@ import env from '#start/env'
 import hash from '@adonisjs/core/services/hash'
 import { BaseSchema } from '@adonisjs/lucid/schema'
 import { randomUUID } from 'node:crypto'
+import validator from 'validator'
 
 export default class extends BaseSchema {
   async up() {
@@ -14,7 +15,7 @@ export default class extends BaseSchema {
         id: randomUUID(),
         full_name: 'Admin',
         verified: true,
-        email: adminEmail,
+        email: validator.normalizeEmail(adminEmail),
         password: await hash.make(adminPassword),
         is_admin: true,
         created_at: this.now(),
