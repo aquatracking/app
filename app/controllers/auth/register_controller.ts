@@ -17,10 +17,6 @@ export default class RegisterController {
    * Display the registration form
    */
   async index({ inertia, request, session, i18n, response }: HttpContext) {
-    if (!env.get('REQUIRE_INVITATION')) {
-      return inertia.render('auth/register')
-    }
-
     const { invitationToken } = await request.validateUsing(
       vine.compile(
         vine.object({
@@ -29,26 +25,32 @@ export default class RegisterController {
       )
     )
 
-    if (!invitationToken) {
-      session.flashErrors({
-        E_INVITATION_REQUIRED: i18n.t('errors.E_INVITATION_REQUIRED'),
-      })
+    if (env.get('REQUIRE_INVITATION')) {
+      if (!invitationToken) {
+        session.flashErrors({
+          E_INVITATION_REQUIRED: i18n.t('errors.E_INVITATION_REQUIRED'),
+        })
 
-      return response.redirect().toPath('/auth/login')
+        return response.redirect().toPath('/auth/login')
+      }
     }
 
-    const invitation = await UserInvitation.query().where('token', invitationToken).first()
+    if (invitationToken) {
+      const invitation = await UserInvitation.query().where('token', invitationToken).first()
 
-    if (!invitation || invitation.isExpired()) {
-      session.flashErrors({
-        E_INVITATION_INVALID: i18n.t('errors.E_INVITATION_INVALID'),
+      if (!invitation || invitation.isExpired()) {
+        session.flashErrors({
+          E_INVITATION_INVALID: i18n.t('errors.E_INVITATION_INVALID'),
+        })
+        return response.redirect().toPath('/auth/login')
+      }
+
+      return inertia.render('auth/register', {
+        email: invitation.email,
       })
-      return response.redirect().toPath('/auth/login')
     }
 
-    return inertia.render('auth/register', {
-      email: invitation.email,
-    })
+    return inertia.render('auth/register')
   }
 
   /**
@@ -66,10 +68,14 @@ export default class RegisterController {
 
         return response.redirect().toPath('/auth/login')
       }
+    }
 
+    let user: User | null = null
+
+    if (invitationToken) {
       const invitation = await UserInvitation.query()
         .where('email', email)
-        .where('token', invitationToken)
+        .where('token', invitationToken ?? '')
         .first()
 
       if (!invitation || invitation.isExpired()) {
@@ -78,21 +84,39 @@ export default class RegisterController {
         })
         return response.redirect().toPath('/auth/login')
       }
+
+      user = await User.create({
+        fullName,
+        email,
+        password,
+        verified: true,
+      })
+
+      logger.info(`Account created for user ${email} (${user.id}) from invitation ${invitation.id}`)
+
+      session.flash('notification', {
+        type: 'success',
+        message: i18n.t('notifications.accountCreated'),
+      })
+    } else {
+      user = await User.create({
+        fullName,
+        email,
+        password,
+      })
+
+      const token = await UserToken.generateEmailVerificationToken(user)
+      await this.mailService.sendEmailVerification(user, token, i18n.locale)
+
+      logger.info(`Account created for user ${email} (${user.id})`)
+
+      session.flash('notification', {
+        type: 'success',
+        message: i18n.t('notifications.accountCreatedCheckEmail'),
+      })
     }
 
-    const user = await User.create({ fullName, email, password })
-
     await UserInvitation.query().where('email', email).delete()
-
-    const token = await UserToken.generateEmailVerificationToken(user)
-    await this.mailService.sendEmailVerification(user, token, i18n.locale)
-
-    logger.info(`Account created for user ${email} (${user.id})`)
-
-    session.flash('notification', {
-      type: 'success',
-      message: i18n.t('notifications.accountCreatedCheckEmail'),
-    })
 
     return response.redirect().toPath('/auth/login')
   }

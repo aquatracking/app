@@ -91,6 +91,7 @@
   },
   "notifications": {
     "accountCreatedCheckEmail": "Account created successfully, check your email for the verification link",
+    "accountCreated": "Account created successfully",
     "resetLinkSent": "If an account exists with this email address, a reset link has been sent.",
     "passwordReset": "Password reset successfully",
     "emailNotVerified": "Email not verified, check your inbox for the verification link",

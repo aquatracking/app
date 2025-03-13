@@ -91,6 +91,7 @@
   },
   "notifications": {
     "accountCreatedCheckEmail": "Compte créé avec succès, vérifiez votre email pour le lien de vérification",
+    "accountCreated": "Compte créé avec succès",
     "resetLinkSent": "Si un compte existe avec cette adresse email, un lien de réinitialisation a été envoyé.",
     "passwordReset": "Mot de passe réinitialisé avec succès",
     "emailNotVerified": "Email non vérifié, vérifiez votre boîte de réception pour le lien de vérification",
