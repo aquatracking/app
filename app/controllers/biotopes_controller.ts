@@ -2,6 +2,7 @@ import { biotopeCreateValidator } from '#validators/biotope_create_validator'
 import { biotopeUpdateValidator } from '#validators/biotope_update_validator'
 import type { HttpContext } from '@adonisjs/core/http'
 import { MeasureTypes } from '../constant.js'
+import db from '@adonisjs/lucid/services/db'
 
 export default class BiotopesController {
   /**
@@ -58,9 +59,25 @@ export default class BiotopesController {
           .orderBy('measuredAt', 'desc')
           .first()
 
+        const history = await db.rawQuery(
+          `
+          SELECT Date(measured_at) as measuredAt, AVG(value) as value
+          FROM measures
+          WHERE biotope_id = :biotopeId AND measured_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+          AND measure_type_code = :measureTypeCode
+          GROUP BY measuredAt
+          ORDER BY measuredAt ASC
+          `,
+          {
+            biotopeId: biotope.id,
+            measureTypeCode: type.code,
+          }
+        )
+
         return {
           type,
           last: lastValue,
+          history: history[0],
         }
       })
     )

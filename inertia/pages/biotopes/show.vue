@@ -25,10 +25,11 @@ import { MeasureType } from '../../../app/constant'
 import { BiotopeDto } from '../../../app/dto/biotope_dto'
 import { MeasureDto } from '../../../app/dto/measure_dto'
 import LocaleTimeAgo from '~/components/LocaleTimeAgo.vue'
+import BiotopeMeasureCard from '~/components/BiotopeMeasureCard.vue'
 
 const props = defineProps<{
   biotope: BiotopeDto
-  measures: { type: MeasureType; last: MeasureDto }[]
+  measures: { type: MeasureType; last: MeasureDto; history: MeasureDto[] }[]
   availableMeasureTypes: MeasureType[]
 }>()
 
@@ -118,6 +119,9 @@ function deleteBiotope() {
             </p>
           </CardContent>
         </Card>
+      </div>
+      <div class="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
+        <BiotopeMeasureCard :measure class="h-96" v-for="measure in measures" />
       </div>
     </PageContent>
   </NavigationLayout>
