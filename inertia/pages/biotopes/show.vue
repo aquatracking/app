@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import BiotopesController from '#controllers/biotopes_controller'
+import { InferPageProps } from '@adonisjs/inertia/types'
 import { Link, router } from '@inertiajs/vue3'
 import { Edit2, Plus, Trash } from 'lucide-vue-next'
 import { toRefs } from 'vue'
 import CreateMeasureDialog from '~/components/dialogs/CreateMeasureDialog.vue'
 import ErrorAndNotificationDisplay from '~/components/ErrorAndNotificationDisplay.vue'
+import LocaleTimeAgo from '~/components/LocaleTimeAgo.vue'
 import PageContent from '~/components/PageContent.vue'
 import TitleBar from '~/components/TitleBar.vue'
 import {
@@ -21,16 +24,9 @@ import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { useBiotopeDetails } from '~/composables/use_biotope_details'
 import NavigationLayout from '~/layouts/NavigationLayout.vue'
-import { MeasureType } from '../../../app/constant'
-import { BiotopeDto } from '../../../app/dto/biotope_dto'
-import { MeasureDto } from '../../../app/dto/measure_dto'
-import LocaleTimeAgo from '~/components/LocaleTimeAgo.vue'
 
-const props = defineProps<{
-  biotope: BiotopeDto
-  measures: { type: MeasureType; last: MeasureDto }[]
-  availableMeasureTypes: MeasureType[]
-}>()
+const props = defineProps<InferPageProps<BiotopesController, 'show'>>()
+props.biotope
 
 const { biotope } = toRefs(props)
 
