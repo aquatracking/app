@@ -74,8 +74,8 @@ function submit() {
                 </SelectGroup>
               </SelectContent>
             </Select>
-            <InputError v-for="error in form.errors.measureTypeCode ?? []">
-              {{ error }}
+            <InputError v-if="form.errors.measureTypeCode">
+              {{ form.errors.measureTypeCode }}
             </InputError>
           </div>
 

@@ -51,7 +51,7 @@ function submit() {
   form
     .transform((data) => ({
       ...data,
-      startedDate: data.startedDate.toString(),
+      startedDate: data.startedDate?.toString(),
     }))
     .post('/biotopes')
 }
@@ -78,8 +78,8 @@ function submit() {
               {{ $t('fields.name') }}
             </Label>
             <Input id="name" name="name" type="text" v-model="form.name" />
-            <InputError v-for="error in form.errors.name ?? []">
-              {{ error }}
+            <InputError v-if="form.errors.name">
+              {{ form.errors.name }}
             </InputError>
           </div>
 
