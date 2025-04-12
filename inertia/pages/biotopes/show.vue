@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import BiotopesController from '#controllers/biotopes_controller'
+import type BiotopesController from '#controllers/biotopes_controller'
 import { InferPageProps } from '@adonisjs/inertia/types'
 import { Link, router } from '@inertiajs/vue3'
 import { Edit2, Plus, Trash } from 'lucide-vue-next'
@@ -25,8 +25,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { useBiotopeDetails } from '~/composables/use_biotope_details'
 import NavigationLayout from '~/layouts/NavigationLayout.vue'
 
-const props = defineProps<InferPageProps<BiotopesController, 'show'>>()
-props.biotope
+type PageProps = InferPageProps<BiotopesController, 'show'>
+const props = defineProps<{
+  biotope: PageProps['biotope']
+  measures: PageProps['measures']
+  availableMeasureTypes: PageProps['availableMeasureTypes']
+}>()
 
 const { biotope } = toRefs(props)
 
@@ -108,10 +112,12 @@ function deleteBiotope() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div class="text-2xl font-bold">{{ measure.last.value }} {{ measure.type.unit }}</div>
-            <p class="text-xs text-muted-foreground first-letter:uppercase">
-              <LocaleTimeAgo :date="measure.last.measuredAt" />
-            </p>
+            <template v-if="measure.last">
+              <div class="text-2xl font-bold">{{ measure.last.value }} {{ measure.type.unit }}</div>
+              <p class="text-xs text-muted-foreground first-letter:uppercase">
+                <LocaleTimeAgo :date="measure.last.measuredAt" />
+              </p>
+            </template>
           </CardContent>
         </Card>
       </div>
