@@ -1,7 +1,9 @@
 import { biotopeCreateValidator } from '#validators/biotope_create_validator'
 import { biotopeUpdateValidator } from '#validators/biotope_update_validator'
 import type { HttpContext } from '@adonisjs/core/http'
+import db from '@adonisjs/lucid/services/db'
 import { MeasureTypes } from '../constant.js'
+import { BiotopeDto } from '../dto/biotope_dto.js'
 
 export default class BiotopesController {
   /**
@@ -49,26 +51,56 @@ export default class BiotopesController {
       [...type.recommendedBiotopes].includes(biotope.type)
     )
 
-    let measures = await Promise.all(
-      availableMeasureTypes.map(async (type) => {
-        const lastValue = await biotope
-          .related('measures')
-          .query()
-          .where('measureTypeCode', type.code)
-          .orderBy('measuredAt', 'desc')
-          .first()
+    const rawLastValues: {
+      measure_type_code: string
+      value: number
+      measured_at: Date
+    }[][] = await db
+      .rawQuery(
+        `
+      WITH last_values AS (
+        SELECT
+          measure_type_code,
+          value,
+          measured_at,
+          ROW_NUMBER() OVER (PARTITION BY measure_type_code ORDER BY measured_at DESC) AS rn
+        FROM measures
+        WHERE biotope_id = :biotopeId
+      )
+      SELECT
+        measure_type_code,
+        value,
+        measured_at
+      FROM last_values
+      WHERE rn = 1
+      ORDER BY measure_type_code;
+      `,
+        {
+          biotopeId: biotope.id,
+        }
+      )
+      .debug(true)
 
+    let measures = availableMeasureTypes
+      .map((measureType) => {
+        const last = rawLastValues[0].find(
+          (measure) => measure.measure_type_code === measureType.code
+        )
         return {
-          type,
-          last: lastValue,
+          type: measureType,
+          last: last
+            ? {
+                measureTypeCode: last.measure_type_code,
+                value: last.value,
+                measuredAt: last.measured_at,
+              }
+            : null,
         }
       })
-    )
-
-    measures = measures.filter((measure) => measure.last)
+      .filter((measure) => measure.last)
 
     return inertia.render('biotopes/show', {
-      biotope: biotope.serialize(),
+      biotope: biotope.serialize() as BiotopeDto,
       measures,
       availableMeasureTypes,
     })
