@@ -1,30 +1,20 @@
-FROM node:22.14-alpine AS base
+FROM node:22.14.0-alpine AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN npm install -g corepack@latest && corepack enable
 
-# All deps stage
-FROM base AS deps
-WORKDIR /app
-ADD package.json package-lock.json ./
-RUN npm ci
-
-# Production only deps stage
-FROM base AS production-deps
-WORKDIR /app
-ADD package.json package-lock.json ./
-RUN npm ci --omit=dev
-
-# Build stage
 FROM base AS build
-WORKDIR /app
-COPY --from=deps /app/node_modules /app/node_modules
-ADD . .
-RUN node ace build
+WORKDIR /build
+COPY . /build
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    pnpm install --frozen-lockfile
+RUN pnpm build
+RUN pnpm deploy --filter=@aquatracking/backend --prod /prod/backend
 
 # Production stage
 FROM base
 ENV NODE_ENV=production
-ENV DB_MIGRATE_ON_START=true
 WORKDIR /app
-COPY --from=production-deps /app/node_modules /app/node_modules
-COPY --from=build /app/build /app
-EXPOSE 8080
+COPY --from=build /prod/backend/build/ /app
+COPY --from=build /prod/backend/node_modules /app/node_modules
 CMD ["node", "./bin/server.js"]

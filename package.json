@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "format": "pnpm -r format",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

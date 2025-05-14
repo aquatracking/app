@@ -2,9 +2,11 @@ services:
   mysql:
     image: mysql:9.1
     ports:
-      - '3306:3306'
+      - "3306:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_DATABASE}
       LANG: C.UTF-8
     volumes:
@@ -14,11 +16,11 @@ services:
     links:
       - mysql
     ports:
-      - '8080:80'
+      - "8080:80"
     environment:
       PMA_HOST: mysql
   maildev:
     image: maildev/maildev
     ports:
-      - '1080:1080'
-      - '1025:1025'
+      - "1080:1080"
+      - "1025:1025"
