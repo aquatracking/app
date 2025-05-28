@@ -26,6 +26,9 @@ importers:
       '@adonisjs/session':
         specifier: ^7.5.1
         version: 7.5.1(@adonisjs/core@6.17.2(@adonisjs/assembler@7.8.2(typescript@5.7.3))(@vinejs/vine@3.0.1))(@japa/api-client@3.1.0(@japa/assert@4.0.1(@japa/runner@4.2.0))(@japa/runner@4.2.0))
+      '@aquatracking/commons':
+        specifier: workspace:*
+        version: link:../../packages/commons
       '@vinejs/vine':
         specifier: ^3.0.0
         version: 3.0.1
@@ -87,6 +90,18 @@ importers:
       ts-node-maintained:
         specifier: ^10.9.5
         version: 10.9.5(@swc/core@1.10.7)(@types/node@22.15.18)(typescript@5.7.3)
+      typescript:
+        specifier: ~5.7
+        version: 5.7.3
+
+  packages/commons:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.13.2
+        version: 22.15.18
+      prettier:
+        specifier: ^3.5.3
+        version: 3.5.3
       typescript:
         specifier: ~5.7
         version: 5.7.3

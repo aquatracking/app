@@ -1,0 +1,32 @@
+{
+  "name": "@aquatracking/commons",
+  "version": "0.1.0",
+  "description": "",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "development": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./dtos": {
+      "types": "./src/dtos/index.ts",
+      "development": "./src/dtos/index.ts",
+      "default": "./dist/dtos/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "format": "prettier --write ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.6.2",
+  "devDependencies": {
+    "@types/node": "^22.13.2",
+    "typescript": "~5.7",
+    "prettier": "^3.5.3"
+  }
+}

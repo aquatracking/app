@@ -16,7 +16,12 @@ const loggerConfig = defineConfig({
       level: env.get('LOG_LEVEL'),
       transport: {
         targets: targets()
-          .pushIf(!app.inProduction, targets.pretty())
+          .pushIf(
+            !app.inProduction,
+            targets.pretty({
+              ignore: 'request,request_id,user',
+            })
+          )
           .pushIf(app.inProduction, targets.file({ destination: 1 }))
           .toArray(),
       },
