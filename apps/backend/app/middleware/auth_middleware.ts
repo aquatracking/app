@@ -19,7 +19,15 @@ export default class AuthMiddleware {
       guards?: (keyof Authenticators)[]
     } = {}
   ) {
-    await ctx.auth.authenticateUsing(options.guards, { loginRoute: this.redirectTo })
+    const user = await ctx.auth.authenticateUsing(options.guards, { loginRoute: this.redirectTo })
+
+    ctx.logger = ctx.logger.child({
+      user: {
+        id: user.id,
+        email: user.email,
+      },
+    })
+
     return next()
   }
 }
