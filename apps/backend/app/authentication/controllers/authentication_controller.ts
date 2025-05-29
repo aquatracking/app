@@ -1,13 +1,9 @@
 import { HttpContext } from '@adonisjs/core/http'
 import { loginValidator } from '../validators/login_validator.js'
-import { inject } from '@adonisjs/core'
 import User from '../../users/models/user.js'
 import { UserMapper } from '../../users/mappers/user_mapper.js'
 
-@inject()
 export default class AuthenticationController {
-  constructor() {}
-
   async login({ request, logger, auth }: HttpContext) {
     const { email, password } = await request.validateUsing(loginValidator)
 
@@ -38,5 +34,17 @@ export default class AuthenticationController {
     await auth.use('web').login(user)
 
     return UserMapper.toDto(user)
+  }
+
+  async logout({ auth, logger, response }: HttpContext) {
+    const user = auth.user
+
+    if (user) {
+      await auth.use('web').logout()
+
+      logger.info('User %s logged out successfully', auth)
+    }
+
+    return response.status(204)
   }
 }

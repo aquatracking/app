@@ -23,6 +23,7 @@ router
 router
   .group(() => {
     router.post('/login', [AuthenticationController, 'login']).as('login')
+    router.post('/logout', [AuthenticationController, 'logout']).as('logout')
   })
   .prefix('/auth')
   .as('auth')
