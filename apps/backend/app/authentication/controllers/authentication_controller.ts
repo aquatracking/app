@@ -1,9 +1,29 @@
+import { inject } from '@adonisjs/core'
 import { HttpContext } from '@adonisjs/core/http'
-import { loginValidator } from '../validators/login_validator.js'
-import User from '../../users/models/user.js'
 import { UserMapper } from '../../users/mappers/user_mapper.js'
+import User from '../../users/models/user.js'
+import { AuthenticationService } from '../services/authentication_service.js'
+import { loginValidator } from '../validators/login_validator.js'
+import { registerValidator } from '../validators/register_validator.js'
 
+@inject()
 export default class AuthenticationController {
+  constructor(private readonly authenticationService: AuthenticationService) {}
+
+  async register({ request }: HttpContext) {
+    const { fullName, email, password, invitationToken } =
+      await request.validateUsing(registerValidator)
+
+    const user = await this.authenticationService.register(
+      fullName,
+      email,
+      password,
+      invitationToken
+    )
+
+    return UserMapper.toDto(user)
+  }
+
   async login({ request, logger, auth }: HttpContext) {
     const { email, password } = await request.validateUsing(loginValidator)
 
@@ -37,13 +57,9 @@ export default class AuthenticationController {
   }
 
   async logout({ auth, logger, response }: HttpContext) {
-    const user = auth.user
+    await auth.use('web').logout()
 
-    if (user) {
-      await auth.use('web').logout()
-
-      logger.info('User %s logged out successfully', auth)
-    }
+    logger.info('User %s logged out successfully', auth.user?.email)
 
     return response.status(204)
   }

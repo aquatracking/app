@@ -25,7 +25,11 @@ router
 router
   .group(() => {
     router.post('/login', [AuthenticationController, 'login']).as('login')
-    router.post('/logout', [AuthenticationController, 'logout']).as('logout')
+    router.post('/logout', [AuthenticationController, 'logout']).as('logout').use(middleware.auth())
+    router
+      .post('/register', [AuthenticationController, 'register'])
+      .as('register')
+      .use(middleware.guest())
   })
   .prefix('/auth')
   .as('auth')

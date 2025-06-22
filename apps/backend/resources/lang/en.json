@@ -1,0 +1,20 @@
+{
+  "email": {
+    "verifyYourEmail": {
+      "subject": "Verify your email address",
+      "text": "Hello {fullName},\n\nThank you for signing up on Aquatracking. To complete your registration, please click on the link below.\n\n{verificationLink}"
+    },
+    "resetYourPassword": {
+      "subject": "Reset your password",
+      "text": "Hello {fullName},\n\nYou have requested to reset your password. Please click on the link below to reset your password.\n\n{resetLink}"
+    },
+    "passwordResetConfirmation": {
+      "subject": "Password reset confirmation",
+      "text": "Hello {fullName},\n\nYour password has been reset successfully."
+    },
+    "invitation": {
+      "subject": "Invitation to join Aquatracking",
+      "text": "Hello,\n\nYou have been invited to join Aquatracking. Click on the link below to create your account.\n\n{invitationLink}"
+    }
+  }
+}

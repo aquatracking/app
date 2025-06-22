@@ -4,6 +4,7 @@ import hash from '@adonisjs/core/services/hash'
 import { BaseModel, beforeCreate, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 import { randomUUID } from 'node:crypto'
+import { DbRememberMeTokensProvider } from '@adonisjs/auth/session'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -51,6 +52,8 @@ export default class User extends compose(BaseModel, AuthFinder) implements User
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime | null
+
+  static readonly rememberMeTokens = DbRememberMeTokensProvider.forModel(User)
 
   @beforeCreate()
   static assignUuid(user: User) {

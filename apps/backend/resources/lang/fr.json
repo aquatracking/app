@@ -1,0 +1,20 @@
+{
+  "email": {
+    "verifyYourEmail": {
+      "subject": "Vérifiez votre adresse email",
+      "text": "Bonjour {fullName},\n\nMerci de vous être inscrit sur Aquatracking. Pour finaliser votre inscription, veuillez cliquer sur le lien ci-dessous.\n\n{verificationLink}"
+    },
+    "resetYourPassword": {
+      "subject": "Réinitialisez votre mot de passe",
+      "text": "Bonjour {fullName},\n\nVous avez demandé à réinitialiser votre mot de passe. Veuillez cliquer sur le lien ci-dessous pour réinitialiser votre mot de passe.\n\n{resetLink}"
+    },
+    "passwordResetConfirmation": {
+      "subject": "Confirmation de réinitialisation du mot de passe",
+      "text": "Bonjour {fullName},\n\nVotre mot de passe a été réinitialisé avec succès."
+    },
+    "invitation": {
+      "subject": "Invitation à rejoindre Aquatracking",
+      "text": "Bonjour,\n\nVous avez été invité à rejoindre Aquatracking. Pour créer un compte, veuillez cliquer sur le lien ci-dessous.\n\n{invitationLink}"
+    }
+  }
+}
