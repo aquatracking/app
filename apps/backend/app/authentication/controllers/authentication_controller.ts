@@ -5,10 +5,15 @@ import User from '../../users/models/user.js'
 import { AuthenticationService } from '../services/authentication_service.js'
 import { loginValidator } from '../validators/login_validator.js'
 import { registerValidator } from '../validators/register_validator.js'
+import { EmailVerificationService } from '../../users/services/email_verification_service.js'
+import EmailNotVerifiedException from '../exceptions/email_not_verified_exception.js'
 
 @inject()
 export default class AuthenticationController {
-  constructor(private readonly authenticationService: AuthenticationService) {}
+  constructor(
+    private readonly authenticationService: AuthenticationService,
+    private readonly emailVerificationService: EmailVerificationService
+  ) {}
 
   async register({ request }: HttpContext) {
     const { fullName, email, password, invitationToken } =
@@ -48,6 +53,12 @@ export default class AuthenticationController {
     })
 
     logger = logger.child({ user: { id: user.id, email: user.email } })
+
+    if (!user.verified) {
+      logger.info('User %s logged in but not verified', user.email)
+      await this.emailVerificationService.sendVerificationEmail(user)
+      throw new EmailNotVerifiedException()
+    }
 
     logger.info('User %s logged in successfully', user.email)
 
