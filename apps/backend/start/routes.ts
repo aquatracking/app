@@ -30,6 +30,7 @@ router
       .post('/register', [AuthenticationController, 'register'])
       .as('register')
       .use(middleware.guest())
+    router.post('/verify-email', [AuthenticationController, 'verifyEmail']).as('verifyEmail')
   })
   .prefix('/auth')
   .as('auth')

@@ -7,6 +7,7 @@ import { loginValidator } from '../validators/login_validator.js'
 import { registerValidator } from '../validators/register_validator.js'
 import { EmailVerificationService } from '../../users/services/email_verification_service.js'
 import EmailNotVerifiedException from '../exceptions/email_not_verified_exception.js'
+import vine from '@vinejs/vine'
 
 @inject()
 export default class AuthenticationController {
@@ -71,6 +72,16 @@ export default class AuthenticationController {
     await auth.use('web').logout()
 
     logger.info('User %s logged out successfully', auth.user?.email)
+
+    return response.status(204)
+  }
+
+  async verifyEmail({ request, response }: HttpContext) {
+    const { token } = request.qs()
+
+    const validatedToken = await vine.compile(vine.string()).validate(token)
+
+    await this.emailVerificationService.verifyToken(validatedToken)
 
     return response.status(204)
   }

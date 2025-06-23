@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
 import UserToken, { UserTokenModel } from '../models/user_token.js'
+import User from '../models/user.js'
 
 type UserTokenType = 'email_verification' | 'password_reset'
 
@@ -20,5 +21,17 @@ export class UserTokenRepository {
       expiresAt,
       token,
     })
+  }
+
+  async getActiveByToken(token: string, type: UserTokenType): Promise<UserTokenModel | null> {
+    return await UserToken.query()
+      .where('token', token)
+      .where('type', type)
+      .where('expiresAt', '>', DateTime.utc().toSQL())
+      .first()
+  }
+
+  async getUserByUserToken(userToken: UserTokenModel): Promise<User> {
+    return await User.query().where('id', userToken.userId).firstOrFail()
   }
 }

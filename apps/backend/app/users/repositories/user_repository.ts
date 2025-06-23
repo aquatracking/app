@@ -18,4 +18,11 @@ export class UserRepository {
   async findByEmail(email: string): Promise<UserModel | null> {
     return User.query().where('email', email).first()
   }
+
+  async verifyEmail(userId: string): Promise<UserModel> {
+    const u = await User.findOrFail(userId)
+    u.verified = true
+    await u.save()
+    return u
+  }
 }

@@ -7,6 +7,8 @@ import { UserTokenRepository } from '../repositories/user_token_repository.js'
 import i18nManager from '@adonisjs/i18n/services/main'
 import env from '#start/env'
 import mail from '@adonisjs/mail/services/main'
+import InvalidVerifyEmailTokenException from '../exceptions/invalid_verify_email_token_exception.js'
+import { UserRepository } from '../repositories/user_repository.js'
 
 const TOKEN_TYPE = 'email_verification'
 const TOKEN_SIZE = 64
@@ -16,7 +18,10 @@ const baseLink = `${env.get('BASE_URL')}/verify-email`
 
 @inject()
 export class EmailVerificationService {
-  constructor(private readonly userTokenRepository: UserTokenRepository) {}
+  constructor(
+    private readonly userTokenRepository: UserTokenRepository,
+    private readonly userRepository: UserRepository
+  ) {}
 
   async sendVerificationEmail(user: UserModel): Promise<void> {
     const i18n = i18nManager.locale()
@@ -25,7 +30,7 @@ export class EmailVerificationService {
 
     const token = await this.generateToken(user)
 
-    const verificationLink = `${baseLink}?token=${token.token}&email=${user.email}`
+    const verificationLink = `${baseLink}?token=${token.token}`
 
     await mail.sendLater((message) => {
       message
@@ -46,5 +51,20 @@ export class EmailVerificationService {
       DateTime.now().plus(TOKEN_DURATION),
       string.generateRandom(TOKEN_SIZE)
     )
+  }
+
+  async verifyToken(token: string): Promise<UserModel> {
+    const userToken = await this.userTokenRepository.getActiveByToken(token, TOKEN_TYPE)
+
+    if (!userToken) {
+      throw new InvalidVerifyEmailTokenException()
+    }
+
+    const user = await this.userTokenRepository.getUserByUserToken(userToken)
+
+    this.cleanUserVerificationTokens(user)
+    this.userRepository.verifyEmail(user.id)
+
+    return user
   }
 }
