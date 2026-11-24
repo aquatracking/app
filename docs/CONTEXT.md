@@ -1,0 +1,55 @@
+# Glossaire du domaine
+
+Termes utilisés dans les specs, le code et l'interface. Le code est en anglais : chaque terme indique son nom dans le code. Si un terme manque ou devient ambigu, on met ce fichier à jour **avant** d'écrire le code.
+
+## Instance et utilisateurs
+
+**Instance** — Une installation d'AquaTracking (un serveur, une base). Auto-hébergée, elle sert un petit groupe de personnes.
+
+**Utilisateur** (`User`) — Personne qui a un compte sur l'instance. Possède des vivariums. A un prénom, un nom facultatif, un email (identifiant de connexion) et une langue préférée facultative.
+
+**Administrateur** (`User.isAdmin`) — Utilisateur qui gère l'instance : invitations, comptes. Un administrateur **ne voit pas** les vivariums des autres utilisateurs. Il y a toujours au moins un administrateur.
+
+**Installation** (`setup`) — État de l'instance tant qu'aucun utilisateur n'existe. Seul l'écran de création du premier administrateur est accessible.
+
+**Invitation** (`Invitation`) — Lien à usage unique, valable 7 jours, qui permet à une adresse email de créer un compte. C'est le seul moyen d'inscription. L'invitation prouve que l'adresse appartient à la personne : il n'y a pas de vérification d'email.
+
+**Lien de réinitialisation** (`PasswordResetToken`) — Lien à usage unique, valable 24 heures, qui permet de choisir un nouveau mot de passe. Envoyé par email si l'instance a un SMTP, sinon généré par un administrateur qui le transmet lui-même.
+
+**Langue** (`User.locale`) — `fr` ou `en`. Facultative : si elle est vide, on suit la langue du navigateur.
+
+## Vivariums
+
+**Vivarium** (`Vivarium`) — Tout bac qui héberge du vivant et dont on suit les paramètres. Terme générique du code et du glossaire ; l'interface dit plutôt « bac » ou utilise le type. *Remplace « biotope » des versions précédentes, ambigu avec le « bac biotope » de l'aquariophilie.*
+
+**Type de vivarium** (`Vivarium.kind`) — `aquarium`, `terrarium` ou `paludarium` (partie aquatique et partie terrestre). Fixé à la création.
+
+**Type d'eau** (`Vivarium.waterType`) — `fresh` (douce), `brackish` (saumâtre) ou `salt` (mer). Obligatoire pour un aquarium ou un paludarium, absent pour un terrarium.
+
+**Climat** (`Vivarium.climate`) — `tropical` (tropical humide), `desert` (désertique) ou `temperate` (tempéré). Obligatoire pour un terrarium ou un paludarium, absent pour un aquarium.
+
+**Profil** — Combinaison du type de vivarium, du type d'eau et du climat. Détermine les mesures suivies par défaut. Ce n'est pas une entité : c'est une valeur calculée.
+
+**Mise en service** (`Vivarium.startedOn`) — Date de mise en eau (aquarium) ou d'installation (terrarium). Sert à afficher l'âge du bac.
+
+**Archivage** (`Vivarium.archivedAt`) — Un vivarium archivé est un bac démonté ou vendu. Il reste consultable avec tout son historique, mais on ne peut plus y ajouter de relevé. On peut le désarchiver.
+
+## Mesures
+
+**Type de mesure** (`MeasureType`) — Paramètre mesurable : température, pH, nitrites… Les types forment un **catalogue fixe** défini dans le code ; les utilisateurs ne peuvent pas en créer. Chaque type a un code stable (`temperature`, `ph`, `no2`…), une unité, un nombre de décimales et des bornes de plausibilité.
+
+**Catalogue** (`app/catalog/measure_types.ts`) — La source unique des types de mesure et des mesures suivies par défaut pour chaque profil. Synchronisé en base à chaque déploiement.
+
+**Bornes de plausibilité** — Valeurs en dehors desquelles une saisie est forcément une erreur (pH hors de 0–14, température hors de −10–60 °C). Elles servent à la validation. Ce ne sont **pas** des seuils.
+
+**Seuil** — *Hors périmètre 2.0.* Plage min/max souhaitée pour une mesure suivie sur un vivarium donné, qui déclenchera tuiles colorées et alertes.
+
+**Mesure suivie** (`TrackedMeasure`) — Type de mesure que l'utilisateur suit sur un vivarium, avec sa position d'affichage. Les mesures suivies déterminent les tuiles du tableau de bord et les champs du formulaire de relevé. Ne plus suivre un type ne supprime pas ses mesures.
+
+**Mesure** (`Measure`) — Une valeur d'un type de mesure, sur un vivarium, à un instant donné (`measuredAt`). A une source : `manual` (saisie) ou `device` (capteur, hors périmètre 2.0).
+
+**Relevé** — Action de saisir en une fois plusieurs mesures prises au même moment (un test en bandelette, une série de tests en gouttes). Le formulaire de relevé crée une mesure par valeur remplie, toutes avec la même date. Ce n'est **pas** une entité en base.
+
+**Dernière valeur** — Mesure la plus récente d'un type sur un vivarium. Affichée sur les tuiles du tableau de bord.
+
+**Plage** (de graphe) — Fenêtre de temps affichée : 7 jours, 30 jours, 3 mois, 6 mois, 1 an, tout.
