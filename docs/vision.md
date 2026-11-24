@@ -39,6 +39,7 @@ L'ordre est celui de l'implémentation : chaque feature est livrable et testable
 - **Seuils et alertes** : min/max par mesure suivie, tuiles colorées, alertes email. Les seuils iront dans `tracked_measures`. Nécessitera des tâches de fond (queue/scheduler, à choisir au moment venu).
 - **Capteurs** : appareils qui envoient des mesures via une route JSON authentifiée par access token (abilities limitées à un vivarium). La colonne `measures.source` est déjà prévue.
 - **Journal** : maintenance (changement d'eau, nettoyage, ajout de produit), population (poissons, plantes, reptiles), notes. Piste : une table d'événements datés par vivarium.
+- **Mesures calculées** : types dérivés d'autres mesures (CO₂ depuis KH et pH, ammoniac libre depuis NH₃/NH₄⁺, pH et température, salinité depuis la conductivité, ratio NO₃/PO₄). Piste retenue : formule déclarée dans le catalogue (`derivedFrom` + calcul), valeur **calculée à la lecture** et non stockée, en associant les mesures d'entrée qui ont le même `measured_at` (tolérance temporelle à définir pour les capteurs). Un type dérivé peut être suivi (tuile, graphe) mais n'apparaît jamais comme champ du relevé. Stockage en `source = computed` seulement si les volumes de capteurs l'imposent.
 - **Partage** d'un vivarium avec d'autres utilisateurs (table de membres).
 - Double authentification (TOTP), sessions multiples et « déconnecter tous les appareils », export des données, unités alternatives (°F, densité).
 
