@@ -36,6 +36,7 @@ On n'écrit pas ce que le framework fournit. Avant d'ajouter une abstraction, v�
 | Santé | Health checks Adonis (`/health/live`, `/health/ready`) | Pour Docker et les orchestrateurs |
 | Variables d'environnement | `start/env.ts`, `Env.schema` | Secrets en `Env.schema.secret()`, support `file:` pour Docker secrets |
 | Données de référence | Seeder idempotent du catalogue | Lancé à chaque démarrage, comme les migrations |
+| Mise à jour en direct *(après 2.0)* | `@adonisjs/transmit` (SSE) + `router.reload({ only })` d'Inertia | Canal `vivariums/:id` autorisé par `VivariumPolicy` ; le serveur recalcule les props, aucune logique dupliquée côté client. Transport en mémoire pour une instance, Redis si plusieurs. Le reverse proxy doit désactiver le buffering sur la route SSE |
 
 ## Organisation du code
 
@@ -103,7 +104,7 @@ tests/functional/<feature>/…
 ## Démarrage et déploiement
 
 - **Dev** : `compose.yml` fournit PostgreSQL et Mailpit. `node ace serve --hmr`.
-- **Image Docker** unique, multi-étapes. Au démarrage : `migration:run --force`, puis `db:seed --files catalog_seeder`, puis le serveur. Les deux premières étapes sont idempotentes.
+- **Image Docker** unique, multi-étapes. Au démarrage : `migration:run --force` (le flag confirme l'exécution en production, où Adonis la refuse sinon ; il ne rejoue ni ne supprime rien), puis `db:seed --files catalog_seeder`, puis le serveur. Les deux premières étapes sont idempotentes.
 - Volume à persister : `DRIVE_ROOT`.
 
 ## Tests
