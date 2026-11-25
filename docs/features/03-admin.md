@@ -27,7 +27,7 @@ Permettre aux administrateurs d'inviter des personnes et de gérer les comptes d
 - Liste : nom affiché, email, administrateur oui/non, nombre de vivariums, date de création.
 - Nommer ou retirer administrateur. Impossible de retirer le dernier administrateur. Un administrateur ne peut pas se retirer lui-même ses droits.
 - Supprimer un compte : confirmation en saisissant l'email du compte. Supprime aussi ses vivariums, mesures et images. Impossible de supprimer son propre compte depuis cette page, ou le dernier administrateur.
-- Générer un lien de réinitialisation pour un utilisateur : même logique que [02](02-auth-profile.md) (24 h, remplace les précédents). Le lien est affiché avec « copier » et, si SMTP, peut aussi être envoyé par email.
+- Générer un lien de réinitialisation pour un utilisateur : même logique que [02](02-auth-profile.md) (1 h, remplace les précédents ; l'administrateur en régénère un s'il a expiré avant d'être utilisé). Le lien est affiché avec « copier » et, si SMTP, peut aussi être envoyé par email.
 
 ## Données
 `users`, `invitations`, `password_reset_tokens`, suppression en cascade de `vivariums` et des fichiers images.

@@ -14,9 +14,9 @@ Termes utilisés dans les specs, le code et l'interface. Le code est en anglais 
 
 **Invitation** (`Invitation`) — Lien à usage unique, valable 7 jours, qui permet à une adresse email de créer un compte. C'est le seul moyen d'inscription. L'invitation prouve que l'adresse appartient à la personne : il n'y a pas de vérification d'email.
 
-**Lien de réinitialisation** (`PasswordResetToken`) — Lien à usage unique, valable 24 heures, qui permet de choisir un nouveau mot de passe. Envoyé par email si l'instance a un SMTP, sinon généré par un administrateur qui le transmet lui-même.
+**Lien de réinitialisation** (`PasswordResetToken`) — Lien à usage unique, valable 1 heure, qui permet de choisir un nouveau mot de passe. Envoyé par email si l'instance a un SMTP, sinon généré par un administrateur qui le transmet lui-même.
 
-**Langue** (`User.locale`) — `fr` ou `en`. Facultative : si elle est vide, on suit la langue du navigateur.
+**Langue** (`User.locale`) — `fr` ou `en`. Toujours renseignée : préremplie depuis la langue du navigateur (`Accept-Language`, `en` à défaut) dans les formulaires d'installation et d'inscription, modifiable ensuite dans le profil. Avant connexion (pages de login, d'invitation…), l'interface suit la langue du navigateur.
 
 **Fuseau horaire** (`User.timezone`) — Fuseau dans lequel l'utilisateur voit et saisit les dates et heures. Toujours un **nom de fuseau IANA** (`Europe/Paris`, `America/Montreal`), jamais un décalage fixe (`+01:00`) : le nom porte les règles de changement d'heure (heure d'été / heure d'hiver). Toujours renseigné : détecté depuis le navigateur à l'envoi du formulaire d'installation ou d'inscription, modifiable ensuite dans le profil. Connu aussi hors requête (futurs emails d'alerte).
 
@@ -45,6 +45,8 @@ Termes utilisés dans les specs, le code et l'interface. Le code est en anglais 
 **Bornes de plausibilité** — Valeurs en dehors desquelles une saisie est forcément une erreur (pH hors de 0–14, température hors de −10–60 °C). Elles servent à la validation. Ce ne sont **pas** des seuils.
 
 **Seuil** — *Hors périmètre 2.0.* Plage min/max souhaitée pour une mesure suivie sur un vivarium donné, qui déclenchera tuiles colorées et alertes.
+
+**Péremption** — *Hors périmètre 2.0.* Durée, propre à chaque type de mesure, au-delà de laquelle la dernière valeur n'est plus représentative de l'état du bac.
 
 **Mesure suivie** (`TrackedMeasure`) — Type de mesure que l'utilisateur suit sur un vivarium, avec sa position d'affichage. Les mesures suivies déterminent les tuiles du tableau de bord et les champs du formulaire de relevé. Ne plus suivre un type ne supprime pas ses mesures.
 
