@@ -25,6 +25,7 @@ Voir d'un coup d'œil l'état actuel d'un bac et l'évolution de chaque paramèt
 - Plages : 7 jours, 30 jours (défaut), 3 mois, 6 mois, 1 an, tout. La plage choisie est dans l'URL (`?range=30d`).
 - Courbe des valeurs dans le temps, axe des abscisses temporel réel (des mesures irrégulières ne sont pas espacées régulièrement), points visibles quand il y a moins de 100 points.
 - Infobulle : date et heure, valeur.
+- Axe, infobulles et statistiques en heure locale du **fuseau de l'utilisateur**. Les limites de plage (« 7 jours ») et les intervalles d'agrégation d'un jour ou plus sont calculés en jours locaux : un jour de changement d'heure dure 23 ou 25 heures et reste un seul intervalle.
 - **Agrégation** : si la plage contient plus de 500 mesures, le serveur renvoie au plus 500 intervalles (`date_bin`), avec moyenne, min et max par intervalle ; le graphe affiche la moyenne et une bande min–max. Sinon, valeurs brutes.
 - Statistiques de la plage : dernière valeur, minimum, maximum, moyenne, nombre de mesures, plus grande variation entre deux mesures consécutives (avec les dates).
 - Plage sans mesure : message et lien vers le relevé.
@@ -54,3 +55,4 @@ Voir d'un coup d'œil l'état actuel d'un bac et l'évolution de chaque paramèt
 - **CHT-7** Une plage invalide dans l'URL revient à la plage par défaut (30 jours).
 - **CHT-8** Un code de type inconnu, ou sans mesure et non suivi par le vivarium, répond 404.
 - **CHT-9** Les routes répondent 404 pour le vivarium d'un autre utilisateur.
+- **CHT-10** Pour un utilisateur en `Europe/Paris`, des mesures du 31 octobre 2027 entre 00:00 et 23:59 heure locale (25 heures réelles) tombent dans un même intervalle journalier, et aucune mesure du 30 ou du 1er novembre n'y est comptée.

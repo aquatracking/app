@@ -8,6 +8,7 @@ PostgreSQL. Noms de tables et colonnes en `snake_case`, modèles Lucid en `camel
 - **Énumérations** : colonnes `text` avec contrainte `CHECK`, et l'énumération TypeScript correspondante dans le modèle. Ajouter une valeur = une migration qui modifie la contrainte.
 - **Booléens** : `boolean not null default false` (jamais une chaîne).
 - **Tokens** : seul le hash SHA-256 est stocké ; le token en clair n'existe que dans le lien.
+- **Dates et heures** : instants stockés en `timestamptz` (absolus, indépendants du fuseau). Seules les dates « calendaires » sans heure (`started_on`) sont en `date`. Conversion vers et depuis le fuseau de l'utilisateur (`users.timezone`) uniquement à l'affichage et à la saisie.
 - **Suppression** : physique, avec `on delete cascade` sur les données qui appartiennent à leur parent.
 
 ## Schéma
@@ -33,6 +34,7 @@ users 1───* vivariums 1───* tracked_measures *───1 measure_typ
 | `password` | text | hash (scrypt) |
 | `is_admin` | boolean | défaut `false` |
 | `locale` | text | nullable, `CHECK in ('fr','en')` |
+| `timezone` | text | requis, nom de fuseau IANA valide (validé côté application), défaut `UTC` |
 
 Règle d'intégrité applicative : il reste toujours au moins un utilisateur avec `is_admin = true`.
 
@@ -121,4 +123,4 @@ Une mesure peut exister pour un type qui n'est plus suivi : l'historique reste c
 ## Requêtes clés
 
 - **Dernière valeur par type** d'un vivarium : `DISTINCT ON (measure_type_id) … ORDER BY measure_type_id, measured_at DESC`, servi par l'index.
-- **Série d'un graphe** : valeurs brutes si la plage contient ≤ 500 points, sinon moyenne, min et max par intervalle (`date_trunc` ou `date_bin`) pour revenir sous 500 points.
+- **Série d'un graphe** : valeurs brutes si la plage contient ≤ 500 points, sinon moyenne, min et max par intervalle pour revenir sous 500 points. Les intervalles d'un jour ou plus sont calculés dans le fuseau de l'utilisateur (`date_bin(…, measured_at AT TIME ZONE :tz, …)`), pour qu'un « jour » corresponde au jour local, y compris les jours de 23 ou 25 heures au changement d'heure.

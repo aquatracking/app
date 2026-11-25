@@ -79,14 +79,15 @@ tests/functional/<feature>/…
 - **Services** : créés seulement quand une logique est partagée par plusieurs contrôleurs ou trop longue pour une méthode (ex. `MeasureSeriesService` qui calcule les séries agrégées). Pas de couche *repository* : Lucid en tient lieu.
 - **Un nom par concept** : celui de `CONTEXT.md`. Pas de synonymes (`tank`, `biotope`, `setting`…).
 - **Erreurs métier** : exceptions Adonis nommées (`E_INVITATION_EXPIRED`…) traduites, rendues en messages flash.
-- **Dates** : `DateTime` Luxon côté serveur ; affichage dans le fuseau de l'instance (`TZ`).
+- **Dates** : `DateTime` Luxon côté serveur, en UTC dans le code et en base. Conversion vers le **fuseau de l'utilisateur** (`user.timezone`) seulement pour l'affichage et l'interprétation des saisies. Jamais de décalage fixe : toujours un nom de zone IANA, pour que Luxon applique les changements d'heure de la date concernée.
 - **Pas de code mort** : pas d'alias d'import, de dépendance ou de colonne sans usage.
 
 ## Rendu et formulaires
 
 - Formulaires avec le composant `<Form>` d'Inertia et routes typées ; les erreurs de validation reviennent par session.
 - Les messages de succès ou d'erreur métier passent par un flash `notification` partagé par le middleware Inertia.
-- Données partagées à toutes les pages (`InertiaMiddleware`) : utilisateur courant (transformé), langue, notification, `mailEnabled`.
+- Données partagées à toutes les pages (`InertiaMiddleware`) : utilisateur courant (transformé), langue, fuseau de l'utilisateur, notification, `mailEnabled`.
+- **Fuseau horaire** : stocké sur l'utilisateur. Les formulaires d'installation et d'inscription le préremplissent avec `Intl.DateTimeFormat().resolvedOptions().timeZone` ; le serveur le valide (nom IANA) et l'enregistre. Rendu SSR et client utilisent ce même fuseau partagé : pas d'écart à l'hydratation. Pas de cookie ni de détection à chaque requête.
 - Interface pensée **mobile d'abord** : le relevé se fait souvent devant le bac, téléphone en main.
 
 ## Environnement
@@ -95,7 +96,8 @@ tests/functional/<feature>/…
 |---|---|---|
 | `APP_KEY` | oui | Chiffrement, signatures |
 | `APP_URL` | oui | Construction des liens envoyés (invitations, reset) |
-| `PORT`, `HOST`, `LOG_LEVEL`, `TZ` | non | Valeurs par défaut fournies |
+| `PORT`, `HOST`, `LOG_LEVEL` | non | Valeurs par défaut fournies |
+| `TZ` | non | Fuseau du processus, `UTC` conseillé. N'a **aucun effet** sur l'affichage, qui suit le fuseau de chaque utilisateur |
 | `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_DATABASE` | oui | PostgreSQL |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_SECURE` | non | Si `SMTP_HOST` est vide, l'envoi d'email est désactivé |
 | `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | si SMTP | Expéditeur |

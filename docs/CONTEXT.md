@@ -18,6 +18,8 @@ Termes utilisés dans les specs, le code et l'interface. Le code est en anglais 
 
 **Langue** (`User.locale`) — `fr` ou `en`. Facultative : si elle est vide, on suit la langue du navigateur.
 
+**Fuseau horaire** (`User.timezone`) — Fuseau dans lequel l'utilisateur voit et saisit les dates et heures. Toujours un **nom de fuseau IANA** (`Europe/Paris`, `America/Montreal`), jamais un décalage fixe (`+01:00`) : le nom porte les règles de changement d'heure (heure d'été / heure d'hiver). Toujours renseigné : détecté depuis le navigateur à l'envoi du formulaire d'installation ou d'inscription, modifiable ensuite dans le profil. Connu aussi hors requête (futurs emails d'alerte).
+
 ## Vivariums
 
 **Vivarium** (`Vivarium`) — Tout bac qui héberge du vivant et dont on suit les paramètres. Terme générique du code et du glossaire ; l'interface dit plutôt « bac » ou utilise le type. *Remplace « biotope » des versions précédentes, ambigu avec le « bac biotope » de l'aquariophilie.*

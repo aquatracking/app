@@ -21,7 +21,7 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 ### Inscription par invitation
 - Le lien contient un token. S'il est inconnu ou expiré, la page affiche « invitation invalide ou expirée » et un renvoi vers la connexion.
 - L'email est celui de l'invitation et n'est pas modifiable.
-- Champs : prénom, nom (facultatif), mot de passe et confirmation, langue.
+- Champs : prénom, nom (facultatif), mot de passe et confirmation, langue, fuseau horaire (prérempli avec celui du navigateur, modifiable ; UTC s'il est absent ou invalide).
 - À la création du compte, l'invitation est supprimée et l'utilisateur est connecté.
 - Un utilisateur déjà connecté qui ouvre un lien d'invitation est redirigé vers l'accueil avec un message.
 
@@ -32,7 +32,9 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 - La page de réinitialisation vérifie le token dès l'affichage. Nouveau mot de passe + confirmation. Après succès : token supprimé, remember me tokens de l'utilisateur supprimés, utilisateur connecté.
 
 ### Profil
-- Modifiable : prénom, nom, email, langue (fr, en ou « langue du navigateur »).
+- Modifiable : prénom, nom, email, langue (fr, en ou « langue du navigateur »), fuseau horaire (liste IANA avec recherche, ex. « Europe/Paris »).
+- Si le fuseau du navigateur diffère du fuseau enregistré, le profil le signale avec un bouton « Utiliser Europe/Paris » (utile après un déménagement). Rien n'est changé automatiquement.
+- Un fuseau qui n'est pas un nom IANA valide est refusé. Les décalages fixes (`+01:00`, `UTC+1`) ne sont pas proposés : ils ignoreraient le changement d'heure.
 - Changer l'email ou le mot de passe demande le mot de passe actuel.
 - Le nouvel email doit être libre (ni utilisateur, ni invitation en attente).
 - Changer le mot de passe supprime les remember me tokens des autres appareils.
@@ -72,3 +74,6 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 - **AUTH-11** Modifier l'email sans le bon mot de passe actuel est refusé ; avec, il est enregistré en minuscules.
 - **AUTH-12** Choisir une langue change la langue de l'interface à la page suivante ; « langue du navigateur » remet `locale` à vide.
 - **AUTH-13** Une page protégée demandée sans connexion redirige vers la connexion.
+- **AUTH-14** L'inscription par invitation enregistre le fuseau envoyé par le navigateur ; un fuseau absent ou invalide donne `UTC`.
+- **AUTH-15** Modifier le fuseau dans le profil change l'heure affichée des mesures existantes sans modifier les instants stockés.
+- **AUTH-16** Enregistrer un fuseau non IANA (`Mars/Olympus`, `+01:00`) est refusé.
