@@ -42,7 +42,7 @@ Termes utilisés dans les specs, le code et l'interface. Le code est en anglais 
 
 ## Mesures
 
-**Type de mesure** (`MeasureType`) — Paramètre mesurable : température, pH, nitrites… Les types forment un **catalogue fixe** défini dans le code ; les utilisateurs ne peuvent pas en créer. Chaque type a un code stable (`temperature`, `ph`, `no2`…), une unité, un nombre de décimales et des bornes de plausibilité.
+**Type de mesure** (`MeasureType`) — Paramètre mesurable : température, pH, nitrites… Les types forment un **catalogue fixe** défini dans le code ; les utilisateurs ne peuvent pas en créer. Chaque type a un code stable (`temperature`, `ph`, `no2`…), une unité, une précision maximale (nombre de décimales accepté à la saisie) et des bornes de plausibilité.
 
 **Catalogue** (`app/catalog/measure_types.ts`) — La source unique des types de mesure et des mesures suivies par défaut pour chaque profil. Synchronisé en base à chaque déploiement.
 

@@ -99,7 +99,7 @@ Données de référence, **écrites uniquement par le seeder du catalogue**. Pas
 | `id` | uuid | PK |
 | `code` | text | unique, stable (`temperature`, `ph`, `no2`…) |
 | `unit` | text | ex. `°C`, `mg/L`, vide pour le pH |
-| `decimals` | smallint | 0–3 |
+| `decimals` | smallint | 0–3. Précision **maximale** de saisie et d'affichage, pas un arrondi de stockage |
 | `position` | smallint | ordre d'affichage dans le catalogue |
 
 Le libellé vient de l'i18n (`measure_types.<code>`). Les bornes de plausibilité et les profils par défaut restent dans le code du catalogue : ce sont des règles, pas des données. Un type retiré du catalogue n'est jamais supprimé s'il a des mesures.

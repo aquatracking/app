@@ -11,17 +11,24 @@ Fournir dès l'installation un catalogue de paramètres utiles, et permettre à 
 
 Défini dans `app/catalog/measure_types.ts` ([ADR 0005](../adr/0005-catalogue-types-de-mesure-fixe.md)). Chaque entrée : `code`, `unit`, `decimals`, `min`/`max` de plausibilité, liste des profils où le type est suivi par défaut.
 
+**Sens de `decimals`** : c'est la précision **maximale** acceptée à la saisie et affichée, pas un format imposé.
+- La valeur est stockée telle que saisie (`numeric(10,3)`), sans arrondi.
+- Une saisie avec plus de décimales que permis est refusée, avec un message qui indique la précision attendue.
+- Affichage sans zéros forcés : `10` s'affiche « 10 », `7,25` reste « 7,25 », jamais « 10,0 ».
+- Les futurs seuils compareront les valeurs stockées. Être généreux sur `decimals` ne coûte donc rien : il suffit qu'un kit ou un appareil courant ne soit jamais bloqué.
+
 | Code | Libellé (fr) | Unité | Déc. | Plausibilité | Suivi par défaut |
 |---|---|---|---|---|---|
 | `temperature` | Température | °C | 1 | −10 – 60 | tous |
 | `ph` | pH | | 2 | 0 – 14 | eau douce, saumâtre, mer |
 | `gh` | Dureté totale (GH) | °dGH | 0 | 0 – 50 | eau douce |
 | `kh` | Dureté carbonatée (KH) | °dKH | 1 | 0 – 50 | eau douce, saumâtre, mer |
-| `no2` | Nitrites (NO₂) | mg/L | 2 | 0 – 50 | eau douce, saumâtre |
+| `no2` | Nitrites (NO₂) | mg/L | 3 | 0 – 50 | eau douce, saumâtre |
 | `no3` | Nitrates (NO₃) | mg/L | 1 | 0 – 500 | eau douce, saumâtre, mer |
 | `nh3` | Ammoniac / ammonium (NH₃/NH₄⁺) | mg/L | 2 | 0 – 50 | — |
-| `po4` | Phosphates (PO₄) | mg/L | 2 | 0 – 50 | mer |
+| `po4` | Phosphates (PO₄) | mg/L | 3 | 0 – 50 | mer |
 | `salinity` | Salinité | ppt | 1 | 0 – 50 | saumâtre, mer |
+| `specific_gravity` | Densité | | 3 | 1,000 – 1,040 | — |
 | `ca` | Calcium (Ca) | mg/L | 0 | 0 – 1000 | mer |
 | `mg` | Magnésium (Mg) | mg/L | 0 | 0 – 3000 | mer |
 | `co2` | CO₂ | mg/L | 0 | 0 – 200 | — |
@@ -29,6 +36,10 @@ Défini dans `app/catalog/measure_types.ts` ([ADR 0005](../adr/0005-catalogue-ty
 | `conductivity` | Conductivité | µS/cm | 0 | 0 – 100000 | — |
 | `humidity` | Humidité | % | 0 | 0 – 100 | terrarium (tous climats), paludarium |
 | `illuminance` | Luminosité | lux | 0 | 0 – 200000 | — |
+
+La **densité** est un type distinct de la salinité, et non une autre unité : la conversion dépend de la température, et beaucoup de réfractomètres et densimètres affichent directement la densité. Un récifaliste qui mesure ainsi suit la densité à la place, ou en plus, de la salinité.
+
+Justification des décimales notables : pH au 0,01 (pH-mètres, suivi récifal) ; KH au 0,1 (récifal) ; NO₃ au 0,1 (photomètres ultra-bas en récifal, alors qu'en eau douce les kits donnent des entiers) ; NO₂ au 0,001 (kits avec paliers comme 0,025) ; PO₄ au 0,001 (photomètres phosphore en ppb convertis en PO₄).
 
 « Eau douce / saumâtre / mer » s'applique aux aquariums et à la partie aquatique des paludariums. Exemple : un paludarium eau douce tropical suit par défaut température, pH, GH, KH, NO₂, NO₃ et humidité.
 
@@ -42,7 +53,7 @@ Défini dans `app/catalog/measure_types.ts` ([ADR 0005](../adr/0005-catalogue-ty
 - L'utilisateur peut **ajouter** n'importe quel type du catalogue non encore suivi (ajouté en dernière position), **retirer** un type suivi et **réordonner** les types suivis (glisser-déposer, flèches sur mobile).
 - Retirer un type ne supprime aucune mesure. Le réajouter fait réapparaître sa dernière valeur et son historique.
 - Un vivarium peut ne suivre aucun type ; le tableau de bord et le relevé l'invitent alors à en ajouter.
-- Impossible sur un vivarium archivé.
+- Sur un vivarium **archivé**, les mesures suivies sont figées : ajout, retrait et réordonnancement sont refusés (le bac est en lecture seule, comme pour les relevés). Il faut le désarchiver d'abord.
 - Changer le type d'eau ou le climat d'un vivarium ne touche pas aux mesures suivies.
 
 ## Données
@@ -67,3 +78,4 @@ Défini dans `app/catalog/measure_types.ts` ([ADR 0005](../adr/0005-catalogue-ty
 - **TRK-8** Réordonner enregistre les nouvelles positions ; une liste qui ne correspond pas exactement aux types suivis est refusée.
 - **TRK-9** Toute modification des mesures suivies d'un vivarium archivé est refusée.
 - **TRK-10** Les routes répondent 404 pour le vivarium d'un autre utilisateur.
+- **TRK-11** Le type densité existe dans le catalogue mais n'est suivi par défaut par aucun profil.

@@ -13,7 +13,7 @@ Saisir en quelques secondes les valeurs d'un test, retrouver tous les relevés p
 
 ### Relevé ([ADR 0006](../adr/0006-releve-sans-entite.md))
 - Accessible depuis le tableau de bord du vivarium par un bouton « Nouveau relevé » toujours visible (bouton flottant sur mobile). S'ouvre dans une fenêtre (plein écran sur mobile).
-- Champs : date et heure (défaut maintenant), saisies et affichées dans le **fuseau de l'utilisateur** ([CONTEXT](../CONTEXT.md)), puis un champ numérique par **mesure suivie**, dans l'ordre des mesures suivies, avec l'unité affichée et le pas correspondant aux décimales du type.
+- Champs : date et heure (défaut maintenant), saisies et affichées dans le **fuseau de l'utilisateur** ([CONTEXT](../CONTEXT.md)), puis un champ numérique par **mesure suivie**, dans l'ordre des mesures suivies, avec l'unité affichée et au plus le nombre de décimales du type ([05](05-tracked-measures.md), sens de `decimals`).
 - Les champs vides sont ignorés. Il faut au moins une valeur.
 - Chaque valeur doit être dans les bornes de plausibilité du type ([05](05-tracked-measures.md)). La virgule et le point sont acceptés comme séparateur décimal.
 - La date ne peut pas être dans le futur (tolérance 5 minutes) ni antérieure à la mise en service du vivarium.
@@ -28,7 +28,7 @@ Saisir en quelques secondes les valeurs d'un test, retrouver tous les relevés p
 - Page par vivarium, mesures les plus récentes en premier, **regroupées par date et heure identiques** (un groupe = un relevé à l'affichage).
 - Filtre par type de mesure (tous les types ayant au moins une mesure, suivis ou non).
 - Pagination : 50 mesures par page.
-- Valeurs affichées avec le nombre de décimales du type et formatées selon la langue (`7,25` / `7.25`).
+- Valeurs affichées telles que saisies, sans zéros forcés, et formatées selon la langue (`7,25` / `7.25`).
 
 ### Correction
 - Modifier une mesure : valeur et date et heure (mêmes règles que le relevé). Le type n'est pas modifiable : on supprime et on ressaisit.
@@ -64,3 +64,4 @@ Saisir en quelques secondes les valeurs d'un test, retrouver tous les relevés p
 - **MEA-13** Pour un utilisateur en `Europe/Paris`, un relevé saisi le 15 janvier à 18:00 est enregistré à 17:00 UTC, et un relevé saisi le 15 juillet à 18:00 à 16:00 UTC ; les deux s'affichent à 18:00.
 - **MEA-14** Une heure inexistante dans le fuseau de l'utilisateur (ex. 2027-03-28 02:30 à Paris) est refusée ; une heure ambiguë (2027-10-31 02:30 à Paris) est enregistrée à 00:30 UTC.
 - **MEA-15** La même mesure s'affiche à des heures locales différentes pour deux utilisateurs de fuseaux différents ; l'instant stocké ne change pas.
+- **MEA-16** Une valeur avec plus de décimales que permis par le type (ex. température `25,35`) est refusée ; `10` saisi en nitrates s'affiche « 10 » et non « 10,0 ».
