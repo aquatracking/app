@@ -3,7 +3,7 @@
 Instructions pour toute personne ou IA qui travaille sur AquaTracking. À lire avant de modifier le code.
 
 ## Le projet
-Application auto-hébergée de suivi des paramètres d'aquariums, terrariums et paludariums. AdonisJS 7, Inertia + Vue, PostgreSQL. Version en cours : **2.0.0-alpha** (refonte, branche `rewrite/v2`).
+Application auto-hébergée de suivi des paramètres d'aquariums, terrariums et paludariums. AdonisJS 7, Inertia + Vue, PostgreSQL. Version en cours : **2.0.0-alpha**, développée sur `main` avec une PR par feature.
 
 ## Où trouver quoi
 | Besoin | Fichier |
