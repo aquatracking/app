@@ -124,7 +124,7 @@ Unique (`vivarium_id`, `measure_type_id`). Accueillera plus tard `min_value`, `m
 | `measured_at` | timestamptz | requis |
 | `source` | text | `CHECK in ('manual','device')`, défaut `manual` |
 
-Index (`vivarium_id`, `measure_type_id`, `measured_at desc`) : sert à la dernière valeur, à l'historique filtré et aux graphes.
+Index **unique** (`vivarium_id`, `measure_type_id`, `measured_at`) : interdit deux mesures du même type au même instant sur un vivarium, et sert à la dernière valeur, à l'historique filtré et aux graphes (PostgreSQL le parcourt aussi en ordre décroissant). Les mesures manuelles ont un `measured_at` tronqué à la minute.
 
 Une mesure peut exister pour un type qui n'est plus suivi : l'historique reste consultable.
 

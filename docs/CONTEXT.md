@@ -56,7 +56,7 @@ Termes utilisés dans les specs, le code et l'interface. Le code est en anglais 
 
 **Mesure** (`Measure`) — Une valeur d'un type de mesure, sur un vivarium, à un instant donné (`measuredAt`). A une source : `manual` (saisie) ou `device` (capteur, hors périmètre 2.0).
 
-**Relevé** — Action de saisir en une fois plusieurs mesures prises au même moment (un test en bandelette, une série de tests en gouttes). Le formulaire de relevé crée une mesure par valeur remplie, toutes avec la même date. Ce n'est **pas** une entité en base.
+**Relevé** — Action de saisir en une fois plusieurs mesures prises au même moment (un test en bandelette, une série de tests en gouttes). Le formulaire de relevé crée une mesure par valeur remplie, toutes au même instant, tronqué à la minute. Un relevé est identifié par son vivarium et cet instant : saisir la même minute le complète, et « Modifier le relevé » permet de le corriger. Ce n'est **pas** une entité en base.
 
 **Dernière valeur** — Mesure la plus récente d'un type sur un vivarium. Affichée sur les tuiles du tableau de bord.
 

@@ -13,4 +13,5 @@ En pratique, on teste plusieurs paramètres au même moment (bandelette multi-te
 ## Conséquences
 - Le modèle reste simple : une mesure = un type, une valeur, un instant. Les capteurs produiront exactement la même chose.
 - On ne peut pas attacher de note ou de méthode à un relevé. Si le besoin apparaît, il passera par le futur journal (événement daté) plutôt que par une entité relevé.
-- Corriger un relevé = corriger chaque mesure ; l'historique regroupe à l'affichage les mesures qui ont la même date.
+- Un relevé est identifié par son vivarium et son instant. Les mesures manuelles sont tronquées à la minute et une contrainte unique interdit deux mesures du même type au même instant : le groupe est ainsi stable et sans doublon.
+- Le formulaire de relevé sert aussi à **modifier** un relevé existant (compléter, corriger, vider un champ, changer la date), et c'est le seul écran de correction : pas d'édition mesure par mesure.
