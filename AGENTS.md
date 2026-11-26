@@ -27,15 +27,25 @@ Application auto-hébergée de suivi des paramètres d'aquariums, terrariums et 
 9. **Pas de code mort** : pas de dépendance, colonne, alias ou fichier sans usage.
 
 ## Commandes
-> À compléter au scaffolding.
+Prérequis : Node 26 (version dans `.node-version`, lue par fnm ou nvm) et pnpm (version dans le champ `packageManager` de `package.json`).
+
+Première installation : `pnpm install`, `cp .env.example .env`, `node ace generate:key`.
 
 ```bash
-npm run dev          # serveur de dev avec HMR
-npm test             # tests Japa
-npm run lint
-npm run typecheck
-docker compose up -d # PostgreSQL + Mailpit
+docker compose up -d       # PostgreSQL (bases aquatracking et aquatracking_test) + Mailpit (http://localhost:8025)
+node ace migration:run     # migrations, puis régénère database/schema.ts
+pnpm dev                   # serveur de dev avec HMR et SSR (http://localhost:3333)
+pnpm test                  # tests Japa sur la base aquatracking_test
+pnpm test --files=tests/functional/health/health_checks.spec.ts   # un seul fichier
+pnpm lint
+pnpm typecheck
+pnpm format                # Prettier
+node ace codegen           # régénère .adonisjs/ (routes typées, pages, transformers) hors serveur de dev
+pnpm shadcn-vue add <composant>   # ajoute un composant dans inertia/components/ui/
+docker build -t aquatracking .    # image de production
 ```
+
+`database/schema.ts` (classes de colonnes des modèles) et `.adonisjs/` sont générés : ne pas les modifier à la main, les committer après régénération.
 
 ## Définition du « fini »
 Une feature ou un correctif est fini quand :

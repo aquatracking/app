@@ -1,0 +1,12 @@
+{
+  "shared": {
+    "messages": {
+      "required": "Ce champ est obligatoire",
+      "string": "Ce champ doit être un texte",
+      "email": "Saisissez une adresse email valide",
+      "minLength": "Saisissez au moins {min} caractères",
+      "maxLength": "Saisissez au plus {max} caractères",
+      "sameAs": "Ce champ doit être identique à {otherField}"
+    }
+  }
+}

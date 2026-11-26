@@ -2,7 +2,7 @@
 
 Suivi des paramètres de vos aquariums, terrariums et paludariums : relevés rapides, historique et graphes. Application auto-hébergée.
 
-> La version 2 est en cours de réécriture. Pour l'instant, ce dépôt ne contient que ses spécifications.
+> La version 2 est en cours de réécriture (`2.0.0-alpha`) : l'application est scaffoldée, les features du périmètre 2.0 restent à implémenter.
 
 - [Vision et périmètre](docs/vision.md)
 - [Glossaire](docs/CONTEXT.md)
