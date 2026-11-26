@@ -16,6 +16,10 @@ Termes utilisés dans les specs, le code et l'interface. Le code est en anglais 
 
 **Lien de réinitialisation** (`PasswordResetToken`) — Lien à usage unique, valable 1 heure, qui permet de choisir un nouveau mot de passe. Envoyé par email si l'instance a un SMTP, sinon généré par un administrateur qui le transmet lui-même.
 
+**Invitant** (`User.invitedBy`) — Administrateur qui a envoyé l'invitation utilisée pour créer le compte. Les invitations acceptées sont supprimées : c'est l'utilisateur qui garde la trace de qui l'a invité, et sa date d'inscription celle de quand.
+
+**Dernière activité** (`User.lastSeenAt`) — Moment approximatif (à l'heure près) de la dernière utilisation de l'application par l'utilisateur. Plus fiable qu'une « dernière connexion », car une session « se souvenir de moi » peut durer un an sans nouvelle connexion.
+
 **Langue** (`User.locale`) — `fr` ou `en`. Toujours renseignée : préremplie depuis la langue du navigateur (`Accept-Language`, `en` à défaut) dans les formulaires d'installation et d'inscription, modifiable ensuite dans le profil. Avant connexion (pages de login, d'invitation…), l'interface suit la langue du navigateur.
 
 **Fuseau horaire** (`User.timezone`) — Fuseau dans lequel l'utilisateur voit et saisit les dates et heures. Toujours un **nom de fuseau IANA** (`Europe/Paris`, `America/Montreal`), jamais un décalage fixe (`+01:00`) : le nom porte les règles de changement d'heure (heure d'été / heure d'hiver). Toujours renseigné : détecté depuis le navigateur à l'envoi du formulaire d'installation ou d'inscription, modifiable ensuite dans le profil. Connu aussi hors requête (futurs emails d'alerte).

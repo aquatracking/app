@@ -27,7 +27,7 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 - Le lien contient un token. S'il est inconnu ou expiré, la page affiche « invitation invalide ou expirée » et un renvoi vers la connexion.
 - L'email est celui de l'invitation et n'est pas modifiable.
 - Champs : prénom, nom (facultatif), mot de passe et confirmation, langue (préremplie depuis le navigateur), fuseau horaire (prérempli avec celui du navigateur, modifiable ; UTC s'il est absent ou invalide).
-- À la création du compte, l'invitation est supprimée et l'utilisateur est connecté.
+- À la création du compte, l'auteur de l'invitation est enregistré comme `invited_by_id` du nouvel utilisateur, puis l'invitation est supprimée et l'utilisateur est connecté.
 - Un utilisateur déjà connecté qui ouvre un lien d'invitation est redirigé vers l'accueil avec un message.
 
 ### Mot de passe oublié

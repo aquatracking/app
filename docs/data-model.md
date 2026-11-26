@@ -38,6 +38,8 @@ users 1───* vivariums 1───* tracked_measures *───1 measure_typ
 | `is_admin` | boolean | défaut `false` |
 | `locale` | text | requis, `CHECK in ('fr','en')`, défaut `en` |
 | `timezone` | text | requis, nom de fuseau IANA valide (validé côté application), défaut `UTC` |
+| `invited_by_id` | uuid | nullable, FK `users`, `on delete set null`. Qui a envoyé l'invitation utilisée ; vide pour le premier administrateur ou si l'invitant a été supprimé. Avec `created_at` (date d'inscription), c'est l'historique « qui a invité qui, et quand » |
+| `last_seen_at` | timestamptz | nullable. Dernière activité : mise à jour par un middleware sur les requêtes authentifiées, au plus une fois par heure par utilisateur |
 
 Règle d'intégrité applicative : il reste toujours au moins un utilisateur avec `is_admin = true`.
 

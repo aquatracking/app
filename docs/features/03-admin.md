@@ -24,7 +24,8 @@ Permettre aux administrateurs d'inviter des personnes et de gérer les comptes d
 - Liste : email, invité par, date d'expiration, statut (en attente / expirée).
 
 ### Utilisateurs
-- Liste : nom affiché, email, administrateur oui/non, nombre de vivariums, date de création.
+- Liste : nom affiché, email, administrateur oui/non, invité par (nom de l'invitant, « — » pour le premier administrateur, « compte supprimé » si l'invitant n'existe plus), date d'inscription, dernière activité (« il y a 3 jours »), nombre de vivariums.
+- Une invitation acceptée n'est pas conservée : l'historique « qui a invité qui, et quand » est porté par l'utilisateur (`invited_by_id` et date d'inscription).
 - Nommer ou retirer administrateur. Impossible de retirer le dernier administrateur. Un administrateur ne peut pas se retirer lui-même ses droits.
 - Supprimer un compte : confirmation en saisissant l'email du compte. Supprime aussi ses vivariums, mesures et images. Impossible de supprimer son propre compte depuis cette page, ou le dernier administrateur.
 - Générer un lien de réinitialisation pour un utilisateur : même logique que [02](02-auth-profile.md) (1 h, remplace les précédents ; l'administrateur en régénère un s'il a expiré avant d'être utilisé). Le lien est affiché avec « copier » et, si SMTP, peut aussi être envoyé par email.
@@ -58,3 +59,5 @@ Le lien généré (invitation ou reset) revient à la page par un flash dédié,
 - **ADM-9** Supprimer son propre compte depuis l'administration est refusé.
 - **ADM-10** Générer un lien de réinitialisation affiche un lien utilisable une fois ([AUTH-10](02-auth-profile.md)) et invalide les liens précédents.
 - **ADM-11** La page des utilisateurs n'expose ni noms ni contenus de vivariums.
+- **ADM-12** Un utilisateur inscrit par invitation affiche le nom de l'administrateur qui l'a invité ; si cet administrateur est supprimé, l'utilisateur reste et affiche « compte supprimé ».
+- **ADM-13** La dernière activité d'un utilisateur est mise à jour quand il utilise l'application, y compris avec une session restaurée par « se souvenir de moi », et pas plus d'une fois par heure.
