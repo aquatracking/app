@@ -16,7 +16,7 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 - Case « se souvenir de moi » : remember me token valable 1 an. Sans elle, la session expire à la fermeture du navigateur.
 - Message d'erreur unique « identifiants invalides », que l'email existe ou non.
 - Limitation des échecs de connexion, deux compteurs cumulés (`limiter.multi`) :
-  - **IP + email** : 5 échecs en 15 minutes. Freine la recherche du mot de passe d'un compte précis. Remis à zéro par une connexion réussie ;
+  - **IP + email** : 5 échecs en 15 minutes. Freine la recherche du mot de passe d'un compte précis. Une connexion réussie remet à zéro ce compteur (pas l'historique des blocages) ;
   - **IP seule** : 20 échecs en 15 minutes, tous emails confondus. Freine l'essai d'une liste d'identifiants depuis une même machine.
 - **Blocage progressif** : quand un compteur est dépassé, la clé est bloquée 15 minutes, puis la durée double à chaque nouveau blocage de la même clé (30 min, 1 h, 2 h…), plafonnée à 24 h. L'historique des blocages d'une clé est oublié après 24 h sans nouveau blocage.
 - Pendant un blocage, le message indique quand réessayer, sans dire quel compteur a été dépassé.
@@ -26,7 +26,7 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 ### Inscription par invitation
 - Le lien contient un token. S'il est inconnu ou expiré, la page affiche « invitation invalide ou expirée » et un renvoi vers la connexion.
 - L'email est celui de l'invitation et n'est pas modifiable.
-- Champs : prénom, nom (facultatif), mot de passe et confirmation, langue (préremplie depuis le navigateur), fuseau horaire (prérempli avec celui du navigateur, modifiable ; UTC s'il est absent ou invalide).
+- Champs : prénom, nom (facultatif), mot de passe et confirmation, langue (préremplie depuis le navigateur), fuseau horaire (prérempli avec celui du navigateur, `UTC` s'il n'en donne pas, modifiable ; un nom invalide est refusé).
 - À la création du compte, l'auteur de l'invitation est enregistré comme `invited_by_id` du nouvel utilisateur, puis l'invitation est supprimée et l'utilisateur est connecté.
 - Un utilisateur déjà connecté qui ouvre un lien d'invitation est redirigé vers l'accueil avec un message.
 
@@ -47,8 +47,11 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 ### Déconnexion
 - Supprime la session et le remember me token courant, redirige vers la connexion.
 
+### Dernière activité
+- Un middleware, sur toute requête authentifiée (y compris quand la session est restaurée par « se souvenir de moi »), met à jour `users.last_seen_at` si elle est vide ou date de plus d'une heure. La mise à jour est une requête conditionnelle qui ne touche pas `updated_at`. Affichée dans l'administration ([03](03-admin.md), ADM-13).
+
 ## Données
-`users`, `remember_me_tokens`, `invitations` (lecture, suppression), `password_reset_tokens`.
+`users` (création avec `invited_by_id` repris de l'invitation, `locale`, `timezone` ; mise à jour du profil, du mot de passe et de `last_seen_at`), `remember_me_tokens`, `invitations` (lecture de `email` et `invited_by_id`, suppression), `password_reset_tokens`, `rate_limits` via le limiter (connexion, mot de passe oublié).
 
 ## Routes et pages
 | Méthode | Route | Action | Page |
@@ -63,7 +66,7 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 | PUT | `/profile/password` | `profile.updatePassword` | — |
 
 ## Emails (si SMTP)
-- Réinitialisation de mot de passe (lien, durée de validité), dans la langue de l'utilisateur ou, à défaut, celle de la requête.
+- Réinitialisation de mot de passe (lien, durée de validité), dans la langue de l'utilisateur.
 
 ## Critères d'acceptation
 - **AUTH-1** Des identifiants valides connectent l'utilisateur et redirigent vers l'accueil ou la page demandée.
@@ -79,7 +82,7 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 - **AUTH-11** Le formulaire de profil ne permet pas de modifier l'email : un email envoyé est ignoré. Changer le mot de passe sans le bon mot de passe actuel est refusé.
 - **AUTH-12** Choisir une langue change la langue de l'interface à la page suivante ; l'inscription par invitation enregistre la langue préremplie depuis le navigateur (`en` si elle n'est ni `fr` ni `en`).
 - **AUTH-13** Une page protégée demandée sans connexion redirige vers la connexion.
-- **AUTH-14** L'inscription par invitation enregistre le fuseau envoyé par le navigateur ; un fuseau absent ou invalide donne `UTC`.
+- **AUTH-14** L'inscription par invitation enregistre le fuseau soumis ; un nom de fuseau invalide est refusé avec un message sur le champ.
 - **AUTH-15** Modifier le fuseau dans le profil change l'heure affichée des mesures existantes sans modifier les instants stockés.
 - **AUTH-16** Enregistrer un fuseau non IANA (`Mars/Olympus`, `+01:00`) est refusé.
 - **AUTH-17** Après 20 échecs depuis une même IP sur des emails différents, toute tentative depuis cette IP est refusée, y compris pour un autre compte.

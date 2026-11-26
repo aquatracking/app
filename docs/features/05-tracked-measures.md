@@ -45,7 +45,8 @@ Justification des décimales notables : pH au 0,01 (pH-mètres, suivi récifal) 
 
 ### Synchronisation
 - Le seeder `catalog_seeder` est lancé à chaque démarrage. Pour chaque entrée : insère le code s'il est absent, met à jour `unit`, `decimals`, `position` sinon.
-- Un code retiré du catalogue reste en base s'il a des mesures (affiché dans l'historique, plus proposable au suivi, mais conservé dans les mesures suivies existantes) ; sinon il est supprimé avec les mesures suivies qui le référencent.
+- Un type abandonné n'est jamais retiré du catalogue : il est marqué `retired`. Il n'est plus proposé à l'ajout, reste dans les mesures suivies existantes et dans l'historique, et garde ses bornes et décimales, qui continuent de valider les modifications de relevés.
+- Si un code présent en base avec des mesures n'existe plus dans le catalogue, le seeder échoue au démarrage avec un message explicite.
 - Les libellés et une courte description de chaque type sont dans `resources/lang/{fr,en}/measure_types.json`.
 
 ## Règles métier — mesures suivies
@@ -70,7 +71,7 @@ Justification des décimales notables : pH au 0,01 (pH-mètres, suivi récifal) 
 ## Critères d'acceptation
 - **TRK-1** Sur une base vide, après démarrage, `measure_types` contient tous les codes du catalogue ; relancer le seeder ne crée pas de doublon.
 - **TRK-2** Modifier l'unité d'un type dans le catalogue puis relancer le seeder met à jour la base.
-- **TRK-3** Un type retiré du catalogue mais qui a des mesures reste en base et n'est plus proposé à l'ajout.
+- **TRK-3** Un type marqué `retired` n'est plus proposé à l'ajout, reste affiché là où il est suivi, et ses bornes valident toujours la modification d'un relevé qui le contient ; un code avec des mesures absent du catalogue fait échouer le seeder.
 - **TRK-4** Un aquarium d'eau de mer créé suit par défaut température, pH, KH, NO₃, PO₄, salinité, Ca et Mg, dans l'ordre du catalogue.
 - **TRK-5** Un terrarium désertique créé suit par défaut température et humidité.
 - **TRK-6** Ajouter un type déjà suivi est refusé ; ajouter un code absent du catalogue est refusé.

@@ -102,7 +102,7 @@ Données de référence, **écrites uniquement par le seeder du catalogue**. Pas
 | `decimals` | smallint | 0–3. Précision **maximale** de saisie et d'affichage, pas un arrondi de stockage |
 | `position` | smallint | ordre d'affichage dans le catalogue |
 
-Le libellé vient de l'i18n (`measure_types.<code>`). Les bornes de plausibilité et les profils par défaut restent dans le code du catalogue : ce sont des règles, pas des données. Un type retiré du catalogue n'est jamais supprimé s'il a des mesures.
+Le libellé vient de l'i18n (`measure_types.<code>`). Les bornes de plausibilité et les profils par défaut restent dans le code du catalogue : ce sont des règles, pas des données. Un type abandonné reste dans le catalogue avec `retired: true` et sa ligne reste en base ; aucune entrée n'est jamais retirée du code ([ADR 0005](adr/0005-catalogue-types-de-mesure-fixe.md)).
 
 ### `tracked_measures`
 | Colonne | Type | Règles |
@@ -122,7 +122,7 @@ Unique (`vivarium_id`, `measure_type_id`). Accueillera plus tard `min_value`, `m
 | `measure_type_id` | uuid | FK `measure_types` restrict |
 | `value` | numeric(10,3) | requis, dans les bornes de plausibilité du type |
 | `measured_at` | timestamptz | requis |
-| `source` | text | `CHECK in ('manual','device')`, défaut `manual` |
+| `source` | text | `CHECK in ('manual','device')`, défaut `manual`. Toujours `manual` en 2.0 : exception assumée à la règle « pas de colonne sans usage », pour ne pas migrer la plus grosse table à l'arrivée des capteurs |
 
 Index **unique** (`vivarium_id`, `measure_type_id`, `measured_at`) : interdit deux mesures du même type au même instant sur un vivarium, et sert à la dernière valeur, à l'historique filtré et aux graphes (PostgreSQL le parcourt aussi en ordre décroissant). Les mesures manuelles ont un `measured_at` tronqué à la minute.
 

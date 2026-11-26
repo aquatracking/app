@@ -45,7 +45,7 @@ L'ordre est celui de l'implémentation : chaque feature est livrable et testable
 - **Suppression d'un vivarium** : pas prévue, on archive. Si le besoin apparaît, une corbeille propre aux vivariums (récupérables 30 jours, puis purge), pas un soft delete généralisé.
 - **Changement d'email** : seulement si SMTP est configuré, avec un lien de confirmation envoyé à la nouvelle adresse (le changement ne s'applique qu'au clic). Sans SMTP, à voir : modification par un administrateur.
 - **Partage** d'un vivarium avec d'autres utilisateurs (table de membres).
-- Double authentification (TOTP), sessions multiples et « déconnecter tous les appareils », export des données, unités alternatives (°F, densité).
+- Double authentification (TOTP), sessions multiples et « déconnecter tous les appareils », export des données, unités alternatives (°F…).
 
 ## Versionnement
 

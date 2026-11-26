@@ -13,10 +13,10 @@ Une instance fraîchement déployée doit devenir utilisable sans variable d'env
 - Le compte créé est administrateur. La création et la vérification « aucun utilisateur » se font dans une transaction avec verrou : deux soumissions simultanées ne créent qu'un administrateur.
 - Après création, l'administrateur est connecté et arrive sur la page d'accueil.
 - La langue du formulaire suit le navigateur ; la langue choisie est enregistrée comme `locale`.
-- Le fuseau horaire est prérempli avec celui du navigateur et enregistré comme `timezone` (UTC s'il est absent ou invalide).
+- Le fuseau horaire est un champ visible, prérempli avec celui du navigateur (`UTC` si le navigateur n'en donne pas) et enregistré comme `timezone`. Un nom invalide est refusé comme toute autre erreur de validation.
 
 ## Données
-Écrit dans `users` (`is_admin = true`).
+Écrit dans `users` (`is_admin = true`, `locale`, `timezone`, `invited_by_id` vide). `rate_limits` via le limiter (limite de soumission).
 
 ## Routes et pages
 | Méthode | Route | Action | Page |
@@ -41,4 +41,4 @@ Prénom (requis), nom (facultatif), email (requis, format email), mot de passe (
 - **INS-4** Après installation, `GET /setup` et `POST /setup` répondent 404.
 - **INS-5** Deux `POST /setup` simultanés valides ne créent qu'un seul utilisateur.
 - **INS-6** Un mot de passe de moins de 8 caractères ou une confirmation différente est refusé avec un message sur le champ.
-- **INS-7** Le fuseau envoyé par le navigateur (ex. `Europe/Paris`) est enregistré sur l'administrateur ; un fuseau absent ou invalide donne `UTC`.
+- **INS-7** Le fuseau soumis (ex. `Europe/Paris`) est enregistré sur l'administrateur ; un nom de fuseau invalide est refusé avec un message sur le champ.

@@ -15,8 +15,9 @@ Saisir en quelques secondes les valeurs d'un test, retrouver tous les relevés p
 - Accessible depuis le tableau de bord du vivarium par un bouton « Nouveau relevé » toujours visible (bouton flottant sur mobile). S'ouvre dans une fenêtre (plein écran sur mobile).
 - Champs : date et heure (défaut maintenant), saisies et affichées dans le **fuseau de l'utilisateur** ([CONTEXT](../CONTEXT.md)), puis un champ numérique par **mesure suivie**, dans l'ordre des mesures suivies, avec l'unité affichée et au plus le nombre de décimales du type ([05](05-tracked-measures.md), sens de `decimals`).
 - Les champs vides sont ignorés. Il faut au moins une valeur.
+- Un nouveau relevé ne peut contenir que des types **suivis** par le vivarium (la modification accepte en plus les types déjà présents dans le groupe, voir plus bas).
 - Chaque valeur doit être dans les bornes de plausibilité du type ([05](05-tracked-measures.md)). La virgule et le point sont acceptés comme séparateur décimal.
-- La date ne peut pas être dans le futur (tolérance 5 minutes) ni antérieure à la mise en service du vivarium.
+- La date ne peut pas être dans le futur (tolérance 5 minutes) ni antérieure à la mise en service du vivarium. La comparaison avec la mise en service se fait sur la **date locale** du relevé, dans le fuseau de l'utilisateur.
 - **Changement d'heure** : l'heure saisie est convertie en instant avec les règles du fuseau à cette date (un relevé de janvier et un de juillet à « 18:00 » à Paris donnent 17:00 et 16:00 UTC).
   - Heure **inexistante** (passage à l'heure d'été, ex. 02:30 le dernier dimanche de mars à Paris) : refusée avec un message qui l'explique.
   - Heure **ambiguë** (passage à l'heure d'hiver, ex. 02:30 qui existe deux fois fin octobre) : la première occurrence (heure d'été) est retenue.
@@ -27,9 +28,9 @@ Saisir en quelques secondes les valeurs d'un test, retrouver tous les relevés p
 - Impossible sur un vivarium archivé.
 
 ### Historique
-- Page par vivarium, mesures les plus récentes en premier, **regroupées par date et heure identiques** (un groupe = un relevé à l'affichage).
+- Page par vivarium, relevés les plus récents en premier : chaque groupe réunit les mesures de même `measured_at` (un groupe = un relevé).
 - Filtre par type de mesure (tous les types ayant au moins une mesure, suivis ou non).
-- Pagination : 50 mesures par page.
+- Pagination **par relevés** : 20 relevés par page. Un relevé n'est jamais coupé entre deux pages.
 - Valeurs affichées telles que saisies, sans zéros forcés, et formatées selon la langue (`7,25` / `7.25`).
 
 ### Modifier un relevé
@@ -50,7 +51,7 @@ Saisir en quelques secondes les valeurs d'un test, retrouver tous les relevés p
 - Création, modification et suppression de relevés sont refusées.
 
 ## Données
-`measures` (création, lecture, modification et suppression par relevé), `tracked_measures` et `measure_types` (lecture).
+`measures` (création, lecture, modification et suppression par relevé), `tracked_measures` et `measure_types` (lecture), `vivariums` (lecture : `started_on`, `archived_at`).
 
 ## Routes et pages
 | Méthode | Route | Action | Page |
@@ -71,7 +72,7 @@ Saisir en quelques secondes les valeurs d'un test, retrouver tous les relevés p
 - **MEA-5** Une date dans le futur (au-delà de 5 minutes) ou antérieure à la mise en service est refusée.
 - **MEA-6** Un relevé sur un vivarium archivé est refusé.
 - **MEA-7** Un nouveau relevé ne peut contenir que des types suivis par le vivarium ; la modification accepte en plus les types déjà présents dans le groupe.
-- **MEA-8** L'historique affiche les mesures de la plus récente à la plus ancienne, regroupées par `measured_at`, 50 par page.
+- **MEA-8** L'historique affiche les relevés du plus récent au plus ancien, 20 par page, et toutes les mesures d'un relevé sont sur la même page.
 - **MEA-9** Le filtre par type ne renvoie que les mesures de ce type, y compris pour un type qui n'est plus suivi.
 - **MEA-10** Modifier un relevé met à jour les valeurs changées, crée les valeurs ajoutées, supprime les valeurs vidées et déplace toutes les mesures si la date change, en une seule transaction ; une valeur hors bornes annule tout.
 - **MEA-11** Supprimer un relevé supprime toutes les mesures de ce vivarium à ce `measured_at`, et seulement celles-là.

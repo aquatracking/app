@@ -11,7 +11,7 @@ Voir d'un coup d'œil l'état actuel d'un bac et l'évolution de chaque paramèt
 ## Règles métier
 
 ### Tableau de bord (`/vivariums/:id`)
-- En-tête : image, nom, type et profil, volume, âge, actions (modifier, archiver, mesures suivies, historique). Bandeau « archivé » le cas échéant ([04](04-vivariums.md)).
+- En-tête : image, nom, type et profil, volume, âge, actions (modifier, archiver, mesures suivies, historique). Sur un vivarium archivé : bandeau « archivé », seuls « Désarchiver » et « Historique » restent ([04](04-vivariums.md)).
 - Une **tuile par mesure suivie**, dans l'ordre des mesures suivies :
   - libellé, dernière valeur avec unité, ancienneté (« il y a 3 jours ») ;
   - variation par rapport à la mesure précédente du même type (flèche et écart, ex. « ▲ 0,3 ») ;
@@ -22,12 +22,13 @@ Voir d'un coup d'œil l'état actuel d'un bac et l'évolution de chaque paramèt
 - Pas de couleur liée à une valeur « bonne » ou « mauvaise » : ce sera le rôle des seuils (hors périmètre 2.0).
 
 ### Graphe d'un type (`/vivariums/:id/charts/:code`)
-- Plages : 7 jours, 30 jours (défaut), 3 mois, 6 mois, 1 an, tout. La plage choisie est dans l'URL (`?range=30d`).
+- Plages : 7 jours, 30 jours (défaut), 3 mois, 6 mois, 1 an, tout. La plage choisie est dans l'URL : `?range=` parmi `7d`, `30d`, `3m`, `6m`, `1y`, `all`.
 - Courbe des valeurs dans le temps, axe des abscisses temporel réel (des mesures irrégulières ne sont pas espacées régulièrement), points visibles quand il y a moins de 100 points.
 - Infobulle : date et heure, valeur.
 - Axe, infobulles et statistiques en heure locale du **fuseau de l'utilisateur**. Les limites de plage (« 7 jours ») et les intervalles d'agrégation d'un jour ou plus sont calculés en jours locaux : un jour de changement d'heure dure 23 ou 25 heures et reste un seul intervalle.
 - **Agrégation** : si la plage contient plus de `MAX_CHART_POINTS` (500, justification dans [data-model](../data-model.md)) mesures, le serveur renvoie au plus 500 intervalles (`date_bin`), avec moyenne, min et max par intervalle ; le graphe affiche la moyenne et une bande min–max. Sinon, valeurs brutes.
 - Statistiques de la plage : dernière valeur, minimum, maximum, moyenne, nombre de mesures, plus grande variation entre deux mesures consécutives (avec les dates).
+- Les valeurs calculées (moyennes des intervalles, moyenne, variation) sont affichées arrondies à la précision maximale du type (`decimals`), sans zéros forcés.
 - Plage sans mesure : message et lien vers le relevé.
 - Navigation vers les autres types suivis sans revenir au tableau de bord (onglets ou liste déroulante).
 - Fonctionne aussi pour un type qui n'est plus suivi mais qui a des mesures (accès depuis l'historique).
@@ -37,7 +38,7 @@ Voir d'un coup d'œil l'état actuel d'un bac et l'évolution de chaque paramèt
 - La série d'un graphe est calculée par `MeasureSeriesService` et testée unitairement (agrégation, statistiques).
 
 ## Données
-`measures`, `tracked_measures`, `measure_types` en lecture.
+`measures`, `tracked_measures`, `measure_types`, `vivariums` (en-tête) en lecture.
 
 ## Routes et pages
 | Méthode | Route | Action | Page |
