@@ -59,7 +59,7 @@ app/
   policies/                      # vivarium_policy, user_policy, invitation_policy
   transformers/                  # une classe par forme de données exposée
   validators/                    # un fichier par ressource, un validator par action
-  services/                      # seulement pour une logique partagée ou non triviale (ex. séries de graphes)
+  services/                      # opérations métier appelables hors HTTP (relevés, séries, dernières valeurs, mesures suivies par défaut)
   middleware/
 inertia/
   pages/                         # un dossier par ressource, miroir des contrôleurs
@@ -76,7 +76,13 @@ tests/functional/<feature>/…
 
 - **Contrôleurs fins** : valider → autoriser → appeler le modèle ou un service → transformer → rendre ou rediriger. Pas de SQL brut dans un contrôleur.
 - **Modèles** : colonnes, relations, *query scopes* et petites méthodes métier sur l'instance (`vivarium.isArchived`). Pas d'envoi d'email ni d'accès au conteneur depuis un modèle.
-- **Services** : créés seulement quand une logique est partagée par plusieurs contrôleurs ou trop longue pour une méthode (ex. `MeasureSeriesService` qui calcule les séries agrégées). Pas de couche *repository* : Lucid en tient lieu.
+- **Services** : les **opérations métier** vivent dans des services appelables hors requête HTTP, car d'autres points d'entrée les appelleront (outils MCP, API capteurs, après 2.0). Sont concernés au minimum :
+  - créer, modifier et supprimer un relevé (`ReadingService`) ;
+  - calculer les dernières valeurs et les séries de graphes (`MeasureSeriesService`) ;
+  - créer les mesures suivies par défaut d'un vivarium.
+
+  Un service reçoit des données déjà validées (validators Vine) et l'utilisateur concerné, et non le `HttpContext`. L'autorisation reste faite par l'appelant avec les policies Bouncer, utilisables hors HTTP. Un simple CRUD sans règle (renommer un vivarium) peut rester dans le contrôleur. Pas de couche *repository* : Lucid en tient lieu.
+- **Points d'entrée** : les contrôleurs, et plus tard les outils MCP et l'API capteurs, ne font que brancher validation, autorisation, service et transformer. Aucune règle métier ne doit exister dans un seul d'entre eux.
 - **Un nom par concept** : celui de `CONTEXT.md`. Pas de synonymes (`tank`, `biotope`, `setting`…).
 - **Erreurs métier** : exceptions Adonis nommées (`E_INVITATION_EXPIRED`…) traduites, rendues en messages flash.
 - **Dates** : `DateTime` Luxon côté serveur, en UTC dans le code et en base. Conversion vers le **fuseau de l'utilisateur** (`user.timezone`) seulement pour l'affichage et l'interprétation des saisies. Jamais de décalage fixe : toujours un nom de zone IANA, pour que Luxon applique les changements d'heure de la date concernée.
