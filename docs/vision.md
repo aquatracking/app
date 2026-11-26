@@ -43,6 +43,7 @@ L'ordre est celui de l'implémentation : chaque feature est livrable et testable
 - **Mesures calculées** : types dérivés d'autres mesures (CO₂ depuis KH et pH, ammoniac libre depuis NH₃/NH₄⁺, pH et température, salinité depuis la conductivité, ratio NO₃/PO₄). Piste retenue : formule déclarée dans le catalogue (`derivedFrom` + calcul), valeur **calculée à la lecture** et non stockée, en associant les mesures d'entrée qui ont le même `measured_at` (tolérance temporelle à définir pour les capteurs). Un type dérivé peut être suivi (tuile, graphe) mais n'apparaît jamais comme champ du relevé. Stockage en `source = computed` seulement si les volumes de capteurs l'imposent.
 - **Mise à jour en direct** du tableau de bord et des graphes quand une mesure arrive (utile surtout avec les capteurs) : SSE via `@adonisjs/transmit`, canal par vivarium autorisé par la policy, puis rechargement partiel Inertia des props concernées.
 - **Suppression d'un vivarium** : pas prévue, on archive. Si le besoin apparaît, une corbeille propre aux vivariums (récupérables 30 jours, puis purge), pas un soft delete généralisé.
+- **Changement d'email** : seulement si SMTP est configuré, avec un lien de confirmation envoyé à la nouvelle adresse (le changement ne s'applique qu'au clic). Sans SMTP, à voir : modification par un administrateur.
 - **Partage** d'un vivarium avec d'autres utilisateurs (table de membres).
 - Double authentification (TOTP), sessions multiples et « déconnecter tous les appareils », export des données, unités alternatives (°F, densité).
 

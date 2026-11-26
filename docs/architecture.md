@@ -29,7 +29,7 @@ On n'écrit pas ce que le framework fournit. Avant d'ajouter une abstraction, v�
 | Forme des données envoyées aux pages | **Transformers** (`app/transformers/`) | Pas de DTO écrits à la main ; jamais de `serialize()` brut de modèle vers une page |
 | Typage des props de page | Props Inertia générées par Adonis 7 | `inertia.render` est vérifié à la compilation |
 | URLs | `urlFor` (serveur et client), routes nommées automatiquement `controller.method` | Jamais d'URL écrite en dur |
-| Limitation de débit | `@adonisjs/limiter` | Connexion, mot de passe oublié, installation |
+| Limitation de débit | `@adonisjs/limiter`, store **database** (PostgreSQL) | Connexion, mot de passe oublié, installation. Compteurs et historique des blocages dans la table `rate_limits` : ils survivent à un redémarrage et restent partagés si plusieurs instances tournent, sans ajouter Redis. Store `memory` en tests |
 | Tokens à usage unique (invitation, reset) | Token aléatoire, **haché** en base | Voir [data-model](data-model.md) |
 | Traductions | `@adonisjs/i18n` (serveur) + mêmes fichiers côté Vue | Un seul jeu de fichiers `resources/lang/{fr,en}/*.json` |
 | Fichiers | Drive, disque `vivariums` local | Servis par un contrôleur protégé par la policy |
@@ -101,6 +101,7 @@ tests/functional/<feature>/…
 | `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_DATABASE` | oui | PostgreSQL |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_SECURE` | non | Si `SMTP_HOST` est vide, l'envoi d'email est désactivé |
 | `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | si SMTP | Expéditeur |
+| `TRUSTED_PROXIES` | si reverse proxy | Adresses des proxys de confiance (`trustProxy` d'Adonis), pour lire l'IP réelle du client dans `X-Forwarded-For`. Indispensable pour la limitation de débit derrière Traefik, Nginx, Caddy… |
 | `DRIVE_ROOT` | non | Dossier des images (défaut `storage/`), à monter en volume Docker |
 
 ## Démarrage et déploiement
