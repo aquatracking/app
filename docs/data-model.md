@@ -9,7 +9,10 @@ PostgreSQL. Noms de tables et colonnes en `snake_case`, modèles Lucid en `camel
 - **Booléens** : `boolean not null default false` (jamais une chaîne).
 - **Tokens** : seul le hash SHA-256 est stocké ; le token en clair n'existe que dans le lien.
 - **Dates et heures** : instants stockés en `timestamptz` (absolus, indépendants du fuseau). Seules les dates « calendaires » sans heure (`started_on`) sont en `date`. Conversion vers et depuis le fuseau de l'utilisateur (`users.timezone`) uniquement à l'affichage et à la saisie.
-- **Suppression** : physique, avec `on delete cascade` sur les données qui appartiennent à leur parent.
+- **Suppression** : physique, avec `on delete cascade` sur les données qui appartiennent à leur parent. **Pas de soft delete** (`deleted_at`) : il obligerait chaque requête à filtrer les lignes supprimées, compliquerait les contraintes d'unicité (un email supprimé bloque-t-il une invitation ?) et les cascades. Les besoins sont couverts autrement :
+  - un vivarium ne se supprime pas, il s'**archive** ; il n'est supprimé qu'avec le compte de son propriétaire ;
+  - les suppressions restantes (compte, relevé, mesure) demandent une confirmation ;
+  - le filet de sécurité d'une instance auto-hébergée, ce sont ses **sauvegardes** ([architecture](architecture.md)).
 
 ## Schéma
 
@@ -123,4 +126,4 @@ Une mesure peut exister pour un type qui n'est plus suivi : l'historique reste c
 ## Requêtes clés
 
 - **Dernière valeur par type** d'un vivarium : `DISTINCT ON (measure_type_id) … ORDER BY measure_type_id, measured_at DESC`, servi par l'index.
-- **Série d'un graphe** : valeurs brutes si la plage contient ≤ 500 points, sinon moyenne, min et max par intervalle pour revenir sous 500 points. Les intervalles d'un jour ou plus sont calculés dans le fuseau de l'utilisateur (`date_bin(…, measured_at AT TIME ZONE :tz, …)`), pour qu'un « jour » corresponde au jour local, y compris les jours de 23 ou 25 heures au changement d'heure.
+- **Série d'un graphe** : valeurs brutes si la plage contient ≤ `MAX_CHART_POINTS` (500) points, sinon moyenne, min et max par intervalle pour revenir sous cette limite. 500 est une heuristique : un graphe fait 300 à 1000 px de large, au-delà d'un point par pixel rien ne se voit ; la série pèse ~20 Ko et reste fluide en SVG sur téléphone. En saisie manuelle (≈ 365 mesures/an) les valeurs brutes suffisent presque toujours ; l'agrégation sert surtout aux capteurs et à la plage « tout ». À revoir avec les capteurs (nombre de points selon la largeur du graphe, ou algorithme LTTB). Les intervalles d'un jour ou plus sont calculés dans le fuseau de l'utilisateur (`date_bin(…, measured_at AT TIME ZONE :tz, …)`), pour qu'un « jour » corresponde au jour local, y compris les jours de 23 ou 25 heures au changement d'heure.

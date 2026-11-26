@@ -108,6 +108,7 @@ tests/functional/<feature>/…
 - **Dev** : `compose.yml` fournit PostgreSQL et Mailpit. `node ace serve --hmr`.
 - **Image Docker** unique, multi-étapes. Au démarrage : `migration:run --force` (le flag confirme l'exécution en production, où Adonis la refuse sinon ; il ne rejoue ni ne supprime rien), puis `db:seed --files catalog_seeder`, puis le serveur. Les deux premières étapes sont idempotentes.
 - Volume à persister : `DRIVE_ROOT`.
+- **Sauvegardes** : il n'y a ni corbeille ni soft delete, la doc de déploiement doit donc expliquer comment sauvegarder régulièrement la base (`pg_dump`) et le dossier `DRIVE_ROOT`, et comment restaurer.
 
 ## Tests
 

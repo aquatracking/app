@@ -7,12 +7,12 @@ Permettre à chaque utilisateur de décrire ses bacs (aquariums, terrariums, pal
 - En tant qu'utilisateur, je veux voir tous mes bacs en service sur la page d'accueil.
 - En tant qu'utilisateur, je veux créer un bac en précisant son type, son eau ou son climat, sa taille et sa date de mise en service.
 - En tant qu'utilisateur, je veux ajouter une photo de mon bac.
-- En tant qu'utilisateur, je veux archiver un bac démonté sans perdre son historique, ou le supprimer définitivement.
+- En tant qu'utilisateur, je veux archiver un bac démonté sans perdre son historique.
 
 ## Règles métier
 
 ### Propriété
-- Un vivarium appartient à un seul utilisateur. Toute action passe par `VivariumPolicy` : seul le propriétaire peut voir, modifier, archiver, supprimer ou voir l'image. Sinon : 404 (on ne révèle pas l'existence du vivarium).
+- Un vivarium appartient à un seul utilisateur. Toute action passe par `VivariumPolicy` : seul le propriétaire peut voir, modifier, archiver ou voir l'image. Sinon : 404 (on ne révèle pas l'existence du vivarium).
 
 ### Accueil
 - Liste des vivariums **en service**, triés par nom, sous forme de cartes : image (ou illustration par défaut selon le type), nom, type et profil (« Aquarium · eau de mer »), volume, âge (« depuis 2 ans »), date du dernier relevé.
@@ -36,9 +36,9 @@ Permettre à chaque utilisateur de décrire ses bacs (aquariums, terrariums, pal
 - Archiver : `archived_at = maintenant`. Le vivarium disparaît de l'accueil et apparaît dans « Archivés ».
 - Un vivarium archivé reste consultable (tableau de bord, historique, graphes) mais en lecture seule : pas de relevé, pas de modification des mesures, pas de modification des mesures suivies. Un bandeau l'indique, avec le bouton « Désarchiver ».
 
-### Suppression
-- Confirmation en saisissant le nom du vivarium.
-- Supprime le vivarium, ses mesures suivies, ses mesures et son image.
+### Pas de suppression
+- Un utilisateur ne peut pas supprimer un vivarium : l'archivage est le seul moyen de le retirer de l'accueil, y compris pour un bac créé par erreur.
+- Les vivariums ne sont supprimés qu'avec le compte de leur propriétaire ([03-admin](03-admin.md)).
 
 ## Données
 `vivariums`, `tracked_measures` (création des défauts), fichiers Drive.
@@ -53,14 +53,13 @@ Permettre à chaque utilisateur de décrire ses bacs (aquariums, terrariums, pal
 | GET/PUT | `/vivariums/:id/edit`, `/vivariums/:id` | `vivariums.edit` / `update` | `vivariums/edit` |
 | POST | `/vivariums/:id/archive` | `vivariums.archive` | — |
 | POST | `/vivariums/:id/unarchive` | `vivariums.unarchive` | — |
-| DELETE | `/vivariums/:id` | `vivariums.destroy` | — |
 | PUT | `/vivariums/:id/image` | `vivarium_images.update` | — |
 | DELETE | `/vivariums/:id/image` | `vivarium_images.destroy` | — |
 | GET | `/vivariums/:id/image/:filename` | `vivarium_images.show` | — |
 
 ## Critères d'acceptation
 - **VIV-1** L'accueil liste uniquement les vivariums en service de l'utilisateur connecté.
-- **VIV-2** Accéder au vivarium d'un autre utilisateur (page, modification, image, suppression) répond 404.
+- **VIV-2** Accéder au vivarium d'un autre utilisateur (page, modification, archivage, image) répond 404.
 - **VIV-3** Créer un aquarium sans type d'eau est refusé ; créer un terrarium avec un type d'eau est refusé ; un paludarium exige les deux.
 - **VIV-4** Une date de mise en service dans le futur est refusée.
 - **VIV-5** Créer un vivarium crée les mesures suivies par défaut de son profil.
@@ -68,4 +67,4 @@ Permettre à chaque utilisateur de décrire ses bacs (aquariums, terrariums, pal
 - **VIV-7** Une image valide est stockée en WebP de 1600 px maximum sans EXIF ; un fichier non image ou de plus de 15 Mo est refusé.
 - **VIV-8** Remplacer ou retirer l'image supprime l'ancien fichier du disque.
 - **VIV-9** Archiver retire le vivarium de l'accueil et l'affiche dans « Archivés » ; désarchiver fait l'inverse.
-- **VIV-10** Supprimer un vivarium exige la saisie exacte de son nom et supprime ses mesures et son image.
+- **VIV-10** Aucune route ne permet à un utilisateur de supprimer un vivarium.

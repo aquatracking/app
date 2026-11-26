@@ -26,7 +26,7 @@ Voir d'un coup d'œil l'état actuel d'un bac et l'évolution de chaque paramèt
 - Courbe des valeurs dans le temps, axe des abscisses temporel réel (des mesures irrégulières ne sont pas espacées régulièrement), points visibles quand il y a moins de 100 points.
 - Infobulle : date et heure, valeur.
 - Axe, infobulles et statistiques en heure locale du **fuseau de l'utilisateur**. Les limites de plage (« 7 jours ») et les intervalles d'agrégation d'un jour ou plus sont calculés en jours locaux : un jour de changement d'heure dure 23 ou 25 heures et reste un seul intervalle.
-- **Agrégation** : si la plage contient plus de 500 mesures, le serveur renvoie au plus 500 intervalles (`date_bin`), avec moyenne, min et max par intervalle ; le graphe affiche la moyenne et une bande min–max. Sinon, valeurs brutes.
+- **Agrégation** : si la plage contient plus de `MAX_CHART_POINTS` (500, justification dans [data-model](../data-model.md)) mesures, le serveur renvoie au plus 500 intervalles (`date_bin`), avec moyenne, min et max par intervalle ; le graphe affiche la moyenne et une bande min–max. Sinon, valeurs brutes.
 - Statistiques de la plage : dernière valeur, minimum, maximum, moyenne, nombre de mesures, plus grande variation entre deux mesures consécutives (avec les dates).
 - Plage sans mesure : message et lien vers le relevé.
 - Navigation vers les autres types suivis sans revenir au tableau de bord (onglets ou liste déroulante).

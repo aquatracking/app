@@ -34,7 +34,7 @@ Termes utilisés dans les specs, le code et l'interface. Le code est en anglais 
 
 **Mise en service** (`Vivarium.startedOn`) — Date de mise en eau (aquarium) ou d'installation (terrarium). Sert à afficher l'âge du bac.
 
-**Archivage** (`Vivarium.archivedAt`) — Un vivarium archivé est un bac démonté ou vendu. Il reste consultable avec tout son historique, mais on ne peut plus y ajouter de relevé. On peut le désarchiver.
+**Archivage** (`Vivarium.archivedAt`) — Un vivarium archivé est un bac démonté ou vendu. Il reste consultable avec tout son historique, mais on ne peut plus y ajouter de relevé. On peut le désarchiver. C'est le seul moyen pour un utilisateur de retirer un vivarium : il n'y a pas de suppression (voir [data-model](data-model.md)).
 
 ## Mesures
 
