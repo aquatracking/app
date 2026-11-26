@@ -1,23 +1,29 @@
 import { defineConfig } from 'vite'
-import { getDirname } from '@adonisjs/core/helpers'
-import inertia from '@adonisjs/inertia/client'
 import vue from '@vitejs/plugin-vue'
+import tailwindcss from '@tailwindcss/vite'
 import adonisjs from '@adonisjs/vite/client'
 
 export default defineConfig({
   plugins: [
-    inertia({}),
     vue(),
-    adonisjs({ entrypoints: ['inertia/app/app.ts'], reload: ['resources/views/**/*.edge'] }),
+    tailwindcss(),
+    adonisjs({
+      entryPoints: ['inertia/app.ts'],
+      serverEntryPoints: ['inertia/ssr.ts'],
+      reload: ['resources/views/**/*.edge'],
+    }),
   ],
 
-  /**
-   * Define aliases for importing modules from
-   * your frontend code
-   */
   resolve: {
     alias: {
-      '~/': `${getDirname(import.meta.url)}/inertia/`,
+      '~/': `${import.meta.dirname}/inertia/`,
+      '@generated': `${import.meta.dirname}/.adonisjs/client/`,
+    },
+  },
+
+  server: {
+    watch: {
+      ignored: ['**/storage/**', '**/tmp/**'],
     },
   },
 })

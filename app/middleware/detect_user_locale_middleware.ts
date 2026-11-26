@@ -19,13 +19,14 @@ export default class DetectUserLocaleMiddleware {
   }
 
   /**
-   * This method reads the user language from the "Accept-Language"
-   * header and returns the best matching locale by checking it
-   * against the supported locales.
-   *
-   * Feel free to use different mechanism for finding user language.
+   * A signed-in user sees the interface in their own language. Before
+   * sign-in, the interface follows the "Accept-Language" header.
    */
   protected getRequestLocale(ctx: HttpContext) {
+    if (ctx.auth?.user) {
+      return ctx.auth.user.locale
+    }
+
     const userLanguages = ctx.request.languages()
     return i18nManager.getSupportedLocaleFor(userLanguages)
   }
@@ -51,10 +52,7 @@ export default class DetectUserLocaleMiddleware {
 
     /**
      * Sharing request specific instance of i18n with edge
-     * templates.
-     *
-     * Remove the following block of code, if you are not using
-     * edge templates.
+     * templates (the root Inertia layout).
      */
     if ('view' in ctx) {
       ctx.view.share({ i18n: ctx.i18n })

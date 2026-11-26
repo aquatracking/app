@@ -1,15 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ i18n ? i18n.locale : 'en' }}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
-    <title inertia>
-      Aquatracking
-    </title>
-
-    @vite(['inertia/app/app.ts', `inertia/pages/${page.component}.vue`])
+    @vite(['inertia/app.ts'])
     @inertiaHead()
+    @stack('dumper')
   </head>
 
   <body>

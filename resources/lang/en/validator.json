@@ -1,0 +1,12 @@
+{
+  "shared": {
+    "messages": {
+      "required": "This field is required",
+      "string": "This field must be a text",
+      "email": "Enter a valid email address",
+      "minLength": "Enter at least {min} characters",
+      "maxLength": "Enter at most {max} characters",
+      "sameAs": "This field must match {otherField}"
+    }
+  }
+}

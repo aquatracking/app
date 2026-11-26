@@ -1,26 +1,20 @@
 import { defineConfig } from '@adonisjs/inertia'
-import type { InferSharedProps, PageProps } from '@adonisjs/inertia/types'
 
 const inertiaConfig = defineConfig({
   /**
-   * Path to the Edge view that will be used as the root view for Inertia responses
+   * Server-side rendering options.
    */
-  rootView: 'inertia_layout',
+  ssr: {
+    /**
+     * Toggle SSR mode for Inertia pages.
+     */
+    enabled: true,
 
-  /**
-   * Data that should be shared with all rendered pages
-   */
-  sharedData: {
-    errors: (ctx) => ctx.session?.flashMessages.get('errors'),
-    errorsBag: (ctx) => ctx.session?.flashMessages.get('errorsBag'),
-    notification: (ctx) => ctx.session?.flashMessages.get('notification'),
-    locale: (ctx) => ctx.i18n?.locale,
-    user: (ctx) => ctx.auth?.user?.serialize(),
+    /**
+     * Entry file used by the SSR server build.
+     */
+    entrypoint: 'inertia/ssr.ts',
   },
 })
 
 export default inertiaConfig
-
-declare module '@adonisjs/inertia/types' {
-  export interface SharedProps extends InferSharedProps<typeof inertiaConfig>, PageProps {}
-}

@@ -1,24 +1,27 @@
+# Development services: PostgreSQL and Mailpit (SMTP catcher).
 services:
-  mysql:
-    image: mysql:9.1
-    ports:
-      - '3306:3306'
+  postgres:
+    image: postgres:18
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-      MYSQL_DATABASE: ${DB_DATABASE}
-      LANG: C.UTF-8
+      POSTGRES_USER: aquatracking
+      POSTGRES_PASSWORD: aquatracking
+      POSTGRES_DB: aquatracking
+    ports:
+      - '5432:5432'
     volumes:
-      - ./.docker/volumes/db:/var/lib/mysql
-  phpmyadmin:
-    image: phpmyadmin
-    links:
-      - mysql
+      - postgres_data:/var/lib/postgresql
+      - ./docker/postgres/create_test_database.sql:/docker-entrypoint-initdb.d/create_test_database.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U aquatracking']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:v1.34
     ports:
-      - '8080:80'
-    environment:
-      PMA_HOST: mysql
-  maildev:
-    image: maildev/maildev
-    ports:
-      - '1080:1080'
-      - '1025:1025'
+      - '1025:1025' # SMTP
+      - '8025:8025' # Web UI: http://localhost:8025
+
+volumes:
+  postgres_data:

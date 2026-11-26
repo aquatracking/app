@@ -1,7 +1,8 @@
 # Dependencies and AdonisJS build
 node_modules
 build
-tmp
+tmp/*
+!tmp/.gitkeep
 
 # Secrets
 .env
@@ -19,9 +20,10 @@ yarn-error.log
 # Editors specific
 .fleet
 .idea
+.vscode
 
 # Platform specific
 .DS_Store
 
-# Misc
-.docker
+# Vivarium images (DRIVE_ROOT)
+storage

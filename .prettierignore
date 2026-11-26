@@ -1,1 +1,7 @@
-.docker/**/*
+.adonisjs
+node_modules
+build
+database/schema.ts
+pnpm-lock.yaml
+yarn.lock
+*.md
