@@ -40,7 +40,7 @@ Termes utilisés dans les specs, le code et l'interface. Le code est en anglais 
 
 **Profil** (`Vivarium.profile`, calculé) — Combinaison du type de vivarium, du type d'eau et du climat. Détermine les mesures suivies par défaut. Ce n'est pas une entité : c'est une valeur calculée.
 
-**Mise en service** (`Vivarium.startedOn`) — Date de mise en eau (aquarium, paludarium) ou d'installation (terrarium). Sert à afficher l'âge du bac. Aucun relevé ne peut lui être antérieur.
+**Mise en service** (`Vivarium.startedOn`) — Date de mise en eau (aquarium, paludarium) ou d'installation (terrarium). Sert à afficher l'âge du bac. Ne peut pas être après la date du jour dans le fuseau de l'utilisateur. Aucun relevé ne peut lui être antérieur.
 
 **Archivage** (`Vivarium.archivedAt`) — Un vivarium archivé est un bac démonté ou vendu. Il reste consultable avec tout son historique, mais il est en **lecture seule** : ni modification du vivarium (informations, image), ni relevé (création, modification, suppression), ni changement des mesures suivies. Seule action possible : le désarchiver. C'est le seul moyen pour un utilisateur de retirer un vivarium : il n'y a pas de suppression (voir [data-model](data-model.md)).
 

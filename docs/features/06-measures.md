@@ -50,8 +50,13 @@ Saisir en quelques secondes les valeurs d'un test, retrouver tous les relevés p
 ### Vivarium archivé
 - Création, modification et suppression de relevés sont refusées.
 
+### Ajouts à la feature 04
+La 04 a été livrée avant la table `measures`. La 06 y ajoute :
+- la **date du dernier relevé** sur les cartes de l'accueil et des archivés (une seule requête pour tous les vivariums de la liste, pas de N+1) ;
+- la règle de modification de la mise en service ([04](04-vivariums.md)) : la nouvelle date `started_on` ne peut pas être postérieure à la date locale (fuseau de l'utilisateur) du plus ancien relevé du vivarium ; le message indique cette date (critère VIV-12, reporté ici).
+
 ## Données
-`measures` (création, lecture, modification et suppression par relevé), `tracked_measures` et `measure_types` (lecture), `vivariums` (lecture : `started_on`, `archived_at`).
+`measures` (création, lecture, modification et suppression par relevé), `tracked_measures` et `measure_types` (lecture), `vivariums` (lecture : `started_on`, `archived_at` ; validation de la modification de `started_on`).
 
 ## Routes et pages
 | Méthode | Route | Action | Page |
@@ -85,3 +90,5 @@ Saisir en quelques secondes les valeurs d'un test, retrouver tous les relevés p
 - **MEA-18** Un nouveau relevé qui contient un type déjà mesuré à la même minute est refusé en entier, sans créer aucune mesure.
 - **MEA-19** Déplacer un relevé vers une minute qui contient déjà un des mêmes types est refusé ; vers une minute qui ne contient que d'autres types, les deux groupes fusionnent.
 - **MEA-20** Il n'existe aucune route pour modifier ou supprimer une mesure seule.
+- **MEA-21** ([VIV-12](04-vivariums.md)) Déplacer la mise en service d'un vivarium après la date locale de son plus ancien relevé est refusé ; à cette date ou avant, c'est accepté. Les cartes de l'accueil affichent la date du dernier relevé.
+- **MEA-22** ([VIV-13](04-vivariums.md)) Supprimer un utilisateur depuis l'administration supprime les mesures de ses vivariums.

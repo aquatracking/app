@@ -50,7 +50,7 @@ Justification des décimales notables : pH au 0,01 (pH-mètres, suivi récifal) 
 - Les libellés et une courte description de chaque type sont dans `resources/lang/{fr,en}/measure_types.json`.
 
 ## Règles métier — mesures suivies
-- À la création d'un vivarium, une mesure suivie est créée pour chaque type « suivi par défaut » de son profil, dans l'ordre du catalogue.
+- À la création d'un vivarium, une mesure suivie est créée pour chaque type « suivi par défaut » de son profil, dans l'ordre du catalogue, dans la transaction de `VivariumService.create` (critère VIV-5 de [04](04-vivariums.md), reporté ici).
 - L'utilisateur peut **ajouter** n'importe quel type du catalogue non encore suivi (ajouté en dernière position), **retirer** un type suivi et **réordonner** les types suivis (glisser-déposer, flèches sur mobile).
 - Retirer un type ne supprime aucune mesure. Le réajouter fait réapparaître sa dernière valeur et son historique.
 - Un vivarium peut ne suivre aucun type ; le tableau de bord et le relevé l'invitent alors à en ajouter.
@@ -80,3 +80,4 @@ Justification des décimales notables : pH au 0,01 (pH-mètres, suivi récifal) 
 - **TRK-9** Toute modification des mesures suivies d'un vivarium archivé est refusée.
 - **TRK-10** Les routes répondent 404 pour le vivarium d'un autre utilisateur.
 - **TRK-11** Le type densité existe dans le catalogue mais n'est suivi par défaut par aucun profil.
+- **TRK-12** ([VIV-13](04-vivariums.md)) Supprimer un utilisateur depuis l'administration supprime les mesures suivies de ses vivariums.
