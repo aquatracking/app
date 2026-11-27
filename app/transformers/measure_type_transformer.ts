@@ -9,4 +9,11 @@ export default class MeasureTypeTransformer extends BaseTransformer<MeasureType>
   toObject() {
     return this.pick(this.resource, ['code', 'unit'])
   }
+
+  /**
+   * With the maximum precision of its values, to show them.
+   */
+  withDecimals() {
+    return this.pick(this.resource, ['code', 'unit', 'decimals'])
+  }
 }

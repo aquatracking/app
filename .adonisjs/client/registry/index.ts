@@ -224,6 +224,12 @@ const routes = {
     tokens: [[0,"vivariums"],[1,"id"],[0,"readings"],[1,"measuredAt"]],
     types: placeholder as Registry['measures.destroy_reading']['types'],
   },
+  'charts.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/vivariums/:id/charts/:code',
+    tokens: [[0,"vivariums"],[1,"id"],[0,"charts"],[1,"code"]],
+    types: placeholder as Registry['charts.show']['types'],
+  },
   'admin.users.index': {
     methods: ["GET","HEAD"],
     pattern: '/admin/users',

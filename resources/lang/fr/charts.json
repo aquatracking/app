@@ -1,0 +1,40 @@
+{
+  "back": "Retour à {name}",
+  "parameter": "Paramètre",
+  "no_longer_tracked": "Ce paramètre n'est plus suivi sur ce bac : son graphe reste consultable.",
+  "ranges": {
+    "label": "Période",
+    "7d": "7 jours",
+    "30d": "30 jours",
+    "3m": "3 mois",
+    "6m": "6 mois",
+    "1y": "1 an",
+    "all": "Tout"
+  },
+  "empty": "Aucune mesure sur cette période.",
+  "empty_hint": "Saisissez un relevé avec « Nouveau relevé ».",
+  "aggregated": "{count, plural, one {# mesure} other {# mesures}} : moyenne par {unit, select, day {{size, plural, one {jour} other {# jours}}} hour {{size, plural, one {heure} other {# heures}}} other {{size, plural, one {minute} other {# minutes}}}}, avec le minimum et le maximum.",
+  "tooltip": {
+    "average": "Moyenne : {value}",
+    "range": "Min – max : {min} – {max}",
+    "count": "{count, plural, one {# mesure} other {# mesures}}"
+  },
+  "stats": {
+    "title": "Statistiques de la période",
+    "last": "Dernière valeur",
+    "min": "Minimum",
+    "max": "Maximum",
+    "average": "Moyenne",
+    "count": "Nombre de mesures",
+    "largest_variation": "Plus grande variation",
+    "variation_dates": "du {from} au {to}"
+  },
+  "tiles": {
+    "no_measure": "Aucune mesure",
+    "increase": "Hausse de {value}",
+    "decrease": "Baisse de {value}",
+    "unchanged": "Stable",
+    "no_tracked": "Ce bac ne suit aucun paramètre.",
+    "add_tracked": "Choisir les mesures suivies"
+  }
+}

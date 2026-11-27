@@ -13,6 +13,7 @@ export const controllers = {
     Registration: () => import('#controllers/auth/registration_controller'),
     Session: () => import('#controllers/auth/session_controller'),
   },
+  Charts: () => import('#controllers/charts_controller'),
   HealthChecks: () => import('#controllers/health_checks_controller'),
   Measures: () => import('#controllers/measures_controller'),
   Profile: () => import('#controllers/profile_controller'),

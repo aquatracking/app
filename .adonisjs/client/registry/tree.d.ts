@@ -58,6 +58,9 @@ export interface ApiDefinition {
     updateReading: typeof routes['measures.update_reading']
     destroyReading: typeof routes['measures.destroy_reading']
   }
+  charts: {
+    show: typeof routes['charts.show']
+  }
   admin: {
     users: {
       index: typeof routes['admin.users.index']

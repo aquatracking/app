@@ -9,6 +9,7 @@ import { useI18n } from '~/composables/use_i18n'
 import { useVivarium } from '~/composables/use_vivarium'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import VivariumPicture from '~/components/vivariums/vivarium_picture.vue'
+import MeasureTile from '~/components/charts/measure_tile.vue'
 import NewReadingDialog from '~/components/measures/new_reading_dialog.vue'
 import ArchiveVivariumDialog from '~/components/vivariums/archive_vivarium_dialog.vue'
 
@@ -16,12 +17,13 @@ defineOptions({ layout: AppLayout })
 
 /**
  * Dashboard of a vivarium: its header, with the links to the tracked
- * measures (feature 05) and the history, and "New reading" (feature 06).
- * The tiles of the tracked measures come with feature 07. On an archived
+ * measures (feature 05) and the history, and "New reading" (feature 06),
+ * then one tile per tracked measure (feature 07). On an archived
  * vivarium, only "Unarchive" and the history remain.
  */
 const props = defineProps<{
   vivarium: Data.Vivarium
+  tiles: Data.Tile[]
   readingFields: Data.MeasureTypeDefinition[]
 }>()
 
@@ -91,5 +93,28 @@ const { profileLabel, ageLabel, volumeLabel } = useVivarium()
         </div>
       </div>
     </header>
+
+    <section
+      v-if="props.tiles.length > 0"
+      class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"
+    >
+      <MeasureTile
+        v-for="tile in props.tiles"
+        :key="tile.measureType.code"
+        :vivarium-id="props.vivarium.id"
+        :tile="tile"
+      />
+    </section>
+    <div
+      v-else
+      class="flex flex-col items-center gap-3 rounded-lg border border-dashed p-6 text-center"
+    >
+      <p>{{ t('charts.tiles.no_tracked') }}</p>
+      <Button v-if="!props.vivarium.isArchived" variant="outline" size="sm" as-child>
+        <Link route="tracked_measures.index" :params="{ id: props.vivarium.id }"
+          ><ListChecks />{{ t('charts.tiles.add_tracked') }}</Link
+        >
+      </Button>
+    </div>
   </div>
 </template>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Pencil } from '@lucide/vue'
+import { ChartLine, Pencil } from '@lucide/vue'
 import { Head } from '@inertiajs/vue3'
 import AppLayout from '~/layouts/app.vue'
 import type { Data } from '@generated/data'
@@ -45,6 +45,11 @@ const qs = computed(() => {
   return { ...(props.type ? { type: props.type } : {}), ...(page > 1 ? { page } : {}) }
 })
 
+/**
+ * The chart of the filtered type, which has measures (feature 07).
+ */
+const chartable = computed(() => props.measuredTypes.some(({ code }) => code === props.type))
+
 function filter(event: Event) {
   const type = (event.target as HTMLSelectElement).value
   router.get(
@@ -75,19 +80,26 @@ function closeEdit(open: boolean) {
 
     <div class="flex flex-wrap items-end justify-between gap-4">
       <h1 class="text-2xl font-semibold">{{ t('measures.title') }}</h1>
-      <label v-if="props.measuredTypes.length > 0" class="flex flex-col gap-1 text-sm">
-        <span class="text-muted-foreground">{{ t('measures.filter.label') }}</span>
-        <NativeSelect :model-value="props.type ?? ''" @change="filter">
-          <NativeSelectOption value="">{{ t('measures.filter.all') }}</NativeSelectOption>
-          <NativeSelectOption
-            v-for="measureType in props.measuredTypes"
-            :key="measureType.code"
-            :value="measureType.code"
+      <div class="flex flex-wrap items-end gap-2">
+        <Button v-if="props.type && chartable" variant="outline" size="sm" as-child>
+          <Link route="charts.show" :params="{ id: props.vivarium.id, code: props.type }"
+            ><ChartLine />{{ t('measures.chart') }}</Link
           >
-            {{ typeLabel(measureType) }}
-          </NativeSelectOption>
-        </NativeSelect>
-      </label>
+        </Button>
+        <label v-if="props.measuredTypes.length > 0" class="flex flex-col gap-1 text-sm">
+          <span class="text-muted-foreground">{{ t('measures.filter.label') }}</span>
+          <NativeSelect :model-value="props.type ?? ''" @change="filter">
+            <NativeSelectOption value="">{{ t('measures.filter.all') }}</NativeSelectOption>
+            <NativeSelectOption
+              v-for="measureType in props.measuredTypes"
+              :key="measureType.code"
+              :value="measureType.code"
+            >
+              {{ typeLabel(measureType) }}
+            </NativeSelectOption>
+          </NativeSelect>
+        </label>
+      </div>
     </div>
 
     <Alert v-if="props.vivarium.isArchived">

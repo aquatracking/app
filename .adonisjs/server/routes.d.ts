@@ -40,6 +40,7 @@ export type ScannedRoutes = {
     'measures.edit_reading': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'measuredAt': ParamValue} }
     'measures.update_reading': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'measuredAt': ParamValue} }
     'measures.destroy_reading': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'measuredAt': ParamValue} }
+    'charts.show': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'code': ParamValue} }
     'admin.users.index': { paramsTuple?: []; params?: {} }
     'admin.users.toggle_admin': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.users.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -66,6 +67,7 @@ export type ScannedRoutes = {
     'tracked_measures.index': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'measures.index': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'measures.edit_reading': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'measuredAt': ParamValue} }
+    'charts.show': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'code': ParamValue} }
     'admin.users.index': { paramsTuple?: []; params?: {} }
     'admin.invitations.index': { paramsTuple?: []; params?: {} }
   }
@@ -86,6 +88,7 @@ export type ScannedRoutes = {
     'tracked_measures.index': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'measures.index': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'measures.edit_reading': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'measuredAt': ParamValue} }
+    'charts.show': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'code': ParamValue} }
     'admin.users.index': { paramsTuple?: []; params?: {} }
     'admin.invitations.index': { paramsTuple?: []; params?: {} }
   }
