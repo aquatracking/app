@@ -68,6 +68,16 @@ router
         router.put('/image', [controllers.VivariumImages, 'update'])
         router.delete('/image', [controllers.VivariumImages, 'destroy'])
         router.get('/image/:filename', [controllers.VivariumImages, 'show'])
+
+        /**
+         * Tracked measures (docs/features/05-tracked-measures.md).
+         */
+        router.get('/tracked-measures', [controllers.TrackedMeasures, 'index'])
+        router.post('/tracked-measures', [controllers.TrackedMeasures, 'store'])
+        router.put('/tracked-measures/order', [controllers.TrackedMeasures, 'reorder'])
+        router
+          .delete('/tracked-measures/:trackedMeasureId', [controllers.TrackedMeasures, 'destroy'])
+          .where('trackedMeasureId', router.matchers.uuid())
       })
       .prefix('/vivariums/:id')
       .where('id', router.matchers.uuid())

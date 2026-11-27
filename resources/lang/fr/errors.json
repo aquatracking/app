@@ -20,5 +20,7 @@
   "E_OWN_ADMIN_RIGHTS": "Vous ne pouvez pas retirer vos propres droits d'administrateur.",
   "E_OWN_ACCOUNT_DELETION": "Vous ne pouvez pas supprimer votre propre compte depuis l'administration.",
   "E_VIVARIUM_ARCHIVED": "Ce bac est archivé : désarchivez-le pour le modifier.",
-  "E_INVALID_IMAGE": "Cette image est illisible. Essayez un fichier JPEG, PNG ou WebP."
+  "E_INVALID_IMAGE": "Cette image est illisible. Essayez un fichier JPEG, PNG ou WebP.",
+  "E_TRACKED_MEASURE_ALREADY_EXISTS": "Ce paramètre est déjà suivi sur ce bac.",
+  "E_INVALID_TRACKED_MEASURE_ORDER": "L'ordre a changé entre-temps : rechargez la page et réessayez."
 }

@@ -1,0 +1,20 @@
+{
+  "title": "Mesures suivies",
+  "link": "Mesures suivies",
+  "back": "Retour à {name}",
+  "description": "Les paramètres suivis forment les tuiles du tableau de bord et les champs du relevé, dans cet ordre. Retirer un paramètre ne supprime aucune mesure.",
+  "archived": "Ce bac est archivé : ses mesures suivies ne peuvent pas être modifiées.",
+  "empty": "Ce bac ne suit aucun paramètre. Ajoutez-en un pour commencer vos relevés.",
+  "add": {
+    "label": "Ajouter un paramètre",
+    "choose": "Choisir…",
+    "submit": "Ajouter",
+    "none": "Tous les paramètres du catalogue sont déjà suivis."
+  },
+  "drag": "Glisser pour déplacer {name}",
+  "move_up": "Monter {name}",
+  "move_down": "Descendre {name}",
+  "remove": "Retirer {name}",
+  "added": "{name} est maintenant suivi.",
+  "removed": "{name} n'est plus suivi. Ses mesures sont conservées."
+}

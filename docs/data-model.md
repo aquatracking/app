@@ -98,8 +98,8 @@ Données de référence, **écrites uniquement par le seeder du catalogue**. Pas
 |---|---|---|
 | `id` | uuid | PK |
 | `code` | text | unique, stable (`temperature`, `ph`, `no2`…) |
-| `unit` | text | ex. `°C`, `mg/L`, vide pour le pH |
-| `decimals` | smallint | 0–3. Précision **maximale** de saisie et d'affichage, pas un arrondi de stockage |
+| `unit` | text | requis, ex. `°C`, `mg/L` ; chaîne vide pour le pH et la densité |
+| `decimals` | smallint | `CHECK` 0–3. Précision **maximale** de saisie et d'affichage, pas un arrondi de stockage |
 | `position` | smallint | ordre d'affichage dans le catalogue |
 
 Le libellé vient de l'i18n (`measure_types.<code>`). Les bornes de plausibilité et les profils par défaut restent dans le code du catalogue : ce sont des règles, pas des données. Un type abandonné reste dans le catalogue avec `retired: true` et sa ligne reste en base ; aucune entrée n'est jamais retirée du code ([ADR 0005](adr/0005-catalogue-types-de-mesure-fixe.md)).

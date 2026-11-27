@@ -45,6 +45,12 @@ export interface ApiDefinition {
     destroy: typeof routes['vivarium_images.destroy']
     show: typeof routes['vivarium_images.show']
   }
+  trackedMeasures: {
+    index: typeof routes['tracked_measures.index']
+    store: typeof routes['tracked_measures.store']
+    reorder: typeof routes['tracked_measures.reorder']
+    destroy: typeof routes['tracked_measures.destroy']
+  }
   admin: {
     users: {
       index: typeof routes['admin.users.index']

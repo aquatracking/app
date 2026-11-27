@@ -1,0 +1,20 @@
+{
+  "title": "Tracked measures",
+  "link": "Tracked measures",
+  "back": "Back to {name}",
+  "description": "Tracked parameters make the tiles of the dashboard and the fields of a reading, in this order. Removing a parameter deletes no measure.",
+  "archived": "This tank is archived: its tracked measures cannot be changed.",
+  "empty": "This tank tracks no parameter. Add one to start taking readings.",
+  "add": {
+    "label": "Add a parameter",
+    "choose": "Choose…",
+    "submit": "Add",
+    "none": "All the parameters of the catalog are already tracked."
+  },
+  "drag": "Drag to move {name}",
+  "move_up": "Move {name} up",
+  "move_down": "Move {name} down",
+  "remove": "Remove {name}",
+  "added": "{name} is now tracked.",
+  "removed": "{name} is no longer tracked. Its measures are kept."
+}

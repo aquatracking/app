@@ -26,6 +26,7 @@ Saisir en quelques secondes les valeurs d'un test, retrouver tous les relevés p
 - **Unicité** : un vivarium ne peut pas avoir deux mesures du même type au même instant (contrainte unique en base). Si un nouveau relevé tombe sur une minute qui contient déjà une valeur d'un des types saisis, il est refusé en entier, avec un message qui propose de modifier le relevé existant. Cela empêche aussi les doublons par double envoi du formulaire.
 - Après enregistrement : retour au tableau de bord, mis à jour, avec un message « Relevé enregistré (n mesures) ».
 - Impossible sur un vivarium archivé.
+- Si le vivarium ne suit aucun type, le formulaire n'a aucun champ de valeur : il invite à ajouter des mesures suivies ([05](05-tracked-measures.md)), avec un lien vers leur page.
 
 ### Historique
 - Page par vivarium, relevés les plus récents en premier : chaque groupe réunit les mesures de même `measured_at` (un groupe = un relevé).
@@ -92,3 +93,5 @@ La 04 a été livrée avant la table `measures`. La 06 y ajoute :
 - **MEA-20** Il n'existe aucune route pour modifier ou supprimer une mesure seule.
 - **MEA-21** ([VIV-12](04-vivariums.md)) Déplacer la mise en service d'un vivarium après la date locale de son plus ancien relevé est refusé ; à cette date ou avant, c'est accepté. Les cartes de l'accueil affichent la date du dernier relevé.
 - **MEA-22** ([VIV-13](04-vivariums.md)) Supprimer un utilisateur depuis l'administration supprime les mesures de ses vivariums.
+- **MEA-23** ([TRK-3](05-tracked-measures.md)) Les bornes et les décimales d'un type marqué `retired` valident toujours la modification d'un relevé qui le contient.
+- **MEA-24** ([05](05-tracked-measures.md)) Sur un vivarium qui ne suit aucun type, le relevé invite à ajouter des mesures suivies.

@@ -17,6 +17,7 @@ Voir d'un coup d'œil l'état actuel d'un bac et l'évolution de chaque paramèt
   - variation par rapport à la mesure précédente du même type (flèche et écart, ex. « ▲ 0,3 ») ;
   - mini-courbe des 30 derniers jours si au moins 2 mesures sur la période ;
   - « Aucune mesure » si le type n'a jamais été mesuré.
+- Si le vivarium ne suit aucun type, à la place des tuiles : un message qui invite à en ajouter, avec un lien vers les mesures suivies ([05](05-tracked-measures.md)), sauf si archivé.
 - Cliquer sur une tuile ouvre le graphe du type.
 - Bouton « Nouveau relevé » ([06](06-measures.md)), sauf si archivé.
 - Pas de couleur liée à une valeur « bonne » ou « mauvaise » : ce sera le rôle des seuils (hors périmètre 2.0).
@@ -57,3 +58,5 @@ Voir d'un coup d'œil l'état actuel d'un bac et l'évolution de chaque paramèt
 - **CHT-8** Un code de type inconnu, ou sans mesure et non suivi par le vivarium, répond 404.
 - **CHT-9** Les routes répondent 404 pour le vivarium d'un autre utilisateur.
 - **CHT-10** Pour un utilisateur en `Europe/Paris`, des mesures du 31 octobre 2027 entre 00:00 et 23:59 heure locale (25 heures réelles) tombent dans un même intervalle journalier, et aucune mesure du 30 ou du 1er novembre n'y est comptée.
+- **CHT-11** ([TRK-7](05-tracked-measures.md)) Retirer un type suivi conserve ses mesures ; le réajouter fait réapparaître sa tuile avec sa dernière valeur.
+- **CHT-12** ([05](05-tracked-measures.md)) Un vivarium qui ne suit aucun type affiche l'invitation à en ajouter à la place des tuiles.

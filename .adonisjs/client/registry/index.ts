@@ -170,6 +170,30 @@ const routes = {
     tokens: [[0,"vivariums"],[1,"id"],[0,"image"],[1,"filename"]],
     types: placeholder as Registry['vivarium_images.show']['types'],
   },
+  'tracked_measures.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/vivariums/:id/tracked-measures',
+    tokens: [[0,"vivariums"],[1,"id"],[0,"tracked-measures"]],
+    types: placeholder as Registry['tracked_measures.index']['types'],
+  },
+  'tracked_measures.store': {
+    methods: ["POST"],
+    pattern: '/vivariums/:id/tracked-measures',
+    tokens: [[0,"vivariums"],[1,"id"],[0,"tracked-measures"]],
+    types: placeholder as Registry['tracked_measures.store']['types'],
+  },
+  'tracked_measures.reorder': {
+    methods: ["PUT"],
+    pattern: '/vivariums/:id/tracked-measures/order',
+    tokens: [[0,"vivariums"],[1,"id"],[0,"tracked-measures"],[0,"order"]],
+    types: placeholder as Registry['tracked_measures.reorder']['types'],
+  },
+  'tracked_measures.destroy': {
+    methods: ["DELETE"],
+    pattern: '/vivariums/:id/tracked-measures/:trackedMeasureId',
+    tokens: [[0,"vivariums"],[1,"id"],[0,"tracked-measures"],[1,"trackedMeasureId"]],
+    types: placeholder as Registry['tracked_measures.destroy']['types'],
+  },
   'admin.users.index': {
     methods: ["GET","HEAD"],
     pattern: '/admin/users',

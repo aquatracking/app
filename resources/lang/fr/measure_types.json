@@ -1,0 +1,70 @@
+{
+  "temperature": {
+    "label": "Température",
+    "description": "Température de l'eau, ou de l'air pour un terrarium."
+  },
+  "ph": {
+    "label": "pH",
+    "description": "Acidité de l'eau : moins de 7 acide, plus de 7 basique."
+  },
+  "gh": {
+    "label": "Dureté totale (GH)",
+    "description": "Teneur en calcium et magnésium de l'eau."
+  },
+  "kh": {
+    "label": "Dureté carbonatée (KH)",
+    "description": "Teneur en carbonates, qui stabilise le pH."
+  },
+  "no2": {
+    "label": "Nitrites (NO₂)",
+    "description": "Toxiques même à faible dose, signe d'un cycle de l'azote incomplet."
+  },
+  "no3": {
+    "label": "Nitrates (NO₃)",
+    "description": "Produit final du cycle de l'azote, éliminé par les changements d'eau et les plantes."
+  },
+  "nh3": {
+    "label": "Ammoniac / ammonium (NH₃/NH₄⁺)",
+    "description": "Déchets azotés des animaux, toxiques sous forme d'ammoniac."
+  },
+  "po4": {
+    "label": "Phosphates (PO₄)",
+    "description": "Nutriment des algues, à surveiller de près en récifal."
+  },
+  "salinity": {
+    "label": "Salinité",
+    "description": "Quantité de sel dissous, en parties pour mille (‰)."
+  },
+  "specific_gravity": {
+    "label": "Densité",
+    "description": "Densité de l'eau salée, lue au réfractomètre ou au densimètre."
+  },
+  "ca": {
+    "label": "Calcium (Ca)",
+    "description": "Élément consommé par les coraux durs pour construire leur squelette."
+  },
+  "mg": {
+    "label": "Magnésium (Mg)",
+    "description": "Élément qui maintient l'équilibre entre calcium et KH en récifal."
+  },
+  "co2": {
+    "label": "CO₂",
+    "description": "Dioxyde de carbone dissous, nécessaire aux plantes, dangereux pour les poissons en excès."
+  },
+  "fe": {
+    "label": "Fer (Fe)",
+    "description": "Oligo-élément des plantes aquatiques."
+  },
+  "conductivity": {
+    "label": "Conductivité",
+    "description": "Quantité de sels minéraux dissous dans l'eau."
+  },
+  "humidity": {
+    "label": "Humidité",
+    "description": "Humidité relative de l'air."
+  },
+  "illuminance": {
+    "label": "Luminosité",
+    "description": "Éclairement reçu, mesuré au luxmètre."
+  }
+}

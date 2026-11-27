@@ -34,6 +34,7 @@ Première installation : `pnpm install`, `cp .env.example .env`, `node ace gener
 ```bash
 docker compose up -d       # PostgreSQL (bases aquatracking et aquatracking_test) + Mailpit (http://localhost:8025)
 node ace migration:run     # migrations, puis régénère database/schema.ts
+node ace db:seed           # synchronise le catalogue des types de mesure (idempotent)
 pnpm dev                   # serveur de dev avec HMR et SSR (http://localhost:3333)
 pnpm test                  # tests Japa sur la base aquatracking_test
 pnpm test --files=tests/functional/health/health_checks.spec.ts   # un seul fichier

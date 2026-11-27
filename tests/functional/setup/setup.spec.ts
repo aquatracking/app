@@ -50,10 +50,12 @@ async function waitForLockWaiters(table: string, count: number) {
 /**
  * The database is emptied by truncation rather than rolled back: INS-5
  * needs two requests on two connections, which a global transaction
- * would merge into one.
+ * would merge into one. The truncation also empties the measure type
+ * catalog, seeded again for the other groups.
  */
 test.group('Setup', (group) => {
   group.each.setup(() => testUtils.db().truncate())
+  group.teardown(() => testUtils.db().seed())
   group.each.setup(() => SetupService.forget())
   group.each.setup(() => limiter.clear())
 
