@@ -13,7 +13,7 @@ Défini dans `app/catalog/measure_types.ts` ([ADR 0005](../adr/0005-catalogue-ty
 
 **Sens de `decimals`** : c'est la précision **maximale** acceptée à la saisie et affichée, pas un format imposé.
 - La valeur est stockée telle que saisie (`numeric(10,3)`), sans arrondi.
-- Une saisie avec plus de décimales que permis est refusée, avec un message qui indique la précision attendue.
+- Une saisie avec plus de décimales que permis est refusée, avec un message qui indique la précision attendue. Les zéros finaux ne comptent pas : `25,30` vaut 25,3 et est accepté en température (1 décimale).
 - Affichage sans zéros forcés : `10` s'affiche « 10 », `7,25` reste « 7,25 », jamais « 10,0 ».
 - Les futurs seuils compareront les valeurs stockées. Être généreux sur `decimals` ne coûte donc rien : il suffit qu'un kit ou un appareil courant ne soit jamais bloqué.
 
