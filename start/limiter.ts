@@ -17,3 +17,11 @@ import limiter from '@adonisjs/limiter/services/main'
 export const setupThrottle = limiter.define('setup', () => {
   return limiter.allowRequests(10).every('1 minute')
 })
+
+/**
+ * Requests of a password reset link: 3 per hour and per IP. Login
+ * attempts are limited by the login service, which counts failures only.
+ */
+export const forgotPasswordThrottle = limiter.define('forgot_password', () => {
+  return limiter.allowRequests(3).every('1 hour')
+})

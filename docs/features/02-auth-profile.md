@@ -17,22 +17,23 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 - Message d'erreur unique « identifiants invalides », que l'email existe ou non.
 - Limitation des échecs de connexion, deux compteurs cumulés (`limiter.multi`) :
   - **IP + email** : 5 échecs en 15 minutes. Freine la recherche du mot de passe d'un compte précis. Une connexion réussie remet à zéro ce compteur (pas l'historique des blocages) ;
-  - **IP seule** : 20 échecs en 15 minutes, tous emails confondus. Freine l'essai d'une liste d'identifiants depuis une même machine.
-- **Blocage progressif** : quand un compteur est dépassé, la clé est bloquée 15 minutes, puis la durée double à chaque nouveau blocage de la même clé (30 min, 1 h, 2 h…), plafonnée à 24 h. L'historique des blocages d'une clé est oublié après 24 h sans nouveau blocage.
+  - **IP seule** : 20 échecs en 15 minutes, tous emails confondus. Freine l'essai d'une liste d'identifiants depuis une même machine. Une connexion réussie ne remet pas ce compteur à zéro : sinon, un compte valide permettrait de relancer l'essai d'une liste d'identifiants.
+- **Blocage progressif** : quand un compteur est dépassé, la clé est bloquée 15 minutes, puis la durée double à chaque nouveau blocage de la même clé (30 min, 1 h, 2 h…), plafonnée à 24 h. L'historique des blocages d'une clé est oublié 24 h après la fin de son dernier blocage.
 - Pendant un blocage, le message indique quand réessayer, sans dire quel compteur a été dépassé.
 - Les IP sont celles du client réel : derrière un reverse proxy, il doit être déclaré de confiance ([architecture](../architecture.md)), sinon tous les utilisateurs partageraient l'IP du proxy et se bloqueraient mutuellement.
 - Pages accessibles sans connexion : connexion, inscription par invitation, mot de passe oublié, réinitialisation. Toutes les autres redirigent vers la connexion, puis vers la page demandée après connexion.
+- Ces quatre pages sont réservées aux visiteurs : un utilisateur déjà connecté qui en ouvre une est redirigé vers l'accueil avec un message.
 
 ### Inscription par invitation
 - Le lien contient un token. S'il est inconnu ou expiré, la page affiche « invitation invalide ou expirée » et un renvoi vers la connexion.
 - L'email est celui de l'invitation et n'est pas modifiable.
 - Champs : prénom, nom (facultatif), mot de passe et confirmation, langue (préremplie depuis le navigateur), fuseau horaire (prérempli avec celui du navigateur, `UTC` s'il n'en donne pas, modifiable ; un nom invalide est refusé).
 - À la création du compte, l'auteur de l'invitation est enregistré comme `invited_by_id` du nouvel utilisateur, puis l'invitation est supprimée et l'utilisateur est connecté.
-- Un utilisateur déjà connecté qui ouvre un lien d'invitation est redirigé vers l'accueil avec un message.
+- Un utilisateur déjà connecté qui ouvre un lien d'invitation est redirigé vers l'accueil avec un message (comme pour les autres pages réservées aux visiteurs) ; l'invitation reste valable.
 
 ### Mot de passe oublié
 - **Avec SMTP** : l'utilisateur saisit son email ; si un compte existe, un email contient un lien valable 1 h. La réponse est la même que le compte existe ou non. Limitation : 3 demandes par heure par IP.
-- **Sans SMTP** : la page explique de demander un lien à un administrateur (voir [03-admin](03-admin.md)).
+- **Sans SMTP** : la page explique de demander un lien à un administrateur (voir [03-admin](03-admin.md)). Une soumission du formulaire répond 404.
 - Générer un lien supprime les liens précédents de l'utilisateur.
 - La page de réinitialisation vérifie le token dès l'affichage. Nouveau mot de passe + confirmation. Après succès : token supprimé, remember me tokens de l'utilisateur supprimés, utilisateur connecté.
 
@@ -45,7 +46,7 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 - Changer le mot de passe supprime les remember me tokens des autres appareils.
 
 ### Déconnexion
-- Supprime la session et le remember me token courant, redirige vers la connexion.
+- Vide la session et supprime le remember me token courant, redirige vers la connexion.
 
 ### Dernière activité
 - Un middleware, sur toute requête authentifiée (y compris quand la session est restaurée par « se souvenir de moi »), met à jour `users.last_seen_at` si elle est vide ou date de plus d'une heure. La mise à jour est une requête conditionnelle qui ne touche pas `updated_at`. Affichée dans l'administration ([03](03-admin.md), ADM-13).

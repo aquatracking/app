@@ -14,9 +14,10 @@ const authConfig = defineConfig({
      */
     web: sessionGuard({
       /**
-       * Enable persistent login using remember-me tokens.
+       * "Remember me" keeps the user signed in on the device for 1 year.
        */
-      useRememberMeTokens: false,
+      useRememberMeTokens: true,
+      rememberMeTokensAge: '1 year',
 
       provider: sessionUserProvider({
         model: () => import('#models/user'),

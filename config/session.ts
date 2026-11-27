@@ -14,10 +14,10 @@ const sessionConfig = defineConfig({
   cookieName: 'adonis-session',
 
   /**
-   * When set to true, the session id cookie will be deleted
-   * once the user closes the browser.
+   * The session ends when the browser is closed. "Remember me" keeps the
+   * user signed in longer, with its own cookie (config/auth.ts).
    */
-  clearWithBrowser: false,
+  clearWithBrowser: true,
 
   /**
    * Define how long to keep the session data alive without

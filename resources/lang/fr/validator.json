@@ -9,7 +9,8 @@
       "sameAs": "Ce champ doit être identique à {otherField}",
       "confirmed": "La confirmation ne correspond pas",
       "enum": "Choisissez une des valeurs proposées",
-      "timezone": "Saisissez un nom de fuseau horaire valide, par exemple Europe/Paris"
+      "timezone": "Saisissez un nom de fuseau horaire valide, par exemple Europe/Paris",
+      "currentPassword": "Le mot de passe actuel est incorrect"
     }
   }
 }

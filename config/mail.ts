@@ -1,14 +1,12 @@
 import env from '#start/env'
+import { mail } from '#config/app'
 import { defineConfig, transports } from '@adonisjs/mail'
 
 /**
- * SMTP is optional (ADR 0003): when SMTP_HOST is empty, the instance
- * sends no email and administrators share links by hand.
+ * SMTP is optional: see "mail" in config/app.ts.
  */
-export const mailEnabled = Boolean(env.get('SMTP_HOST'))
-
 const fromAddress = env.get('MAIL_FROM_ADDRESS')
-if (mailEnabled && !fromAddress) {
+if (mail.enabled && !fromAddress) {
   throw new Error('MAIL_FROM_ADDRESS is required when SMTP_HOST is set')
 }
 

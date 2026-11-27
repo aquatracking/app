@@ -44,7 +44,7 @@ users 1───* vivariums 1───* tracked_measures *───1 measure_typ
 Règle d'intégrité applicative : il reste toujours au moins un utilisateur avec `is_admin = true`.
 
 ### `remember_me_tokens`
-Table standard d'`@adonisjs/auth` (`tokenable_id` → `users.id` en cascade).
+Table standard d'`@adonisjs/auth` (`tokenable_id` uuid → `users.id` en cascade, `hash` unique, `expires_at`). Exception à la convention des identifiants : sa clé `id` est un entier auto-incrémenté, car le fournisseur de tokens d'Adonis insère les lignes sans identifiant. Gérée par le fournisseur de tokens d'Adonis ; l'application n'y fait qu'une requête directe, la suppression des tokens d'un utilisateur (réinitialisation et changement de mot de passe). Exclue de la génération de `database/schema.ts`.
 
 ### `rate_limits`
 Table gérée par `@adonisjs/limiter` (store database), créée par sa migration standard : une ligne par clé limitée (`key`, `points`, `expire`). Contient aussi les clés qui comptent les blocages successifs pour le blocage progressif. Jamais lue ni écrite en dehors du limiter. Nettoyage des lignes expirées : assuré par la bibliothèque sous-jacente (`rate-limiter-flexible`, option `clearExpiredByTimeout` activée dans `config/limiter.ts`) : toutes les 5 minutes, suppression des lignes expirées depuis plus d'une heure. Exclue de la génération de `database/schema.ts` (aucun modèle).

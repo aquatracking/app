@@ -6,6 +6,7 @@ import AppLayout from '~/layouts/app.vue'
 import { Input } from '~/components/ui/input'
 import { Button } from '~/components/ui/button'
 import { useI18n } from '~/composables/use_i18n'
+import TimezoneInput from '~/components/timezone_input.vue'
 import { NativeSelect, NativeSelectOption } from '~/components/ui/native-select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field'
@@ -22,11 +23,9 @@ const page = usePage()
  */
 const locales = ['en', 'fr'] as const
 const timezone = ref('UTC')
-const timezones = ref<string[]>([])
 
 onMounted(() => {
   timezone.value = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
-  timezones.value = ['UTC', ...Intl.supportedValuesOf('timeZone')]
 })
 </script>
 
@@ -128,18 +127,12 @@ onMounted(() => {
 
           <Field :data-invalid="!!errors.timezone">
             <FieldLabel for="timezone">{{ t('setup.timezone') }}</FieldLabel>
-            <Input
+            <TimezoneInput
               id="timezone"
               v-model="timezone"
               name="timezone"
-              list="timezones"
-              autocomplete="off"
-              required
-              :aria-invalid="!!errors.timezone"
+              :invalid="!!errors.timezone"
             />
-            <datalist id="timezones">
-              <option v-for="name in timezones" :key="name" :value="name" />
-            </datalist>
             <FieldDescription>{{ t('setup.timezone_hint') }}</FieldDescription>
             <FieldError :errors="[errors.timezone]" />
           </Field>

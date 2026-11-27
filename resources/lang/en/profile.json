@@ -1,0 +1,17 @@
+{
+  "title": "Profile",
+  "description": "Your name, language and time zone.",
+  "email_hint": "Your login. It cannot be changed.",
+  "timezone_suggestion": "Your browser is in the {timezone} time zone.",
+  "use_timezone": "Use {timezone}",
+  "submit": "Save",
+  "saved": "Your profile has been saved.",
+  "password": {
+    "title": "Password",
+    "description": "Changing your password signs you out of your other devices.",
+    "current": "Current password",
+    "new": "New password",
+    "submit": "Change the password"
+  },
+  "password_changed": "Your password has been changed."
+}

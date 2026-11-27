@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3'
+import { Head, usePage } from '@inertiajs/vue3'
 import { Link } from '@adonisjs/inertia/vue'
+import { Button } from '~/components/ui/button'
 import { useI18n } from '~/composables/use_i18n'
 import FlashNotification from '~/components/flash_notification.vue'
 
 const { t } = useI18n()
+const page = usePage()
 </script>
 
 <template>
@@ -12,8 +14,16 @@ const { t } = useI18n()
   <Head title="" />
   <div class="min-h-svh bg-background">
     <header class="border-b">
-      <div class="mx-auto flex h-14 max-w-5xl items-center px-4">
+      <div class="mx-auto flex h-14 max-w-5xl items-center gap-4 px-4">
         <Link route="home" class="font-semibold">{{ t('app.name') }}</Link>
+        <nav v-if="page.props.user" class="ml-auto flex items-center gap-2">
+          <Button variant="ghost" size="sm" as-child>
+            <Link route="profile.edit">{{ page.props.user.firstName }}</Link>
+          </Button>
+          <Button variant="outline" size="sm" as-child>
+            <Link route="session.destroy" as="button">{{ t('auth.logout') }}</Link>
+          </Button>
+        </nav>
       </div>
     </header>
     <main class="mx-auto max-w-5xl px-4 py-8">

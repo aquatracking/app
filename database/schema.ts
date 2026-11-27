@@ -7,6 +7,42 @@
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
 
+export class InvitationSchema extends BaseModel {
+  static $columns = ['createdAt', 'email', 'expiresAt', 'id', 'invitedById', 'tokenHash', 'updatedAt'] as const
+  $columns = InvitationSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare email: string
+  @column.dateTime()
+  declare expiresAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare invitedById: string | null
+  @column()
+  declare tokenHash: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
+}
+
+export class PasswordResetTokenSchema extends BaseModel {
+  static $columns = ['createdAt', 'expiresAt', 'id', 'tokenHash', 'updatedAt', 'userId'] as const
+  $columns = PasswordResetTokenSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column.dateTime()
+  declare expiresAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare tokenHash: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
+  @column()
+  declare userId: string
+}
+
 export class UserSchema extends BaseModel {
   static $columns = ['createdAt', 'email', 'firstName', 'id', 'invitedById', 'isAdmin', 'lastName', 'lastSeenAt', 'locale', 'password', 'timezone', 'updatedAt'] as const
   $columns = UserSchema.$columns

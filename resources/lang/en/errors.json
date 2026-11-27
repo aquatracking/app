@@ -7,5 +7,9 @@
     "title": "Something went wrong",
     "description": "An unexpected error occurred. Please try again in a moment."
   },
-  "E_TOO_MANY_REQUESTS": "Too many attempts. Please try again in a moment."
+  "E_TOO_MANY_REQUESTS": "Too many attempts. Please try again in a moment.",
+  "E_INVALID_CREDENTIALS": "Invalid credentials.",
+  "E_LOGIN_BLOCKED": "Too many failed attempts. Please try again in {duration}.",
+  "E_INVALID_INVITATION": "This invitation is invalid or expired.",
+  "E_INVALID_PASSWORD_RESET_TOKEN": "This link is invalid, expired or already used."
 }

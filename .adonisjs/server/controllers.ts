@@ -4,6 +4,12 @@
  */
 
 export const controllers = {
+  auth: {
+    PasswordReset: () => import('#controllers/auth/password_reset_controller'),
+    Registration: () => import('#controllers/auth/registration_controller'),
+    Session: () => import('#controllers/auth/session_controller'),
+  },
   HealthChecks: () => import('#controllers/health_checks_controller'),
+  Profile: () => import('#controllers/profile_controller'),
   Setup: () => import('#controllers/setup_controller'),
 }

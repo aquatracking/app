@@ -13,6 +13,15 @@ const trustedProxies = (env.get('TRUSTED_PROXIES') ?? '')
   .filter(Boolean)
 
 /**
+ * SMTP is optional (ADR 0003): when SMTP_HOST is empty, the instance
+ * sends no email and administrators share links by hand. Read through
+ * the config service ("app.mail.enabled"), so that tests can switch it.
+ */
+export const mail = {
+  enabled: Boolean(env.get('SMTP_HOST')),
+}
+
+/**
  * The configuration settings used by the HTTP server
  */
 export const http = defineConfig({

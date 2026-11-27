@@ -1,4 +1,5 @@
 import app from '@adonisjs/core/services/app'
+import { errors as authErrors } from '@adonisjs/auth'
 import { errors as limiterErrors } from '@adonisjs/limiter'
 import type { Notification } from '#middleware/inertia_middleware'
 import { type HttpContext, ExceptionHandler } from '@adonisjs/core/http'
@@ -38,6 +39,19 @@ export default class HttpExceptionHandler extends ExceptionHandler {
      */
     if (error instanceof limiterErrors.E_TOO_MANY_REQUESTS && ctx.request.header('x-inertia')) {
       const notification: Notification = { type: 'error', message: error.getResponseMessage(ctx) }
+      ctx.session.flash('notification', notification)
+      return ctx.response.redirect().back()
+    }
+
+    /**
+     * Failed login: one message whether the email exists or not, shown
+     * like the other business errors.
+     */
+    if (error instanceof authErrors.E_INVALID_CREDENTIALS) {
+      const notification: Notification = {
+        type: 'error',
+        message: error.getResponseMessage(error, ctx),
+      }
       ctx.session.flash('notification', notification)
       return ctx.response.redirect().back()
     }

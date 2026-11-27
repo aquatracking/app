@@ -23,9 +23,10 @@ const dbConfig = defineConfig({
         enabled: true,
         rulesPaths: ['./database/schema_rules.js'],
         /**
-         * Managed by @adonisjs/limiter only, never through a model.
+         * Managed by @adonisjs/limiter and @adonisjs/auth only, never
+         * through a model.
          */
-        excludeTables: ['rate_limits'],
+        excludeTables: ['rate_limits', 'remember_me_tokens'],
       },
       debug: app.inDev,
     },

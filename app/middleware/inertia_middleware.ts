@@ -1,4 +1,4 @@
-import { mailEnabled } from '#config/mail'
+import app from '@adonisjs/core/services/app'
 import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
 import UserTransformer from '#transformers/user_transformer'
@@ -28,7 +28,7 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
       user: ctx.inertia.always(auth?.user ? UserTransformer.transform(auth.user) : undefined),
       locale: ctx.inertia.always(i18n?.locale ?? 'en'),
       timezone: ctx.inertia.always(auth?.user?.timezone ?? 'UTC'),
-      mailEnabled: ctx.inertia.always(mailEnabled),
+      mailEnabled: ctx.inertia.always(app.config.get<boolean>('app.mail.enabled')),
     }
   }
 
