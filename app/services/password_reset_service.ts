@@ -1,7 +1,10 @@
+import env from '#start/env'
 import { DateTime } from 'luxon'
 import User from '#models/user'
+import app from '@adonisjs/core/services/app'
 import mail from '@adonisjs/mail/services/main'
 import db from '@adonisjs/lucid/services/db'
+import { urlFor } from '@adonisjs/core/services/url_builder'
 import PasswordResetToken from '#models/password_reset_token'
 import PasswordResetNotification from '#mails/password_reset_notification'
 import InvalidPasswordResetTokenException from '#exceptions/invalid_password_reset_token_exception'
@@ -29,6 +32,26 @@ export class PasswordResetService {
   }
 
   /**
+   * Absolute URL of the link of a token, to send or to show.
+   */
+  url(token: string): string {
+    return urlFor('password_reset.edit', { token }, { prefixUrl: env.get('APP_URL') })
+  }
+
+  /**
+   * Creates a link for the user on behalf of an administrator, who shows
+   * it to pass it on by hand. With SMTP, it is also emailed to the user.
+   */
+  async createLink(user: User): Promise<{ url: string; emailed: boolean }> {
+    const url = this.url(await this.createToken(user))
+    const emailed = app.config.get<boolean>('app.mail.enabled')
+    if (emailed) {
+      await mail.sendLater(new PasswordResetNotification(user, url))
+    }
+    return { url, emailed }
+  }
+
+  /**
    * Emails a link to the account of the email, if there is one. Nothing
    * tells the caller whether it exists. The email is queued rather than
    * sent, so that the response time does not reveal it: only the creation
@@ -41,7 +64,7 @@ export class PasswordResetService {
     }
 
     const token = await this.createToken(user)
-    await mail.sendLater(new PasswordResetNotification(user, token))
+    await mail.sendLater(new PasswordResetNotification(user, this.url(token)))
   }
 
   /**

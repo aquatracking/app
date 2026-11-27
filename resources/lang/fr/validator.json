@@ -10,7 +10,9 @@
       "confirmed": "La confirmation ne correspond pas",
       "enum": "Choisissez une des valeurs proposées",
       "timezone": "Saisissez un nom de fuseau horaire valide, par exemple Europe/Paris",
-      "currentPassword": "Le mot de passe actuel est incorrect"
+      "currentPassword": "Le mot de passe actuel est incorrect",
+      "emailWithoutAccount": "Un compte utilise déjà cet email",
+      "accountEmail": "Saisissez l'email du compte pour confirmer"
     }
   }
 }

@@ -4,6 +4,10 @@
  */
 
 export const controllers = {
+  admin: {
+    Invitations: () => import('#controllers/admin/invitations_controller'),
+    Users: () => import('#controllers/admin/users_controller'),
+  },
   auth: {
     PasswordReset: () => import('#controllers/auth/password_reset_controller'),
     Registration: () => import('#controllers/auth/registration_controller'),

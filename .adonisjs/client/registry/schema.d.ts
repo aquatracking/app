@@ -216,6 +216,110 @@ export interface Registry {
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/profile_controller').default['updatePassword']>>> | { status: 422; response: { errors: SimpleError[] } }
     }
   }
+  'admin.users.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/admin/users'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/users_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/users_controller').default['index']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/admin/users_controller').default['index']>>>
+    }
+  }
+  'admin.users.toggle_admin': {
+    methods: ["PUT"]
+    pattern: '/admin/users/:id/admin'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/admin').updateAdminValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/admin').updateAdminValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/users_controller').default['toggleAdmin']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/users_controller').default['toggleAdmin']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/admin/users_controller').default['toggleAdmin']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'admin.users.destroy': {
+    methods: ["DELETE"]
+    pattern: '/admin/users/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/admin').deleteUserValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/admin').deleteUserValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/users_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/users_controller').default['destroy']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/admin/users_controller').default['destroy']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'admin.users.create_password_reset': {
+    methods: ["POST"]
+    pattern: '/admin/users/:id/password-reset'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/users_controller').default['createPasswordReset']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/users_controller').default['createPasswordReset']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/admin/users_controller').default['createPasswordReset']>>>
+    }
+  }
+  'admin.invitations.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/admin/invitations'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/invitations_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/invitations_controller').default['index']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/admin/invitations_controller').default['index']>>>
+    }
+  }
+  'admin.invitations.store': {
+    methods: ["POST"]
+    pattern: '/admin/invitations'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/admin').createInvitationValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/admin').createInvitationValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/invitations_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/invitations_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/admin/invitations_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'admin.invitations.renew': {
+    methods: ["POST"]
+    pattern: '/admin/invitations/:id/renew'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/invitations_controller').default['renew']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/invitations_controller').default['renew']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/admin/invitations_controller').default['renew']>>>
+    }
+  }
+  'admin.invitations.destroy': {
+    methods: ["DELETE"]
+    pattern: '/admin/invitations/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/admin/invitations_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/admin/invitations_controller').default['destroy']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/admin/invitations_controller').default['destroy']>>>
+    }
+  }
 }
 
 export namespace Route {

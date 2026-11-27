@@ -30,4 +30,18 @@ export interface ApiDefinition {
     update: typeof routes['profile.update']
     updatePassword: typeof routes['profile.update_password']
   }
+  admin: {
+    users: {
+      index: typeof routes['admin.users.index']
+      toggleAdmin: typeof routes['admin.users.toggle_admin']
+      destroy: typeof routes['admin.users.destroy']
+      createPasswordReset: typeof routes['admin.users.create_password_reset']
+    }
+    invitations: {
+      index: typeof routes['admin.invitations.index']
+      store: typeof routes['admin.invitations.store']
+      renew: typeof routes['admin.invitations.renew']
+      destroy: typeof routes['admin.invitations.destroy']
+    }
+  }
 }

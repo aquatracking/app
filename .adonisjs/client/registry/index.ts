@@ -104,6 +104,54 @@ const routes = {
     tokens: [[0,"profile"],[0,"password"]],
     types: placeholder as Registry['profile.update_password']['types'],
   },
+  'admin.users.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/admin/users',
+    tokens: [[0,"admin"],[0,"users"]],
+    types: placeholder as Registry['admin.users.index']['types'],
+  },
+  'admin.users.toggle_admin': {
+    methods: ["PUT"],
+    pattern: '/admin/users/:id/admin',
+    tokens: [[0,"admin"],[0,"users"],[1,"id"],[0,"admin"]],
+    types: placeholder as Registry['admin.users.toggle_admin']['types'],
+  },
+  'admin.users.destroy': {
+    methods: ["DELETE"],
+    pattern: '/admin/users/:id',
+    tokens: [[0,"admin"],[0,"users"],[1,"id"]],
+    types: placeholder as Registry['admin.users.destroy']['types'],
+  },
+  'admin.users.create_password_reset': {
+    methods: ["POST"],
+    pattern: '/admin/users/:id/password-reset',
+    tokens: [[0,"admin"],[0,"users"],[1,"id"],[0,"password-reset"]],
+    types: placeholder as Registry['admin.users.create_password_reset']['types'],
+  },
+  'admin.invitations.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/admin/invitations',
+    tokens: [[0,"admin"],[0,"invitations"]],
+    types: placeholder as Registry['admin.invitations.index']['types'],
+  },
+  'admin.invitations.store': {
+    methods: ["POST"],
+    pattern: '/admin/invitations',
+    tokens: [[0,"admin"],[0,"invitations"]],
+    types: placeholder as Registry['admin.invitations.store']['types'],
+  },
+  'admin.invitations.renew': {
+    methods: ["POST"],
+    pattern: '/admin/invitations/:id/renew',
+    tokens: [[0,"admin"],[0,"invitations"],[1,"id"],[0,"renew"]],
+    types: placeholder as Registry['admin.invitations.renew']['types'],
+  },
+  'admin.invitations.destroy': {
+    methods: ["DELETE"],
+    pattern: '/admin/invitations/:id',
+    tokens: [[0,"admin"],[0,"invitations"],[1,"id"]],
+    types: placeholder as Registry['admin.invitations.destroy']['types'],
+  },
 } as const satisfies Record<string, AdonisEndpoint>
 
 export { routes }

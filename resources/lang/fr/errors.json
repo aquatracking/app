@@ -11,5 +11,12 @@
   "E_INVALID_CREDENTIALS": "Identifiants invalides.",
   "E_LOGIN_BLOCKED": "Trop de tentatives échouées. Réessayez dans {duration}.",
   "E_INVALID_INVITATION": "Cette invitation est invalide ou expirée.",
-  "E_INVALID_PASSWORD_RESET_TOKEN": "Ce lien est invalide, expiré ou déjà utilisé."
+  "E_INVALID_PASSWORD_RESET_TOKEN": "Ce lien est invalide, expiré ou déjà utilisé.",
+  "forbidden": {
+    "title": "Accès refusé",
+    "description": "Cette page est réservée aux administrateurs."
+  },
+  "E_LAST_ADMIN": "Il doit rester au moins un administrateur.",
+  "E_OWN_ADMIN_RIGHTS": "Vous ne pouvez pas retirer vos propres droits d'administrateur.",
+  "E_OWN_ACCOUNT_DELETION": "Vous ne pouvez pas supprimer votre propre compte depuis l'administration."
 }

@@ -1,5 +1,6 @@
 import app from '@adonisjs/core/services/app'
 import { errors as authErrors } from '@adonisjs/auth'
+import { errors as bouncerErrors } from '@adonisjs/bouncer'
 import { errors as limiterErrors } from '@adonisjs/limiter'
 import type { Notification } from '#middleware/inertia_middleware'
 import { type HttpContext, ExceptionHandler } from '@adonisjs/core/http'
@@ -54,6 +55,15 @@ export default class HttpExceptionHandler extends ExceptionHandler {
       }
       ctx.session.flash('notification', notification)
       return ctx.response.redirect().back()
+    }
+
+    /**
+     * Refused access answers 403 with its page, form submissions included
+     * (Bouncer would redirect them back): the administration is not shown
+     * to non-administrators (docs/features/03-admin.md).
+     */
+    if (error instanceof bouncerErrors.E_AUTHORIZATION_FAILURE) {
+      return ctx.response.status(403).send(await ctx.inertia.render('errors/forbidden', {}))
     }
 
     return super.handle(error, ctx)
