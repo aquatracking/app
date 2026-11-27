@@ -7,5 +7,9 @@
     "title": "Une erreur est survenue",
     "description": "Une erreur inattendue s'est produite. Réessayez dans un instant."
   },
-  "E_TOO_MANY_REQUESTS": "Trop de tentatives. Réessayez dans un instant."
+  "E_TOO_MANY_REQUESTS": "Trop de tentatives. Réessayez dans un instant.",
+  "E_INVALID_CREDENTIALS": "Identifiants invalides.",
+  "E_LOGIN_BLOCKED": "Trop de tentatives échouées. Réessayez dans {duration}.",
+  "E_INVALID_INVITATION": "Cette invitation est invalide ou expirée.",
+  "E_INVALID_PASSWORD_RESET_TOKEN": "Ce lien est invalide, expiré ou déjà utilisé."
 }

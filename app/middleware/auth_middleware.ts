@@ -1,16 +1,14 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
 import type { Authenticators } from '@adonisjs/auth/types'
+import { urlFor } from '@adonisjs/core/services/url_builder'
 
 /**
- * Lets only signed-in users through. Guests are sent to the login page.
+ * Lets only signed-in users through. Guests are sent to the login page,
+ * which brings them back to the requested page once signed in.
  */
 export default class AuthMiddleware {
-  /**
-   * Provisional: the login page comes with feature 02, which will replace
-   * this path by its route (docs/features/02-auth-profile.md).
-   */
-  redirectTo = '/login'
+  redirectTo = urlFor('session.create')
 
   async handle(
     ctx: HttpContext,

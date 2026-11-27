@@ -9,7 +9,8 @@
       "sameAs": "This field must match {otherField}",
       "confirmed": "The confirmation does not match",
       "enum": "Choose one of the proposed values",
-      "timezone": "Enter a valid time zone name, for example Europe/Paris"
+      "timezone": "Enter a valid time zone name, for example Europe/Paris",
+      "currentPassword": "The current password is incorrect"
     }
   }
 }
