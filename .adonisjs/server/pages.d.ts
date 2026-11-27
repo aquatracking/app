@@ -18,6 +18,7 @@ declare module '@adonisjs/inertia/types' {
     'errors/forbidden': ExtractProps<(typeof import('../../inertia/pages/errors/forbidden.vue'))['default']>
     'errors/not_found': ExtractProps<(typeof import('../../inertia/pages/errors/not_found.vue'))['default']>
     'errors/server_error': ExtractProps<(typeof import('../../inertia/pages/errors/server_error.vue'))['default']>
+    'measures/index': ExtractProps<(typeof import('../../inertia/pages/measures/index.vue'))['default']>
     'profile/edit': ExtractProps<(typeof import('../../inertia/pages/profile/edit.vue'))['default']>
     'setup/show': ExtractProps<(typeof import('../../inertia/pages/setup/show.vue'))['default']>
     'tracked_measures/index': ExtractProps<(typeof import('../../inertia/pages/tracked_measures/index.vue'))['default']>

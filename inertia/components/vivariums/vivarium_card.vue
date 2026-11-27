@@ -2,11 +2,15 @@
 import { Link } from '@adonisjs/inertia/vue'
 import type { Data } from '@generated/data'
 import { Card } from '~/components/ui/card'
+import { useI18n } from '~/composables/use_i18n'
+import { useDates } from '~/composables/use_dates'
 import { useVivarium } from '~/composables/use_vivarium'
 import VivariumPicture from '~/components/vivariums/vivarium_picture.vue'
 
-const props = defineProps<{ vivarium: Data.Vivarium }>()
+const props = defineProps<{ vivarium: Data.Vivarium.Variants['forCard'] }>()
 
+const { t } = useI18n()
+const { formatDate } = useDates()
 const { profileLabel, ageLabel, volumeLabel } = useVivarium()
 </script>
 
@@ -22,6 +26,13 @@ const { profileLabel, ageLabel, volumeLabel } = useVivarium()
             {{ volumeLabel(props.vivarium.volumeLiters) }} ·
           </template>
           {{ ageLabel(props.vivarium.startedOn) }}
+        </p>
+        <p class="text-sm text-muted-foreground">
+          {{
+            props.vivarium.lastMeasuredAt
+              ? t('vivariums.last_reading', { date: formatDate(props.vivarium.lastMeasuredAt) })
+              : t('vivariums.no_reading')
+          }}
         </p>
       </div>
     </Link>

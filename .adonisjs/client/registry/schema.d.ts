@@ -285,10 +285,10 @@ export interface Registry {
     methods: ["PUT"]
     pattern: '/vivariums/:id'
     types: {
-      body: ExtractBody<InferInput<(typeof import('#validators/vivarium').updateVivariumValidator)>>
+      body: ExtractBody<InferInput<(typeof import('#validators/vivarium').updateVivariumValidator)>|InferInput<(typeof import('luxon').DateTime)['DATE_MED']>>
       paramsTuple: [ParamValue]
       params: { id: ParamValue }
-      query: ExtractQuery<InferInput<(typeof import('#validators/vivarium').updateVivariumValidator)>>
+      query: ExtractQuery<InferInput<(typeof import('#validators/vivarium').updateVivariumValidator)>|InferInput<(typeof import('luxon').DateTime)['DATE_MED']>>
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['update']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
@@ -409,6 +409,71 @@ export interface Registry {
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/tracked_measures_controller').default['destroy']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/tracked_measures_controller').default['destroy']>>>
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/tracked_measures_controller').default['destroy']>>>
+    }
+  }
+  'measures.store_reading': {
+    methods: ["POST"]
+    pattern: '/vivariums/:id/readings'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/reading').readingValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/reading').readingValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/measures_controller').default['storeReading']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/measures_controller').default['storeReading']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/measures_controller').default['storeReading']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'measures.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/vivariums/:id/measures'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/measures_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/measures_controller').default['index']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/measures_controller').default['index']>>>
+    }
+  }
+  'measures.edit_reading': {
+    methods: ["GET","HEAD"]
+    pattern: '/vivariums/:id/readings/:measuredAt/edit'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { id: ParamValue; measuredAt: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/measures_controller').default['editReading']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/measures_controller').default['editReading']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/measures_controller').default['editReading']>>>
+    }
+  }
+  'measures.update_reading': {
+    methods: ["PUT"]
+    pattern: '/vivariums/:id/readings/:measuredAt'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/reading').readingValidator)>>
+      paramsTuple: [ParamValue, ParamValue]
+      params: { id: ParamValue; measuredAt: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/reading').readingValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/measures_controller').default['updateReading']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/measures_controller').default['updateReading']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/measures_controller').default['updateReading']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'measures.destroy_reading': {
+    methods: ["DELETE"]
+    pattern: '/vivariums/:id/readings/:measuredAt'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { id: ParamValue; measuredAt: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/measures_controller').default['destroyReading']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/measures_controller').default['destroyReading']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/measures_controller').default['destroyReading']>>>
     }
   }
   'admin.users.index': {

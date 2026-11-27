@@ -1,0 +1,33 @@
+{
+  "title": "Historique",
+  "back": "Retour à {name}",
+  "filter": {
+    "label": "Paramètre",
+    "all": "Tous les paramètres"
+  },
+  "empty": "Aucun relevé pour l'instant.",
+  "empty_filtered": "Aucune mesure de ce paramètre.",
+  "pagination": {
+    "previous": "Précédents",
+    "next": "Suivants",
+    "page": "Page {page} sur {last}"
+  },
+  "reading": {
+    "new": "Nouveau relevé",
+    "edit": "Modifier",
+    "edit_title": "Modifier le relevé",
+    "measured_at": "Date et heure",
+    "submit": "Enregistrer",
+    "cancel": "Annuler",
+    "no_tracked_measures": "Ce bac ne suit aucun paramètre : ajoutez des mesures suivies pour saisir un relevé.",
+    "add_tracked_measures": "Ajouter des mesures suivies",
+    "edit_hint": "Videz un champ pour supprimer sa mesure. Pour supprimer tout le relevé, utilisez « Supprimer le relevé ».",
+    "created": "Relevé enregistré ({count, plural, one {# mesure} other {# mesures}}).",
+    "updated": "Relevé modifié.",
+    "deleted": "Relevé supprimé ({count, plural, one {# mesure} other {# mesures}}).",
+    "delete": "Supprimer le relevé",
+    "delete_title": "Supprimer le relevé du {date} ?",
+    "delete_description": "{count, plural, one {Sa mesure sera supprimée} other {Ses # mesures seront supprimées}} définitivement.",
+    "delete_submit": "Supprimer"
+  }
+}

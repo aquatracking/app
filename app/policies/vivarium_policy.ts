@@ -15,7 +15,8 @@ export default class VivariumPolicy extends BasePolicy {
   }
 
   /**
-   * Changing the vivarium (form, image) or archiving it.
+   * Changing the vivarium (form, image, tracked measures, readings) or
+   * archiving it.
    */
   update(user: User, vivarium: Vivarium) {
     const owner = this.owner(user, vivarium)

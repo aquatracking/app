@@ -74,5 +74,8 @@
     "saved": "La photo a été enregistrée.",
     "removed": "La photo a été retirée.",
     "alt": "Photo de {name}"
-  }
+  },
+  "last_reading": "Dernier relevé le {date}",
+  "no_reading": "Aucun relevé",
+  "history": "Historique"
 }

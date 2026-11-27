@@ -51,6 +51,13 @@ export interface ApiDefinition {
     reorder: typeof routes['tracked_measures.reorder']
     destroy: typeof routes['tracked_measures.destroy']
   }
+  measures: {
+    storeReading: typeof routes['measures.store_reading']
+    index: typeof routes['measures.index']
+    editReading: typeof routes['measures.edit_reading']
+    updateReading: typeof routes['measures.update_reading']
+    destroyReading: typeof routes['measures.destroy_reading']
+  }
   admin: {
     users: {
       index: typeof routes['admin.users.index']

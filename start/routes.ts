@@ -78,6 +78,27 @@ router
         router
           .delete('/tracked-measures/:trackedMeasureId', [controllers.TrackedMeasures, 'destroy'])
           .where('trackedMeasureId', router.matchers.uuid())
+
+        /**
+         * Readings and history (docs/features/06-measures.md). A reading
+         * is identified by its instant in UTC ("2026-11-26T17:42:00Z"):
+         * there is no route to change or delete one measure. URLs built by
+         * the client encode its colons ("%3A"), which the router does
+         * not decode before matching: both forms are accepted, decoded.
+         */
+        router.post('/readings', [controllers.Measures, 'storeReading'])
+        router.get('/measures', [controllers.Measures, 'index'])
+        router
+          .group(() => {
+            router.get('/edit', [controllers.Measures, 'editReading'])
+            router.put('/', [controllers.Measures, 'updateReading'])
+            router.delete('/', [controllers.Measures, 'destroyReading'])
+          })
+          .prefix('/readings/:measuredAt')
+          .where('measuredAt', {
+            match: /^\d{4}-\d{2}-\d{2}T\d{2}(:|%3A)\d{2}(:|%3A)\d{2}Z$/i,
+            cast: (value) => decodeURIComponent(value),
+          })
       })
       .prefix('/vivariums/:id')
       .where('id', router.matchers.uuid())

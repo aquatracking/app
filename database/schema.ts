@@ -41,6 +41,27 @@ export class MeasureTypeSchema extends BaseModel {
   declare unit: string
 }
 
+export class MeasureSchema extends BaseModel {
+  static $columns = ['createdAt', 'id', 'measureTypeId', 'measuredAt', 'source', 'updatedAt', 'value', 'vivariumId'] as const
+  $columns = MeasureSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare measureTypeId: string
+  @column.dateTime()
+  declare measuredAt: DateTime
+  @column()
+  declare source: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
+  @column({ consume: (value)=>Number(value) })
+  declare value: number
+  @column()
+  declare vivariumId: string
+}
+
 export class PasswordResetTokenSchema extends BaseModel {
   static $columns = ['createdAt', 'expiresAt', 'id', 'tokenHash', 'updatedAt', 'userId'] as const
   $columns = PasswordResetTokenSchema.$columns

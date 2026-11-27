@@ -74,5 +74,8 @@
     "saved": "The photo has been saved.",
     "removed": "The photo has been removed.",
     "alt": "Photo of {name}"
-  }
+  },
+  "last_reading": "Last reading on {date}",
+  "no_reading": "No reading yet",
+  "history": "History"
 }

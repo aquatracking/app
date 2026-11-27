@@ -194,6 +194,36 @@ const routes = {
     tokens: [[0,"vivariums"],[1,"id"],[0,"tracked-measures"],[1,"trackedMeasureId"]],
     types: placeholder as Registry['tracked_measures.destroy']['types'],
   },
+  'measures.store_reading': {
+    methods: ["POST"],
+    pattern: '/vivariums/:id/readings',
+    tokens: [[0,"vivariums"],[1,"id"],[0,"readings"]],
+    types: placeholder as Registry['measures.store_reading']['types'],
+  },
+  'measures.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/vivariums/:id/measures',
+    tokens: [[0,"vivariums"],[1,"id"],[0,"measures"]],
+    types: placeholder as Registry['measures.index']['types'],
+  },
+  'measures.edit_reading': {
+    methods: ["GET","HEAD"],
+    pattern: '/vivariums/:id/readings/:measuredAt/edit',
+    tokens: [[0,"vivariums"],[1,"id"],[0,"readings"],[1,"measuredAt"],[0,"edit"]],
+    types: placeholder as Registry['measures.edit_reading']['types'],
+  },
+  'measures.update_reading': {
+    methods: ["PUT"],
+    pattern: '/vivariums/:id/readings/:measuredAt',
+    tokens: [[0,"vivariums"],[1,"id"],[0,"readings"],[1,"measuredAt"]],
+    types: placeholder as Registry['measures.update_reading']['types'],
+  },
+  'measures.destroy_reading': {
+    methods: ["DELETE"],
+    pattern: '/vivariums/:id/readings/:measuredAt',
+    tokens: [[0,"vivariums"],[1,"id"],[0,"readings"],[1,"measuredAt"]],
+    types: placeholder as Registry['measures.destroy_reading']['types'],
+  },
   'admin.users.index': {
     methods: ["GET","HEAD"],
     pattern: '/admin/users',
