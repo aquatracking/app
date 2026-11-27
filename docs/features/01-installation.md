@@ -42,3 +42,4 @@ Prénom (requis), nom (facultatif), email (requis, format email), mot de passe (
 - **INS-5** Deux `POST /setup` simultanés valides ne créent qu'un seul utilisateur.
 - **INS-6** Un mot de passe de moins de 8 caractères ou une confirmation différente est refusé avec un message sur le champ.
 - **INS-7** Le fuseau soumis (ex. `Europe/Paris`) est enregistré sur l'administrateur ; un nom de fuseau invalide est refusé avec un message sur le champ.
+- **INS-8** Au-delà de 10 soumissions par minute depuis une même IP, la soumission est refusée (429, ou notification « trop de tentatives » pour le formulaire).

@@ -142,6 +142,21 @@ test.group('Setup', (group) => {
     response.assertInertiaComponent('home')
   })
 
+  test('INS-4 the installed state is remembered without querying the users again', async ({
+    client,
+  }) => {
+    await client.post('/setup').withInertia().form(setupForm()).withCsrfToken().redirects(0)
+
+    /**
+     * Emptied behind the application's back: only the remembered state
+     * can still tell that the instance is installed.
+     */
+    await db.from('users').delete()
+
+    const response = await client.get('/setup')
+    response.assertStatus(404)
+  })
+
   test('INS-5 two simultaneous valid submissions create only one user', async ({
     client,
     assert,
@@ -231,6 +246,18 @@ test.group('Setup', (group) => {
     assert.equal(admin.timezone, 'America/Montreal')
   })
 
+  test('INS-7 the case of the time zone is corrected', async ({ client, assert }) => {
+    await client
+      .post('/setup')
+      .withInertia()
+      .form(setupForm({ timezone: 'europe/paris' }))
+      .withCsrfToken()
+      .redirects(0)
+
+    const admin = await User.findByOrFail('email', 'ada@example.com')
+    assert.equal(admin.timezone, 'Europe/Paris')
+  })
+
   test('INS-7 an invalid time zone name is refused on the field')
     .with(['Mars/Olympus_Mons', '+01:00', 'UTC+1'])
     .run(async ({ client, assert }, timezone) => {
@@ -248,7 +275,7 @@ test.group('Setup', (group) => {
       assert.lengthOf(await User.all(), 0)
     })
 
-  test('submissions are limited to 10 per minute and per IP', async ({ client }) => {
+  test('INS-8 submissions are limited to 10 per minute and per IP', async ({ client }) => {
     const invalidForm = setupForm({ password: 'short' })
 
     for (let attempt = 1; attempt <= 10; attempt++) {
@@ -260,7 +287,7 @@ test.group('Setup', (group) => {
     response.assertStatus(429)
   })
 
-  test('an Inertia submission over the limit gets a notification', async ({ client }) => {
+  test('INS-8 an Inertia submission over the limit gets a notification', async ({ client }) => {
     const invalidForm = setupForm({ password: 'short' })
 
     for (let attempt = 1; attempt <= 10; attempt++) {
