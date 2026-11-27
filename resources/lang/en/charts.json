@@ -1,0 +1,40 @@
+{
+  "back": "Back to {name}",
+  "parameter": "Parameter",
+  "no_longer_tracked": "This parameter is no longer tracked on this tank: its chart remains available.",
+  "ranges": {
+    "label": "Period",
+    "7d": "7 days",
+    "30d": "30 days",
+    "3m": "3 months",
+    "6m": "6 months",
+    "1y": "1 year",
+    "all": "All"
+  },
+  "empty": "No measure in this period.",
+  "empty_hint": "Enter a reading with “New reading”.",
+  "aggregated": "{count, plural, one {# measure} other {# measures}}: average per {unit, select, day {{size, plural, one {day} other {# days}}} hour {{size, plural, one {hour} other {# hours}}} other {{size, plural, one {minute} other {# minutes}}}}, with the minimum and maximum.",
+  "tooltip": {
+    "average": "Average: {value}",
+    "range": "Min – max: {min} – {max}",
+    "count": "{count, plural, one {# measure} other {# measures}}"
+  },
+  "stats": {
+    "title": "Statistics of the period",
+    "last": "Last value",
+    "min": "Minimum",
+    "max": "Maximum",
+    "average": "Average",
+    "count": "Number of measures",
+    "largest_variation": "Largest variation",
+    "variation_dates": "from {from} to {to}"
+  },
+  "tiles": {
+    "no_measure": "No measure",
+    "increase": "Up {value}",
+    "decrease": "Down {value}",
+    "unchanged": "Unchanged",
+    "no_tracked": "This tank tracks no parameter.",
+    "add_tracked": "Choose the tracked measures"
+  }
+}

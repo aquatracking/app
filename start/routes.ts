@@ -99,6 +99,12 @@ router
             match: /^\d{4}-\d{2}-\d{2}T\d{2}(:|%3A)\d{2}(:|%3A)\d{2}Z$/i,
             cast: (value) => decodeURIComponent(value),
           })
+
+        /**
+         * Charts (docs/features/07-charts.md), "?range=" among the
+         * ranges of MeasureSeriesService.
+         */
+        router.get('/charts/:code', [controllers.Charts, 'show'])
       })
       .prefix('/vivariums/:id')
       .where('id', router.matchers.uuid())

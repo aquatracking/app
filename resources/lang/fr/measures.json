@@ -1,4 +1,5 @@
 {
+  "chart": "Voir le graphe",
   "title": "Historique",
   "back": "Retour à {name}",
   "filter": {

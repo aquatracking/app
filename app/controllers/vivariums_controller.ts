@@ -5,6 +5,8 @@ import type { HttpContext } from '@adonisjs/core/http'
 import VivariumPolicy from '#policies/vivarium_policy'
 import { VivariumService } from '#services/vivarium_service'
 import { ReadingService } from '#services/reading_service'
+import TileTransformer from '#transformers/tile_transformer'
+import { MeasureSeriesService } from '#services/measure_series_service'
 import type { Notification } from '#middleware/inertia_middleware'
 import VivariumTransformer from '#transformers/vivarium_transformer'
 import type { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
@@ -73,17 +75,25 @@ export default class VivariumsController {
   }
 
   /**
-   * Dashboard of the vivarium: its header and the reading form, whose
-   * fields are the tracked measures (none when archived). The tiles of
-   * the tracked measures come with feature 07.
+   * Dashboard of the vivarium: its header, one tile per tracked measure
+   * and the reading form, whose fields are the tracked measures (none
+   * when archived).
    */
-  async show({ params, bouncer, inertia }: HttpContext) {
+  @inject()
+  async show(
+    { params, auth, bouncer, inertia }: HttpContext,
+    measureSeriesService: MeasureSeriesService
+  ) {
     const vivarium = await Vivarium.findOrFail(params.id)
     await bouncer.with(VivariumPolicy).authorize('view', vivarium)
+    const tiles = await measureSeriesService.tiles(vivarium, {
+      timezone: auth.getUserOrFail().timezone,
+    })
     const fields = vivarium.isArchived ? [] : await this.readingService.fieldTypes(vivarium)
 
     return inertia.render('vivariums/show', {
       vivarium: VivariumTransformer.transform(vivarium),
+      tiles: TileTransformer.transform(tiles),
       readingFields: MeasureTypeDefinitionTransformer.transform(fields),
     })
   }
