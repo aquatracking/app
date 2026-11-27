@@ -46,14 +46,14 @@ Justification des décimales notables : pH au 0,01 (pH-mètres, suivi récifal) 
 ### Synchronisation
 - Le seeder `catalog_seeder` est lancé à chaque démarrage. Pour chaque entrée : insère le code s'il est absent, met à jour `unit`, `decimals`, `position` sinon.
 - Un type abandonné n'est jamais retiré du catalogue : il est marqué `retired`. Il n'est plus proposé à l'ajout, reste dans les mesures suivies existantes et dans l'historique, et garde ses bornes et décimales, qui continuent de valider les modifications de relevés.
-- Si un code présent en base avec des mesures n'existe plus dans le catalogue, le seeder échoue au démarrage avec un message explicite.
+- Si un code présent en base n'existe plus dans le catalogue, le seeder échoue au démarrage avec un message explicite, que ce code ait des mesures ou non : une entrée n'est jamais retirée du catalogue, son absence est donc toujours une erreur. Le contrôle ne dépend pas des tables qui utilisent le type.
 - Les libellés et une courte description de chaque type sont dans `resources/lang/{fr,en}/measure_types.json`.
 
 ## Règles métier — mesures suivies
 - À la création d'un vivarium, une mesure suivie est créée pour chaque type « suivi par défaut » de son profil, dans l'ordre du catalogue, dans la transaction de `VivariumService.create` (critère VIV-5 de [04](04-vivariums.md), reporté ici).
-- L'utilisateur peut **ajouter** n'importe quel type du catalogue non encore suivi (ajouté en dernière position), **retirer** un type suivi et **réordonner** les types suivis (glisser-déposer, flèches sur mobile).
+- L'utilisateur peut **ajouter** n'importe quel type du catalogue non encore suivi et non retiré (ajouté en dernière position), **retirer** un type suivi et **réordonner** les types suivis (glisser-déposer, y compris au toucher, et flèches haut/bas). Chaque déplacement est enregistré aussitôt.
 - Retirer un type ne supprime aucune mesure. Le réajouter fait réapparaître sa dernière valeur et son historique.
-- Un vivarium peut ne suivre aucun type ; le tableau de bord et le relevé l'invitent alors à en ajouter.
+- Un vivarium peut ne suivre aucun type. La page des mesures suivies l'indique ; le tableau de bord ([07](07-charts.md)) et le relevé ([06](06-measures.md)) invitent alors à en ajouter.
 - Sur un vivarium **archivé**, les mesures suivies sont figées : ajout, retrait et réordonnancement sont refusés (le bac est en lecture seule, comme pour les relevés). Il faut le désarchiver d'abord.
 - Changer le type d'eau ou le climat d'un vivarium ne touche pas aux mesures suivies.
 
@@ -71,11 +71,11 @@ Justification des décimales notables : pH au 0,01 (pH-mètres, suivi récifal) 
 ## Critères d'acceptation
 - **TRK-1** Sur une base vide, après démarrage, `measure_types` contient tous les codes du catalogue ; relancer le seeder ne crée pas de doublon.
 - **TRK-2** Modifier l'unité d'un type dans le catalogue puis relancer le seeder met à jour la base.
-- **TRK-3** Un type marqué `retired` n'est plus proposé à l'ajout, reste affiché là où il est suivi, et ses bornes valident toujours la modification d'un relevé qui le contient ; un code avec des mesures absent du catalogue fait échouer le seeder.
+- **TRK-3** Un type marqué `retired` n'est plus proposé à l'ajout, son ajout est refusé, et il reste affiché là où il est suivi ; un code présent en base et absent du catalogue fait échouer le seeder. La validation d'un relevé par les bornes d'un type retiré est testée par MEA-23 ([06](06-measures.md)).
 - **TRK-4** Un aquarium d'eau de mer créé suit par défaut température, pH, KH, NO₃, PO₄, salinité, Ca et Mg, dans l'ordre du catalogue.
 - **TRK-5** Un terrarium désertique créé suit par défaut température et humidité.
 - **TRK-6** Ajouter un type déjà suivi est refusé ; ajouter un code absent du catalogue est refusé.
-- **TRK-7** Retirer un type suivi conserve ses mesures ; le réajouter les rend de nouveau visibles sur le tableau de bord.
+- **TRK-7** Retirer un type suivi puis le réajouter le fait de nouveau suivre, en dernière position. La conservation de ses mesures et leur retour sur le tableau de bord sont testés par CHT-11 ([07](07-charts.md)).
 - **TRK-8** Réordonner enregistre les nouvelles positions ; une liste qui ne correspond pas exactement aux types suivis est refusée.
 - **TRK-9** Toute modification des mesures suivies d'un vivarium archivé est refusée.
 - **TRK-10** Les routes répondent 404 pour le vivarium d'un autre utilisateur.

@@ -8,6 +8,7 @@
 | Framework | AdonisJS 7, starter kit **Inertia + Vue** | Auth, validation, autorisations et typage fournis ; un seul projet à maintenir ([ADR 0001](adr/0001-monolithe-inertia-vue.md)) |
 | Rendu | Inertia 3 + Vue 3, SSR activé | Pages serveur sans API à écrire, navigation SPA |
 | UI | Tailwind + shadcn-vue, graphes shadcn-vue (Unovis) | Composants copiés dans le repo, cohérents entre eux |
+| Listes triables | `vue-draggable-plus` (SortableJS) | Glisser-déposer aussi au toucher, pour l'ordre des mesures suivies |
 | Base | PostgreSQL ≥ 16 via Lucid | Séries temporelles, `date_trunc`, fonctions de fenêtrage ([ADR 0002](adr/0002-postgresql-uuidv7.md)) |
 | Fichiers | `@adonisjs/drive`, disque local | Images de vivarium hors base |
 | Images | `sharp` | Redimensionnement et conversion WebP |
@@ -116,7 +117,7 @@ tests/functional/<feature>/…
 
 ## Démarrage et déploiement
 
-- **Dev** : `compose.yml` fournit PostgreSQL et Mailpit. `node ace serve --hmr`.
+- **Dev** : `compose.yml` fournit PostgreSQL et Mailpit. `node ace migration:run`, `node ace db:seed` (catalogue, à relancer quand il change), puis `node ace serve --hmr`. Les tests lancent eux-mêmes migrations et seeder.
 - **Image Docker** unique, multi-étapes. Au démarrage : `migration:run --force` (le flag confirme l'exécution en production, où Adonis la refuse sinon ; il ne rejoue ni ne supprime rien), puis `db:seed --files catalog_seeder`, puis le serveur. Les deux premières étapes sont idempotentes.
 - Volume à persister : `DRIVE_ROOT`.
 - **HTTPS obligatoire** : en production, les cookies de session sont `Secure` et HSTS est actif ; servie en HTTP, l'application ne garde pas la session. Déploiement prévu derrière un reverse proxy (Traefik, Nginx, Caddy…) qui termine le HTTPS, avec `TRUSTED_PROXIES` renseigné.

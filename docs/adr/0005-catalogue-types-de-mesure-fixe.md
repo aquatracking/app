@@ -8,7 +8,7 @@ Trois approches ont été essayées : catalogue géré par l'admin (serveur Fast
 ## Décision
 - Les types de mesure forment un **catalogue fixe** défini dans `app/catalog/measure_types.ts` : code, unité, décimales, bornes de plausibilité, profils pour lesquels le type est suivi par défaut.
 - Un seeder idempotent synchronise la table `measure_types` à chaque démarrage (insertion des nouveaux codes, mise à jour des unités, décimales et positions).
-- On ne retire jamais une entrée du catalogue : un type abandonné est marqué `retired`. Il n'est plus proposé au suivi, mais garde ses règles (bornes, décimales) pour les mesures existantes. Si un code présent en base avec des mesures manque au catalogue, le seeder échoue au démarrage plutôt que de laisser des mesures sans règles.
+- On ne retire jamais une entrée du catalogue : un type abandonné est marqué `retired`. Il n'est plus proposé au suivi, mais garde ses règles (bornes, décimales) pour les mesures existantes. Si un code présent en base manque au catalogue, le seeder échoue au démarrage plutôt que de risquer des mesures sans règles. L'échec ne dépend pas de l'usage du code : son absence est toujours une erreur, puisqu'aucune entrée n'est jamais retirée.
 - Les libellés et descriptions sont dans l'i18n.
 - Ni les utilisateurs ni les administrateurs ne créent de types.
 
