@@ -46,7 +46,9 @@ Termes utilisés dans les specs, le code et l'interface. Le code est en anglais 
 
 **Tableau de bord** (`vivariums.show`) — Page d'un vivarium : en-tête, une tuile par mesure suivie, accès au relevé, à l'historique et aux graphes.
 
-**Tuile** — Carré du tableau de bord pour une mesure suivie : dernière valeur, ancienneté, variation et mini-courbe.
+**Tuile** (`Tile`) — Carré du tableau de bord pour une mesure suivie : dernière valeur, ancienneté, variation et mini-courbe.
+
+**Mini-courbe** (`Tile.sparkline`) — Petite courbe sans axes d'une tuile : les mesures des 30 derniers jours, affichée à partir de 2 mesures.
 
 ## Mesures
 
@@ -75,6 +77,8 @@ Termes utilisés dans les specs, le code et l'interface. Le code est en anglais 
 **Plage** (`range`, de graphe) — Fenêtre de temps affichée : `7d`, `30d`, `3m`, `6m`, `1y`, `all` (7 jours, 30 jours, 3 mois, 6 mois, 1 an, tout).
 
 **Agrégation** — Regroupement des mesures d'une plage en intervalles de temps (moyenne, min, max par intervalle) quand elles sont trop nombreuses pour être affichées une à une (`MAX_CHART_POINTS`).
+
+**Intervalle** (`SeriesBin`) — Période d'une série agrégée, de durée fixe (de 1 minute à plusieurs jours), avec la moyenne, le minimum, le maximum et le nombre de ses mesures. Un intervalle d'un jour ou plus est compté en jours locaux.
 
 ## Hors périmètre 2.0
 

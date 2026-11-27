@@ -15,7 +15,7 @@ Voir d'un coup d'œil l'état actuel d'un bac et l'évolution de chaque paramèt
 - Une **tuile par mesure suivie**, dans l'ordre des mesures suivies :
   - libellé, dernière valeur avec unité, ancienneté (« il y a 3 jours ») ;
   - variation par rapport à la mesure précédente du même type (flèche et écart, ex. « ▲ 0,3 ») ;
-  - mini-courbe des 30 derniers jours si au moins 2 mesures sur la période ;
+  - mini-courbe des 30 derniers jours (même bornes que la plage `30d`), sur un axe temporel réel et sans axes, si au moins 2 mesures sur la période ;
   - « Aucune mesure » si le type n'a jamais été mesuré.
 - Si le vivarium ne suit aucun type, à la place des tuiles : un message qui invite à en ajouter, avec un lien vers les mesures suivies ([05](05-tracked-measures.md)), sauf si archivé.
 - Cliquer sur une tuile ouvre le graphe du type.
@@ -24,15 +24,22 @@ Voir d'un coup d'œil l'état actuel d'un bac et l'évolution de chaque paramèt
 
 ### Graphe d'un type (`/vivariums/:id/charts/:code`)
 - Plages : 7 jours, 30 jours (défaut), 3 mois, 6 mois, 1 an, tout. La plage choisie est dans l'URL : `?range=` parmi `7d`, `30d`, `3m`, `6m`, `1y`, `all`.
+- Bornes d'une plage : elle se termine maintenant et commence à minuit local, de sorte qu'elle compte sa durée **aujourd'hui compris** : `7d` est aujourd'hui et les 6 jours précédents, `3m` commence le lendemain de la même date 3 mois plus tôt (de même pour `30d`, `6m`, `1y`). `all` commence à minuit local du jour de la première mesure du type.
 - Courbe des valeurs dans le temps, axe des abscisses temporel réel (des mesures irrégulières ne sont pas espacées régulièrement), points visibles quand il y a moins de 100 points.
 - Infobulle : date et heure, valeur.
 - Axe, infobulles et statistiques en heure locale du **fuseau de l'utilisateur**. Les limites de plage (« 7 jours ») et les intervalles d'agrégation d'un jour ou plus sont calculés en jours locaux : un jour de changement d'heure dure 23 ou 25 heures et reste un seul intervalle.
 - **Agrégation** : si la plage contient plus de `MAX_CHART_POINTS` (500, justification dans [data-model](../data-model.md)) mesures, le serveur renvoie au plus 500 intervalles (`date_bin`), avec moyenne, min et max par intervalle ; le graphe affiche la moyenne et une bande min–max. Sinon, valeurs brutes.
-- Statistiques de la plage : dernière valeur, minimum, maximum, moyenne, nombre de mesures, plus grande variation entre deux mesures consécutives (avec les dates).
+  - La durée d'un intervalle est la plus petite de 1, 5, 15 et 30 minutes, 1, 3, 6 et 12 heures, puis d'un nombre entier de jours, qui découpe la plage en au plus 500 intervalles (ex. `7d` → 30 min, `30d` → 3 h, `1y` → 1 jour). Les intervalles commencent au début de la plage.
+  - Les intervalles de moins d'un jour sont en temps absolu ; ceux d'un jour ou plus en jours locaux.
+  - Infobulle d'un intervalle : sa période, la moyenne, le min–max et le nombre de mesures. Sous le graphe, une phrase indique la durée des intervalles.
+- La courbe relie les points par des segments droits : elle n'invente pas de valeur entre deux mesures.
+- Statistiques de la plage : dernière valeur, minimum, maximum, moyenne, nombre de mesures, plus grande variation entre deux mesures consécutives (avec les dates). Elles portent sur les mesures brutes, même quand la série est agrégée.
+  - Plus grande variation : le plus grand écart en valeur absolue entre deux mesures consécutives de la plage, affiché avec son signe (« ▼ 0,6 ») ; à égalité, la plus récente. Aucune avec une seule mesure.
 - Les valeurs calculées (moyennes des intervalles, moyenne, variation) sont affichées arrondies à la précision maximale du type (`decimals`), sans zéros forcés.
-- Plage sans mesure : message et lien vers le relevé.
-- Navigation vers les autres types suivis sans revenir au tableau de bord (onglets ou liste déroulante).
-- Fonctionne aussi pour un type qui n'est plus suivi mais qui a des mesures (accès depuis l'historique).
+- Plage sans mesure : message qui renvoie au bouton « Nouveau relevé » de la page ([06](06-measures.md), sauf si archivé ; après enregistrement, retour au tableau de bord).
+- Navigation vers les autres types suivis sans revenir au tableau de bord : liste déroulante des types suivis, dans leur ordre, plus le type affiché s'il n'est plus suivi.
+- Fonctionne aussi pour un type qui n'est plus suivi mais qui a des mesures : un bandeau le signale. Accès depuis l'historique filtré sur ce type (« Voir le graphe »).
+- Lecture seule : consultable aussi sur un vivarium archivé.
 
 ### Performance
 - Le tableau de bord exécute un nombre de requêtes **constant**, quel que soit le nombre de mesures suivies : dernières valeurs avec `DISTINCT ON`, valeurs précédentes et mini-courbes en une requête chacune (pas de N+1, cf. le correctif de la v0.1.1).

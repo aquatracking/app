@@ -128,7 +128,7 @@ tests/functional/<feature>/…
 - Chaque critère d'acceptation d'une spec correspond à au moins un test fonctionnel Japa dans `tests/functional/<feature>/`.
 - La base de test est réinitialisée par transaction globale par test. Exception : un test qui a besoin de plusieurs connexions simultanées (concurrence, verrous) vide la base par troncature, car la transaction globale réunirait ses requêtes sur une seule connexion.
 - Les emails sont capturés avec `mail.fake()`.
-- Tests unitaires seulement pour la logique pure (catalogue, calcul des séries).
+- Tests unitaires seulement pour la logique pure (catalogue). Le calcul des séries (`MeasureSeriesService`) se fait en SQL : ses tests appellent directement le service, dans la suite `functional` car ils ont besoin de la base (`tests/functional/charts/measure_series.spec.ts`).
 
 ## CI (GitHub Actions)
 
