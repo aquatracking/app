@@ -22,7 +22,8 @@
     "delete_description": "Their vivariums, measures and images are deleted too. This cannot be undone.",
     "delete_confirm": "Type {email} to confirm",
     "delete_submit": "Delete the account",
-    "deleted": "The account {email} has been deleted."
+    "deleted": "The account {email} has been deleted.",
+    "vivariums": "Tanks"
   },
   "invitations": {
     "title": "Invitations",

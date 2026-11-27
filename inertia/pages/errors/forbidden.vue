@@ -16,7 +16,7 @@ const { t } = useI18n()
     <h1 class="text-2xl font-semibold">{{ t('errors.forbidden.title') }}</h1>
     <p class="text-muted-foreground">{{ t('errors.forbidden.description') }}</p>
     <Button as-child>
-      <Link route="home">{{ t('app.back_home') }}</Link>
+      <Link route="vivariums.index">{{ t('app.back_home') }}</Link>
     </Button>
   </div>
 </template>

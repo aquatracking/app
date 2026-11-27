@@ -29,6 +29,7 @@ const props = defineProps<{
     invitedByName: string | null
     createdAt: string
     lastSeenAt: string | null
+    vivariumsCount: number
   }[]
 }>()
 
@@ -54,6 +55,7 @@ const page = usePage()
           <TableHead>{{ t('admin.users.invited_by') }}</TableHead>
           <TableHead>{{ t('admin.users.signed_up') }}</TableHead>
           <TableHead>{{ t('admin.users.last_seen') }}</TableHead>
+          <TableHead class="text-right">{{ t('admin.users.vivariums') }}</TableHead>
           <TableHead class="text-right">{{ t('admin.actions') }}</TableHead>
         </TableRow>
       </TableHeader>
@@ -75,6 +77,7 @@ const page = usePage()
             >
             <span v-else class="text-muted-foreground">{{ t('admin.users.never_seen') }}</span>
           </TableCell>
+          <TableCell class="text-right tabular-nums">{{ user.vivariumsCount }}</TableCell>
           <TableCell>
             <div class="flex flex-wrap justify-end gap-2">
               <Form route="admin.users.create_password_reset" :params="{ id: user.id }">

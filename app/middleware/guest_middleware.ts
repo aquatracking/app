@@ -14,7 +14,7 @@ export default class GuestMiddleware {
         message: ctx.i18n.t('auth.already_signed_in'),
       }
       ctx.session.flash('notification', notification)
-      return ctx.response.redirect().toRoute('home')
+      return ctx.response.redirect().toRoute('vivariums.index')
     }
 
     return next()

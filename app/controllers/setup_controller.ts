@@ -18,6 +18,6 @@ export default class SetupController {
     const admin = await setupService.createAdmin(data)
 
     await auth.use('web').login(admin)
-    return response.redirect().toRoute('home')
+    return response.redirect().toRoute('vivariums.index')
   }
 }

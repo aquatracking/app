@@ -4,7 +4,6 @@ type ParamValue = string | number | bigint | boolean
 
 export type ScannedRoutes = {
   ALL: {
-    'home': { paramsTuple?: []; params?: {} }
     'health_checks.live': { paramsTuple?: []; params?: {} }
     'setup.show': { paramsTuple?: []; params?: {} }
     'setup.store': { paramsTuple?: []; params?: {} }
@@ -20,6 +19,18 @@ export type ScannedRoutes = {
     'profile.edit': { paramsTuple?: []; params?: {} }
     'profile.update': { paramsTuple?: []; params?: {} }
     'profile.update_password': { paramsTuple?: []; params?: {} }
+    'vivariums.index': { paramsTuple?: []; params?: {} }
+    'vivariums.archived': { paramsTuple?: []; params?: {} }
+    'vivariums.create': { paramsTuple?: []; params?: {} }
+    'vivariums.store': { paramsTuple?: []; params?: {} }
+    'vivariums.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'vivariums.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'vivariums.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'vivariums.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'vivariums.unarchive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'vivarium_images.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'vivarium_images.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'vivarium_images.show': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'filename': ParamValue} }
     'admin.users.index': { paramsTuple?: []; params?: {} }
     'admin.users.toggle_admin': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.users.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -30,7 +41,6 @@ export type ScannedRoutes = {
     'admin.invitations.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   GET: {
-    'home': { paramsTuple?: []; params?: {} }
     'health_checks.live': { paramsTuple?: []; params?: {} }
     'setup.show': { paramsTuple?: []; params?: {} }
     'session.create': { paramsTuple?: []; params?: {} }
@@ -38,11 +48,16 @@ export type ScannedRoutes = {
     'password_reset.create': { paramsTuple?: []; params?: {} }
     'password_reset.edit': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'profile.edit': { paramsTuple?: []; params?: {} }
+    'vivariums.index': { paramsTuple?: []; params?: {} }
+    'vivariums.archived': { paramsTuple?: []; params?: {} }
+    'vivariums.create': { paramsTuple?: []; params?: {} }
+    'vivariums.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'vivariums.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'vivarium_images.show': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'filename': ParamValue} }
     'admin.users.index': { paramsTuple?: []; params?: {} }
     'admin.invitations.index': { paramsTuple?: []; params?: {} }
   }
   HEAD: {
-    'home': { paramsTuple?: []; params?: {} }
     'health_checks.live': { paramsTuple?: []; params?: {} }
     'setup.show': { paramsTuple?: []; params?: {} }
     'session.create': { paramsTuple?: []; params?: {} }
@@ -50,6 +65,12 @@ export type ScannedRoutes = {
     'password_reset.create': { paramsTuple?: []; params?: {} }
     'password_reset.edit': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'profile.edit': { paramsTuple?: []; params?: {} }
+    'vivariums.index': { paramsTuple?: []; params?: {} }
+    'vivariums.archived': { paramsTuple?: []; params?: {} }
+    'vivariums.create': { paramsTuple?: []; params?: {} }
+    'vivariums.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'vivariums.edit': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'vivarium_images.show': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'filename': ParamValue} }
     'admin.users.index': { paramsTuple?: []; params?: {} }
     'admin.invitations.index': { paramsTuple?: []; params?: {} }
   }
@@ -60,6 +81,9 @@ export type ScannedRoutes = {
     'password_reset.store': { paramsTuple?: []; params?: {} }
     'password_reset.update': { paramsTuple: [ParamValue]; params: {'token': ParamValue} }
     'session.destroy': { paramsTuple?: []; params?: {} }
+    'vivariums.store': { paramsTuple?: []; params?: {} }
+    'vivariums.archive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'vivariums.unarchive': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.users.create_password_reset': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.invitations.store': { paramsTuple?: []; params?: {} }
     'admin.invitations.renew': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -67,9 +91,12 @@ export type ScannedRoutes = {
   PUT: {
     'profile.update': { paramsTuple?: []; params?: {} }
     'profile.update_password': { paramsTuple?: []; params?: {} }
+    'vivariums.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'vivarium_images.update': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.users.toggle_admin': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }
   DELETE: {
+    'vivarium_images.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.users.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'admin.invitations.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
   }

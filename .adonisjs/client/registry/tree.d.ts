@@ -2,7 +2,6 @@
 import type { routes } from './index.ts'
 
 export interface ApiDefinition {
-  home: typeof routes['home']
   healthChecks: {
     live: typeof routes['health_checks.live']
   }
@@ -29,6 +28,22 @@ export interface ApiDefinition {
     edit: typeof routes['profile.edit']
     update: typeof routes['profile.update']
     updatePassword: typeof routes['profile.update_password']
+  }
+  vivariums: {
+    index: typeof routes['vivariums.index']
+    archived: typeof routes['vivariums.archived']
+    create: typeof routes['vivariums.create']
+    store: typeof routes['vivariums.store']
+    show: typeof routes['vivariums.show']
+    edit: typeof routes['vivariums.edit']
+    update: typeof routes['vivariums.update']
+    archive: typeof routes['vivariums.archive']
+    unarchive: typeof routes['vivariums.unarchive']
+  }
+  vivariumImages: {
+    update: typeof routes['vivarium_images.update']
+    destroy: typeof routes['vivarium_images.destroy']
+    show: typeof routes['vivarium_images.show']
   }
   admin: {
     users: {

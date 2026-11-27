@@ -1,0 +1,78 @@
+{
+  "title": "My tanks",
+  "archived_title": "Archived tanks",
+  "archived_link": "Archived tanks",
+  "archived_empty": "No archived tank.",
+  "back_to_list": "Back to my tanks",
+  "create": "New tank",
+  "empty": {
+    "title": "No tank yet",
+    "description": "Describe your aquarium, terrarium or paludarium to start tracking its parameters.",
+    "action": "Create my first tank"
+  },
+  "kinds": {
+    "aquarium": "Aquarium",
+    "terrarium": "Terrarium",
+    "paludarium": "Paludarium"
+  },
+  "water_types": {
+    "fresh": "freshwater",
+    "brackish": "brackish water",
+    "salt": "saltwater"
+  },
+  "climates": {
+    "tropical": "tropical",
+    "desert": "desert",
+    "temperate": "temperate"
+  },
+  "volume": "{volume, number} L",
+  "age": "{duration} old",
+  "age_today": "Set up today",
+  "form": {
+    "create_title": "New tank",
+    "edit_title": "Edit {name}",
+    "kind": "Type",
+    "kind_hint": "It cannot be changed afterwards.",
+    "name": "Name",
+    "description": "Description",
+    "water_type": "Water",
+    "climate": "Climate",
+    "choose": "Choose…",
+    "dimensions": "Dimensions (cm)",
+    "length": "Length",
+    "width": "Width",
+    "height": "Height",
+    "volume": "Net volume (L)",
+    "volume_suggestion": "Gross volume from the dimensions: {volume, number} L",
+    "use_volume": "Use it",
+    "started_on": "Set up on",
+    "started_on_hint": "Date the tank was filled or set up.",
+    "submit_create": "Create the tank",
+    "submit_edit": "Save",
+    "cancel": "Cancel"
+  },
+  "edit": "Edit",
+  "archive": "Archive",
+  "archive_confirm": {
+    "title": "Archive “{name}”?",
+    "description": "This tank will no longer appear in “My tanks” and can no longer be changed. Its data is kept: you can unarchive it at any time.",
+    "submit": "Archive"
+  },
+  "unarchive": "Unarchive",
+  "archived_banner": "This tank is archived: it is read-only. Unarchive it to change it.",
+  "created": "{name} has been created.",
+  "saved": "{name} has been saved.",
+  "archived_notice": "{name} has been archived.",
+  "unarchived_notice": "{name} is back in service.",
+  "image": {
+    "title": "Photo",
+    "change": "Change the photo",
+    "add": "Add a photo",
+    "remove": "Remove the photo",
+    "hint": "JPEG, PNG or WebP, 15 MB at most.",
+    "submit": "Upload",
+    "saved": "The photo has been saved.",
+    "removed": "The photo has been removed.",
+    "alt": "Photo of {name}"
+  }
+}

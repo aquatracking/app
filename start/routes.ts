@@ -12,11 +12,6 @@ import { controllers } from '#generated/controllers'
 import router from '@adonisjs/core/services/router'
 import { forgotPasswordThrottle, setupThrottle } from '#start/limiter'
 
-/**
- * Provisional home page, replaced by the list of vivariums in feature 04.
- */
-router.on('/').renderInertia('home', {}).as('home').use(middleware.auth())
-
 router.get('/health/live', [controllers.HealthChecks, 'live'])
 
 router.get('/setup', [controllers.Setup, 'show'])
@@ -49,6 +44,33 @@ router
     router.get('/profile', [controllers.Profile, 'edit'])
     router.put('/profile', [controllers.Profile, 'update'])
     router.put('/profile/password', [controllers.Profile, 'updatePassword'])
+
+    /**
+     * Vivariums (docs/features/04-vivariums.md). The home page lists them.
+     * There is no route to delete a vivarium.
+     */
+    router.get('/', [controllers.Vivariums, 'index'])
+    router.get('/vivariums/archived', [controllers.Vivariums, 'archived'])
+    router.get('/vivariums/create', [controllers.Vivariums, 'create'])
+    router.post('/vivariums', [controllers.Vivariums, 'store'])
+
+    /**
+     * Routes of one vivarium: ":id" is a UUID, so that "/vivariums/archived"
+     * and "/vivariums/create" are never taken for one.
+     */
+    router
+      .group(() => {
+        router.get('/', [controllers.Vivariums, 'show'])
+        router.get('/edit', [controllers.Vivariums, 'edit'])
+        router.put('/', [controllers.Vivariums, 'update'])
+        router.post('/archive', [controllers.Vivariums, 'archive'])
+        router.post('/unarchive', [controllers.Vivariums, 'unarchive'])
+        router.put('/image', [controllers.VivariumImages, 'update'])
+        router.delete('/image', [controllers.VivariumImages, 'destroy'])
+        router.get('/image/:filename', [controllers.VivariumImages, 'show'])
+      })
+      .prefix('/vivariums/:id')
+      .where('id', router.matchers.uuid())
   })
   .use(middleware.auth())
 

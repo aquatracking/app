@@ -60,9 +60,24 @@ export default class HttpExceptionHandler extends ExceptionHandler {
     /**
      * Refused access answers 403 with its page, form submissions included
      * (Bouncer would redirect them back): the administration is not shown
-     * to non-administrators (docs/features/03-admin.md).
+     * to non-administrators (docs/features/03-admin.md). A policy that
+     * hides the existence of a resource (VivariumPolicy) denies with 404
+     * instead, rendered as any missing page. A refusal that explains
+     * itself to the owner (archived vivarium) is a notification on the
+     * previous page.
      */
     if (error instanceof bouncerErrors.E_AUTHORIZATION_FAILURE) {
+      if (error.response.status === 404) {
+        return ctx.response.status(404).send(await ctx.inertia.render('errors/not_found', {}))
+      }
+      if (error.response.translation) {
+        const notification: Notification = {
+          type: 'error',
+          message: error.getResponseMessage(ctx),
+        }
+        ctx.session.flash('notification', notification)
+        return ctx.response.redirect().back()
+      }
       return ctx.response.status(403).send(await ctx.inertia.render('errors/forbidden', {}))
     }
 

@@ -21,7 +21,7 @@ export default class SessionController {
     const user = await loginService.attempt(email, password, request.ip())
 
     await auth.use('web').login(user, rememberMe === true)
-    return response.redirect().toIntendedRoute('home')
+    return response.redirect().toIntendedRoute('vivariums.index')
   }
 
   /**

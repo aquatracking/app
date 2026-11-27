@@ -8,19 +8,6 @@ import type { routes } from './index.ts'
 export type ParamValue = string | number | bigint | boolean
 
 export interface Registry {
-  'home': {
-    methods: ["GET","HEAD"]
-    pattern: '/'
-    types: {
-      body: {}
-      paramsTuple: []
-      params: {}
-      query: {}
-      response: unknown
-      errorResponse: unknown
-      rawResponse: ExtractRawResponse<unknown>
-    }
-  }
   'health_checks.live': {
     methods: ["GET","HEAD"]
     pattern: '/health/live'
@@ -214,6 +201,162 @@ export interface Registry {
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/profile_controller').default['updatePassword']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/profile_controller').default['updatePassword']>>> | { status: 422; response: { errors: SimpleError[] } }
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/profile_controller').default['updatePassword']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'vivariums.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['index']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['index']>>>
+    }
+  }
+  'vivariums.archived': {
+    methods: ["GET","HEAD"]
+    pattern: '/vivariums/archived'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['archived']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['archived']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['archived']>>>
+    }
+  }
+  'vivariums.create': {
+    methods: ["GET","HEAD"]
+    pattern: '/vivariums/create'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['create']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['create']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['create']>>>
+    }
+  }
+  'vivariums.store': {
+    methods: ["POST"]
+    pattern: '/vivariums'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/vivarium').createVivariumValidator)>>
+      paramsTuple: []
+      params: {}
+      query: ExtractQuery<InferInput<(typeof import('#validators/vivarium').createVivariumValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'vivariums.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/vivariums/:id'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['show']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['show']>>>
+    }
+  }
+  'vivariums.edit': {
+    methods: ["GET","HEAD"]
+    pattern: '/vivariums/:id/edit'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['edit']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['edit']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['edit']>>>
+    }
+  }
+  'vivariums.update': {
+    methods: ["PUT"]
+    pattern: '/vivariums/:id'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/vivarium').updateVivariumValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/vivarium').updateVivariumValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'vivariums.archive': {
+    methods: ["POST"]
+    pattern: '/vivariums/:id/archive'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['archive']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['archive']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['archive']>>>
+    }
+  }
+  'vivariums.unarchive': {
+    methods: ["POST"]
+    pattern: '/vivariums/:id/unarchive'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['unarchive']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['unarchive']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/vivariums_controller').default['unarchive']>>>
+    }
+  }
+  'vivarium_images.update': {
+    methods: ["PUT"]
+    pattern: '/vivariums/:id/image'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/vivarium').updateVivariumImageValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/vivarium').updateVivariumImageValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/vivarium_images_controller').default['update']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/vivarium_images_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/vivarium_images_controller').default['update']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'vivarium_images.destroy': {
+    methods: ["DELETE"]
+    pattern: '/vivariums/:id/image'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/vivarium_images_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/vivarium_images_controller').default['destroy']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/vivarium_images_controller').default['destroy']>>>
+    }
+  }
+  'vivarium_images.show': {
+    methods: ["GET","HEAD"]
+    pattern: '/vivariums/:id/image/:filename'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { id: ParamValue; filename: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/vivarium_images_controller').default['show']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/vivarium_images_controller').default['show']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/vivarium_images_controller').default['show']>>>
     }
   }
   'admin.users.index': {

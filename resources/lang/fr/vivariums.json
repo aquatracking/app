@@ -1,0 +1,78 @@
+{
+  "title": "Mes bacs",
+  "archived_title": "Bacs archivés",
+  "archived_link": "Bacs archivés",
+  "archived_empty": "Aucun bac archivé.",
+  "back_to_list": "Retour à mes bacs",
+  "create": "Nouveau bac",
+  "empty": {
+    "title": "Aucun bac pour l'instant",
+    "description": "Décrivez votre aquarium, terrarium ou paludarium pour commencer à suivre ses paramètres.",
+    "action": "Créer mon premier bac"
+  },
+  "kinds": {
+    "aquarium": "Aquarium",
+    "terrarium": "Terrarium",
+    "paludarium": "Paludarium"
+  },
+  "water_types": {
+    "fresh": "eau douce",
+    "brackish": "eau saumâtre",
+    "salt": "eau de mer"
+  },
+  "climates": {
+    "tropical": "tropical humide",
+    "desert": "désertique",
+    "temperate": "tempéré"
+  },
+  "volume": "{volume, number} L",
+  "age": "depuis {duration}",
+  "age_today": "Mis en service aujourd'hui",
+  "form": {
+    "create_title": "Nouveau bac",
+    "edit_title": "Modifier {name}",
+    "kind": "Type",
+    "kind_hint": "Il ne pourra plus être modifié.",
+    "name": "Nom",
+    "description": "Description",
+    "water_type": "Eau",
+    "climate": "Climat",
+    "choose": "Choisir…",
+    "dimensions": "Dimensions (cm)",
+    "length": "Longueur",
+    "width": "Largeur",
+    "height": "Hauteur",
+    "volume": "Volume net (L)",
+    "volume_suggestion": "Volume brut d'après les dimensions : {volume, number} L",
+    "use_volume": "L'utiliser",
+    "started_on": "Mise en service",
+    "started_on_hint": "Date de mise en eau ou d'installation du bac.",
+    "submit_create": "Créer le bac",
+    "submit_edit": "Enregistrer",
+    "cancel": "Annuler"
+  },
+  "edit": "Modifier",
+  "archive": "Archiver",
+  "archive_confirm": {
+    "title": "Archiver « {name} » ?",
+    "description": "Ce bac n'apparaîtra plus dans « Mes bacs » et ne pourra plus être modifié. Ses données sont conservées : vous pourrez le désarchiver à tout moment.",
+    "submit": "Archiver"
+  },
+  "unarchive": "Désarchiver",
+  "archived_banner": "Ce bac est archivé : il est en lecture seule. Désarchivez-le pour le modifier.",
+  "created": "{name} a été créé.",
+  "saved": "{name} a été enregistré.",
+  "archived_notice": "{name} a été archivé.",
+  "unarchived_notice": "{name} est de nouveau en service.",
+  "image": {
+    "title": "Photo",
+    "change": "Changer la photo",
+    "add": "Ajouter une photo",
+    "remove": "Retirer la photo",
+    "hint": "JPEG, PNG ou WebP, 15 Mo maximum.",
+    "submit": "Envoyer",
+    "saved": "La photo a été enregistrée.",
+    "removed": "La photo a été retirée.",
+    "alt": "Photo de {name}"
+  }
+}
