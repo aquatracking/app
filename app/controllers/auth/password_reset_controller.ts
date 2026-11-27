@@ -66,6 +66,6 @@ export default class PasswordResetController {
       message: i18n.t('auth.reset_password.done'),
     }
     session.flash('notification', notification)
-    return response.redirect().toRoute('home')
+    return response.redirect().toRoute('vivariums.index')
   }
 }

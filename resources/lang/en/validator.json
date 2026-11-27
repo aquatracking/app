@@ -12,7 +12,19 @@
       "timezone": "Enter a valid time zone name, for example Europe/Paris",
       "currentPassword": "The current password is incorrect",
       "emailWithoutAccount": "An account already uses this email",
-      "accountEmail": "Type the email of the account to confirm"
+      "accountEmail": "Type the email of the account to confirm",
+      "number": "Enter a number",
+      "range": "Enter a number between {min} and {max}",
+      "positive": "Enter a number greater than 0",
+      "max": "Enter a number up to {max}",
+      "decimal": "Enter at most one decimal",
+      "withoutDecimals": "Enter a whole number",
+      "date": "Enter a valid date",
+      "date.beforeOrEqual": "The date cannot be in the future",
+      "allowedByKind": "This field does not apply to this type of tank",
+      "file": "Choose a file",
+      "file.size": "The file must not exceed {size}",
+      "file.extname": "Choose a JPEG, PNG or WebP image"
     }
   }
 }

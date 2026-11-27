@@ -55,7 +55,7 @@ test.group('Last activity', (group) => {
       .withInertia()
 
     response.assertStatus(200)
-    response.assertInertiaComponent('home')
+    response.assertInertiaComponent('vivariums/index')
     const { lastSeenAt } = await storedDates(user)
     assert.isNotNull(lastSeenAt)
   })

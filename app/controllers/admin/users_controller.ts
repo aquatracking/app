@@ -16,7 +16,10 @@ export default class UsersController {
   async index({ bouncer, inertia }: HttpContext) {
     await bouncer.with(UserPolicy).authorize('viewList')
 
-    const users = await User.query().preload('invitedBy').orderBy('created_at', 'asc')
+    const users = await User.query()
+      .preload('invitedBy')
+      .withCount('vivariums')
+      .orderBy('created_at', 'asc')
 
     return inertia.render('admin/users/index', {
       users: UserTransformer.transform(users).useVariant('forAdmin'),

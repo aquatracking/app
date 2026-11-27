@@ -139,7 +139,7 @@ test.group('Setup', (group) => {
     const response = await client.get('/').withInertia().loginAs(user)
 
     response.assertStatus(200)
-    response.assertInertiaComponent('home')
+    response.assertInertiaComponent('vivariums/index')
   })
 
   test('INS-4 the installed state is remembered without querying the users again', async ({

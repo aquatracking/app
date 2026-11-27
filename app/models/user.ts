@@ -3,8 +3,9 @@ import db from '@adonisjs/lucid/services/db'
 import { UserSchema } from '#database/schema'
 import hash from '@adonisjs/core/services/hash'
 import { compose } from '@adonisjs/core/helpers'
-import { belongsTo } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import Vivarium from '#models/vivarium'
+import { belongsTo, hasMany } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import { withUuidV7 } from '#models/mixins/with_uuid_v7'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { DbRememberMeTokensProvider } from '@adonisjs/auth/session'
@@ -33,6 +34,9 @@ export default class User extends compose(UserSchema, withUuidV7, withAuthFinder
    */
   @belongsTo(() => User, { foreignKey: 'invitedById' })
   declare invitedBy: BelongsTo<typeof User>
+
+  @hasMany(() => Vivarium)
+  declare vivariums: HasMany<typeof Vivarium>
 
   /**
    * First name and last name, as shown to others.

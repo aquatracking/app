@@ -9,6 +9,7 @@ import type { ApiClient, ApiResponse } from '@japa/api-client'
 import testUtils from '@adonisjs/core/services/test_utils'
 import PasswordResetToken from '#models/password_reset_token'
 import { UserFactory } from '#database/factories/user_factory'
+import { VivariumFactory } from '#database/factories/vivarium_factory'
 import type { GeneratedLink } from '#middleware/inertia_middleware'
 import { PasswordResetService } from '#services/password_reset_service'
 import { InvitationFactory } from '#database/factories/invitation_factory'
@@ -115,8 +116,9 @@ test.group('Administration of users', (group) => {
     const lastAdmin = await UserFactory.merge({ isAdmin: true }).create()
     await db.from('users').where('id', actor.id).update({ is_admin: false })
 
+    const userAdministrationService = await app.container.make(UserAdministrationService)
     await assert.rejects(
-      () => new UserAdministrationService().setAdmin(actor, lastAdmin, false),
+      () => userAdministrationService.setAdmin(actor, lastAdmin, false),
       LastAdminException
     )
     await lastAdmin.refresh()
@@ -280,12 +282,17 @@ test.group('Administration of users', (group) => {
     })
   })
 
-  test('ADM-11 the users page exposes only the account columns, nothing about vivariums', async ({
+  test('ADM-11 the users page exposes only the account columns and the number of vivariums', async ({
     client,
     assert,
   }) => {
     const admin = await UserFactory.merge({ isAdmin: true }).create()
-    await UserFactory.create()
+    const owner = await UserFactory.create()
+    await VivariumFactory.merge({
+      userId: owner.id,
+      name: 'Secret reef',
+      description: 'Hidden corals',
+    }).create()
 
     const response = await listUsers(client, admin)
 
@@ -300,9 +307,12 @@ test.group('Administration of users', (group) => {
         'invitedByName',
         'createdAt',
         'lastSeenAt',
+        'vivariumsCount',
       ])
     }
-    assert.notInclude(JSON.stringify(response.inertiaProps).toLowerCase(), 'vivarium')
+    const props = JSON.stringify(response.inertiaProps)
+    assert.notInclude(props, 'Secret reef')
+    assert.notInclude(props, 'Hidden corals')
   })
 
   test('ADM-12 a user shows the name of their inviter, and "—" once the inviter is deleted', async ({

@@ -18,5 +18,7 @@
   },
   "E_LAST_ADMIN": "Il doit rester au moins un administrateur.",
   "E_OWN_ADMIN_RIGHTS": "Vous ne pouvez pas retirer vos propres droits d'administrateur.",
-  "E_OWN_ACCOUNT_DELETION": "Vous ne pouvez pas supprimer votre propre compte depuis l'administration."
+  "E_OWN_ACCOUNT_DELETION": "Vous ne pouvez pas supprimer votre propre compte depuis l'administration.",
+  "E_VIVARIUM_ARCHIVED": "Ce bac est archivé : désarchivez-le pour le modifier.",
+  "E_INVALID_IMAGE": "Cette image est illisible. Essayez un fichier JPEG, PNG ou WebP."
 }

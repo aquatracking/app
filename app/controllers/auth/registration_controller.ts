@@ -30,6 +30,6 @@ export default class RegistrationController {
     const user = await registrationService.register(params.token, data)
 
     await auth.use('web').login(user)
-    return response.redirect().toRoute('home')
+    return response.redirect().toRoute('vivariums.index')
   }
 }

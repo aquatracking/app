@@ -71,3 +71,40 @@ export class UserSchema extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 }
+
+export class VivariumSchema extends BaseModel {
+  static $columns = ['archivedAt', 'climate', 'createdAt', 'description', 'heightCm', 'id', 'imagePath', 'kind', 'lengthCm', 'name', 'startedOn', 'updatedAt', 'userId', 'volumeLiters', 'waterType', 'widthCm'] as const
+  $columns = VivariumSchema.$columns
+  @column.dateTime()
+  declare archivedAt: DateTime | null
+  @column()
+  declare climate: string | null
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare description: string | null
+  @column()
+  declare heightCm: number | null
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare imagePath: string | null
+  @column()
+  declare kind: string
+  @column()
+  declare lengthCm: number | null
+  @column()
+  declare name: string
+  @column.date()
+  declare startedOn: DateTime
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
+  @column()
+  declare userId: string
+  @column({ consume: (value)=>value === null ? null : Number(value) })
+  declare volumeLiters: number | null
+  @column()
+  declare waterType: string | null
+  @column()
+  declare widthCm: number | null
+}

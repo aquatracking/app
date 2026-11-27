@@ -8,12 +8,6 @@ export type { Route, Path } from './schema.d.ts'
 const placeholder: any = {}
 
 const routes = {
-  'home': {
-    methods: ["GET","HEAD"],
-    pattern: '/',
-    tokens: [[0,"/"]],
-    types: placeholder as Registry['home']['types'],
-  },
   'health_checks.live': {
     methods: ["GET","HEAD"],
     pattern: '/health/live',
@@ -103,6 +97,78 @@ const routes = {
     pattern: '/profile/password',
     tokens: [[0,"profile"],[0,"password"]],
     types: placeholder as Registry['profile.update_password']['types'],
+  },
+  'vivariums.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/',
+    tokens: [[0,"/"]],
+    types: placeholder as Registry['vivariums.index']['types'],
+  },
+  'vivariums.archived': {
+    methods: ["GET","HEAD"],
+    pattern: '/vivariums/archived',
+    tokens: [[0,"vivariums"],[0,"archived"]],
+    types: placeholder as Registry['vivariums.archived']['types'],
+  },
+  'vivariums.create': {
+    methods: ["GET","HEAD"],
+    pattern: '/vivariums/create',
+    tokens: [[0,"vivariums"],[0,"create"]],
+    types: placeholder as Registry['vivariums.create']['types'],
+  },
+  'vivariums.store': {
+    methods: ["POST"],
+    pattern: '/vivariums',
+    tokens: [[0,"vivariums"]],
+    types: placeholder as Registry['vivariums.store']['types'],
+  },
+  'vivariums.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/vivariums/:id',
+    tokens: [[0,"vivariums"],[1,"id"]],
+    types: placeholder as Registry['vivariums.show']['types'],
+  },
+  'vivariums.edit': {
+    methods: ["GET","HEAD"],
+    pattern: '/vivariums/:id/edit',
+    tokens: [[0,"vivariums"],[1,"id"],[0,"edit"]],
+    types: placeholder as Registry['vivariums.edit']['types'],
+  },
+  'vivariums.update': {
+    methods: ["PUT"],
+    pattern: '/vivariums/:id',
+    tokens: [[0,"vivariums"],[1,"id"]],
+    types: placeholder as Registry['vivariums.update']['types'],
+  },
+  'vivariums.archive': {
+    methods: ["POST"],
+    pattern: '/vivariums/:id/archive',
+    tokens: [[0,"vivariums"],[1,"id"],[0,"archive"]],
+    types: placeholder as Registry['vivariums.archive']['types'],
+  },
+  'vivariums.unarchive': {
+    methods: ["POST"],
+    pattern: '/vivariums/:id/unarchive',
+    tokens: [[0,"vivariums"],[1,"id"],[0,"unarchive"]],
+    types: placeholder as Registry['vivariums.unarchive']['types'],
+  },
+  'vivarium_images.update': {
+    methods: ["PUT"],
+    pattern: '/vivariums/:id/image',
+    tokens: [[0,"vivariums"],[1,"id"],[0,"image"]],
+    types: placeholder as Registry['vivarium_images.update']['types'],
+  },
+  'vivarium_images.destroy': {
+    methods: ["DELETE"],
+    pattern: '/vivariums/:id/image',
+    tokens: [[0,"vivariums"],[1,"id"],[0,"image"]],
+    types: placeholder as Registry['vivarium_images.destroy']['types'],
+  },
+  'vivarium_images.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/vivariums/:id/image/:filename',
+    tokens: [[0,"vivariums"],[1,"id"],[0,"image"],[1,"filename"]],
+    types: placeholder as Registry['vivarium_images.show']['types'],
   },
   'admin.users.index': {
     methods: ["GET","HEAD"],

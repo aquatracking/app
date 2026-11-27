@@ -57,7 +57,7 @@ Un refus d'accès (non-admin) répond 403 avec la page `errors/forbidden`, y com
 - **ADM-5** Avec SMTP, créer une invitation envoie un email à l'adresse invitée ; sans SMTP, aucun email n'est envoyé.
 - **ADM-6** Révoquer une invitation rend son lien invalide.
 - **ADM-7** Retirer les droits du dernier administrateur est refusé ; retirer ses propres droits est refusé.
-- **ADM-8** Supprimer un utilisateur supprime ses vivariums, ses mesures et ses fichiers images. Testé en 03 sur le compte et ses tokens ; vivariums, mesures et images sont testés par [04](04-vivariums.md).
+- **ADM-8** Supprimer un utilisateur supprime ses vivariums, ses mesures et ses fichiers images. Testé en 03 sur le compte et ses tokens ; vivariums et images sont testés par VIV-13 ([04](04-vivariums.md)), mesures suivies par TRK-12 ([05](05-tracked-measures.md)) et mesures par MEA-22 ([06](06-measures.md)).
 - **ADM-9** Supprimer son propre compte depuis l'administration est refusé.
 - **ADM-10** Générer un lien de réinitialisation affiche un lien utilisable une fois ([AUTH-10](02-auth-profile.md)) et invalide les liens précédents.
 - **ADM-11** La page des utilisateurs n'expose ni noms ni contenus de vivariums.

@@ -18,5 +18,7 @@
   },
   "E_LAST_ADMIN": "There must remain at least one administrator.",
   "E_OWN_ADMIN_RIGHTS": "You cannot remove your own administrator rights.",
-  "E_OWN_ACCOUNT_DELETION": "You cannot delete your own account from the administration."
+  "E_OWN_ACCOUNT_DELETION": "You cannot delete your own account from the administration.",
+  "E_VIVARIUM_ARCHIVED": "This tank is archived: unarchive it to change it.",
+  "E_INVALID_IMAGE": "This image cannot be read. Try a JPEG, PNG or WebP file."
 }

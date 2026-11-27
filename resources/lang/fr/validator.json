@@ -12,7 +12,19 @@
       "timezone": "Saisissez un nom de fuseau horaire valide, par exemple Europe/Paris",
       "currentPassword": "Le mot de passe actuel est incorrect",
       "emailWithoutAccount": "Un compte utilise déjà cet email",
-      "accountEmail": "Saisissez l'email du compte pour confirmer"
+      "accountEmail": "Saisissez l'email du compte pour confirmer",
+      "number": "Saisissez un nombre",
+      "range": "Saisissez un nombre entre {min} et {max}",
+      "positive": "Saisissez un nombre supérieur à 0",
+      "max": "Saisissez un nombre jusqu'à {max}",
+      "decimal": "Saisissez au plus une décimale",
+      "withoutDecimals": "Saisissez un nombre entier",
+      "date": "Saisissez une date valide",
+      "date.beforeOrEqual": "La date ne peut pas être dans le futur",
+      "allowedByKind": "Ce champ ne s'applique pas à ce type de bac",
+      "file": "Choisissez un fichier",
+      "file.size": "Le fichier ne doit pas dépasser {size}",
+      "file.extname": "Choisissez une image JPEG, PNG ou WebP"
     }
   }
 }

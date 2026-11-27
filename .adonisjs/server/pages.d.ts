@@ -18,8 +18,12 @@ declare module '@adonisjs/inertia/types' {
     'errors/forbidden': ExtractProps<(typeof import('../../inertia/pages/errors/forbidden.vue'))['default']>
     'errors/not_found': ExtractProps<(typeof import('../../inertia/pages/errors/not_found.vue'))['default']>
     'errors/server_error': ExtractProps<(typeof import('../../inertia/pages/errors/server_error.vue'))['default']>
-    'home': ExtractProps<(typeof import('../../inertia/pages/home.vue'))['default']>
     'profile/edit': ExtractProps<(typeof import('../../inertia/pages/profile/edit.vue'))['default']>
     'setup/show': ExtractProps<(typeof import('../../inertia/pages/setup/show.vue'))['default']>
+    'vivariums/archived': ExtractProps<(typeof import('../../inertia/pages/vivariums/archived.vue'))['default']>
+    'vivariums/create': ExtractProps<(typeof import('../../inertia/pages/vivariums/create.vue'))['default']>
+    'vivariums/edit': ExtractProps<(typeof import('../../inertia/pages/vivariums/edit.vue'))['default']>
+    'vivariums/index': ExtractProps<(typeof import('../../inertia/pages/vivariums/index.vue'))['default']>
+    'vivariums/show': ExtractProps<(typeof import('../../inertia/pages/vivariums/show.vue'))['default']>
   }
 }

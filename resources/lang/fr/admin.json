@@ -22,7 +22,8 @@
     "delete_description": "Ses vivariums, mesures et images sont aussi supprimés. C'est irréversible.",
     "delete_confirm": "Saisissez {email} pour confirmer",
     "delete_submit": "Supprimer le compte",
-    "deleted": "Le compte {email} a été supprimé."
+    "deleted": "Le compte {email} a été supprimé.",
+    "vivariums": "Bacs"
   },
   "invitations": {
     "title": "Invitations",
