@@ -20,6 +20,18 @@ const routes = {
     tokens: [[0,"health"],[0,"live"]],
     types: placeholder as Registry['health_checks.live']['types'],
   },
+  'setup.show': {
+    methods: ["GET","HEAD"],
+    pattern: '/setup',
+    tokens: [[0,"setup"]],
+    types: placeholder as Registry['setup.show']['types'],
+  },
+  'setup.store': {
+    methods: ["POST"],
+    pattern: '/setup',
+    tokens: [[0,"setup"]],
+    types: placeholder as Registry['setup.store']['types'],
+  },
 } as const satisfies Record<string, AdonisEndpoint>
 
 export { routes }

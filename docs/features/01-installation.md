@@ -32,7 +32,7 @@ Prénom (requis), nom (facultatif), email (requis, format email), mot de passe (
 ## Cas d'erreur
 - Validation : messages par champ.
 - Soumission alors qu'un utilisateur existe déjà : 404.
-- Limitation : 10 soumissions par minute et par IP.
+- Limitation : 10 soumissions par minute et par IP. Au-delà, le formulaire affiche une notification « trop de tentatives ».
 
 ## Critères d'acceptation
 - **INS-1** Avec une base vide, `GET /` redirige vers `/setup`.

@@ -6,5 +6,6 @@
   "server_error": {
     "title": "Something went wrong",
     "description": "An unexpected error occurred. Please try again in a moment."
-  }
+  },
+  "E_TOO_MANY_REQUESTS": "Too many attempts. Please try again in a moment."
 }

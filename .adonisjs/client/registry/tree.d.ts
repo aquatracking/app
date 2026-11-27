@@ -6,4 +6,8 @@ export interface ApiDefinition {
   healthChecks: {
     live: typeof routes['health_checks.live']
   }
+  setup: {
+    show: typeof routes['setup.show']
+    store: typeof routes['setup.store']
+  }
 }
