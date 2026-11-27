@@ -5,4 +5,5 @@
 
 export const controllers = {
   HealthChecks: () => import('#controllers/health_checks_controller'),
+  Setup: () => import('#controllers/setup_controller'),
 }

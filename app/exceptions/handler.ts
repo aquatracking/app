@@ -1,4 +1,6 @@
 import app from '@adonisjs/core/services/app'
+import { errors as limiterErrors } from '@adonisjs/limiter'
+import type { Notification } from '#middleware/inertia_middleware'
 import { type HttpContext, ExceptionHandler } from '@adonisjs/core/http'
 import type { StatusPageRange, StatusPageRenderer } from '@adonisjs/core/types/http'
 
@@ -30,6 +32,16 @@ export default class HttpExceptionHandler extends ExceptionHandler {
    * response to the client
    */
   async handle(error: unknown, ctx: HttpContext) {
+    /**
+     * An Inertia form would show the plain-text 429 response in a modal:
+     * the limit is reported as a notification on the page instead.
+     */
+    if (error instanceof limiterErrors.E_TOO_MANY_REQUESTS && ctx.request.header('x-inertia')) {
+      const notification: Notification = { type: 'error', message: error.getResponseMessage(ctx) }
+      ctx.session.flash('notification', notification)
+      return ctx.response.redirect().back()
+    }
+
     return super.handle(error, ctx)
   }
 
