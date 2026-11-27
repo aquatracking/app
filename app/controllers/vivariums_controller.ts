@@ -4,8 +4,11 @@ import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import VivariumPolicy from '#policies/vivarium_policy'
 import { VivariumService } from '#services/vivarium_service'
+import { ReadingService } from '#services/reading_service'
 import type { Notification } from '#middleware/inertia_middleware'
 import VivariumTransformer from '#transformers/vivarium_transformer'
+import type { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
+import MeasureTypeDefinitionTransformer from '#transformers/measure_type_definition_transformer'
 import { createVivariumValidator, updateVivariumValidator } from '#validators/vivarium'
 
 /**
@@ -13,35 +16,33 @@ import { createVivariumValidator, updateVivariumValidator } from '#validators/vi
  * There is no deletion: archiving is the only way to remove a vivarium
  * from the home page.
  */
+@inject()
 export default class VivariumsController {
+  constructor(protected readingService: ReadingService) {}
+
   /**
    * Home page: the vivariums in service, by name.
    */
   async index({ auth, inertia }: HttpContext) {
     const user = auth.getUserOrFail()
-    const vivariums = await user
-      .related('vivariums')
-      .query()
-      .whereNull('archived_at')
-      .orderBy('name', 'asc')
+    const vivariums = await this.withLastReading(
+      user.related('vivariums').query().whereNull('archived_at')
+    )
     const archived = await user.related('vivariums').query().whereNotNull('archived_at').first()
 
     return inertia.render('vivariums/index', {
-      vivariums: VivariumTransformer.transform(vivariums),
+      vivariums: VivariumTransformer.transform(vivariums).useVariant('forCard'),
       hasArchived: archived !== null,
     })
   }
 
   async archived({ auth, inertia }: HttpContext) {
-    const vivariums = await auth
-      .getUserOrFail()
-      .related('vivariums')
-      .query()
-      .whereNotNull('archived_at')
-      .orderBy('name', 'asc')
+    const vivariums = await this.withLastReading(
+      auth.getUserOrFail().related('vivariums').query().whereNotNull('archived_at')
+    )
 
     return inertia.render('vivariums/archived', {
-      vivariums: VivariumTransformer.transform(vivariums),
+      vivariums: VivariumTransformer.transform(vivariums).useVariant('forCard'),
     })
   }
 
@@ -72,15 +73,18 @@ export default class VivariumsController {
   }
 
   /**
-   * Dashboard of the vivarium: its header here, the tiles of the tracked
-   * measures in feature 07.
+   * Dashboard of the vivarium: its header and the reading form, whose
+   * fields are the tracked measures (none when archived). The tiles of
+   * the tracked measures come with feature 07.
    */
   async show({ params, bouncer, inertia }: HttpContext) {
     const vivarium = await Vivarium.findOrFail(params.id)
     await bouncer.with(VivariumPolicy).authorize('view', vivarium)
+    const fields = vivarium.isArchived ? [] : await this.readingService.fieldTypes(vivarium)
 
     return inertia.render('vivariums/show', {
       vivarium: VivariumTransformer.transform(vivarium),
+      readingFields: MeasureTypeDefinitionTransformer.transform(fields),
     })
   }
 
@@ -100,8 +104,18 @@ export default class VivariumsController {
   async update({ params, auth, bouncer, request, response, session, i18n }: HttpContext) {
     const vivarium = await Vivarium.findOrFail(params.id)
     await bouncer.with(VivariumPolicy).authorize('update', vivarium)
+    const { timezone } = auth.getUserOrFail()
+    const firstMeasuredAt = await this.readingService.firstMeasuredAt(vivarium)
+    const firstReading = firstMeasuredAt && firstMeasuredAt.setZone(timezone)
     const data = await request.validateUsing(updateVivariumValidator, {
-      meta: { timezone: auth.getUserOrFail().timezone, kind: vivarium.kind },
+      meta: {
+        timezone,
+        kind: vivarium.kind,
+        firstReading: firstReading && {
+          date: firstReading.toISODate()!,
+          label: firstReading.setLocale(i18n.locale).toLocaleString(DateTime.DATE_MED),
+        },
+      },
     })
 
     vivarium.merge(data)
@@ -143,5 +157,15 @@ export default class VivariumsController {
     }
     session.flash('notification', notification)
     return response.redirect().toRoute('vivariums.show', { id: vivarium.id })
+  }
+
+  /**
+   * Instant of the last reading of each vivarium, in the same query
+   * ("lastMeasuredAt"), by name.
+   */
+  private withLastReading(query: ModelQueryBuilderContract<typeof Vivarium>) {
+    return query
+      .withAggregate('measures', (measures) => measures.max('measured_at').as('lastMeasuredAt'))
+      .orderBy('name', 'asc')
   }
 }

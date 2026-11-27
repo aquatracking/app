@@ -30,4 +30,17 @@ export default class VivariumTransformer extends BaseTransformer<Vivarium> {
         : null,
     }
   }
+
+  /**
+   * A vivarium on the cards of the home page and of the archived ones,
+   * with the instant of its last reading, null without any. The query
+   * computes it ("withAggregate", as "lastMeasuredAt").
+   */
+  forCard() {
+    const lastMeasuredAt: Date | null = this.resource.$extras.lastMeasuredAt ?? null
+    return {
+      ...this.toObject(),
+      lastMeasuredAt: lastMeasuredAt ? lastMeasuredAt.toISOString() : null,
+    }
+  }
 }

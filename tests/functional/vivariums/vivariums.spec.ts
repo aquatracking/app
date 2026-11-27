@@ -463,6 +463,7 @@ test.group('Vivariums', (group) => {
     assert.deepEqual(deletions, [
       '/vivariums/:id/image',
       '/vivariums/:id/tracked-measures/:trackedMeasureId',
+      '/vivariums/:id/readings/:measuredAt',
     ])
 
     const user = await UserFactory.create()

@@ -8,7 +8,7 @@ import VivariumCard from '~/components/vivariums/vivarium_card.vue'
 
 defineOptions({ layout: AppLayout })
 
-const props = defineProps<{ vivariums: Data.Vivarium[] }>()
+const props = defineProps<{ vivariums: Data.Vivarium.Variants['forCard'][] }>()
 
 const { t } = useI18n()
 </script>

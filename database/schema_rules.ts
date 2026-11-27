@@ -19,5 +19,16 @@ export default {
         },
       },
     },
+    measures: {
+      columns: {
+        /**
+         * Same as "volume_liters": three decimals at most fit a number.
+         */
+        value: {
+          tsType: 'number',
+          decorators: [{ name: '@column', args: { consume: (value: string) => Number(value) } }],
+        },
+      },
+    },
   },
 } satisfies SchemaRules

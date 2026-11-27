@@ -24,7 +24,15 @@
       "allowedByKind": "Ce champ ne s'applique pas à ce type de bac",
       "file": "Choisissez un fichier",
       "file.size": "Le fichier ne doit pas dépasser {size}",
-      "file.extname": "Choisissez une image JPEG, PNG ou WebP"
+      "file.extname": "Choisissez une image JPEG, PNG ou WebP",
+      "atLeastOneValue": "Saisissez au moins une valeur",
+      "measureType": "Ce paramètre ne fait pas partie de ce relevé",
+      "measureDecimals": "{decimals, plural, =0 {Saisissez un nombre entier} one {Saisissez au plus # décimale} other {Saisissez au plus # décimales}}",
+      "localDateTime": "Saisissez une date et une heure valides",
+      "localDateTime.nonexistent": "Cette heure n'existe pas dans votre fuseau horaire (passage à l'heure d'été)",
+      "localDateTime.future": "La date ne peut pas être dans le futur",
+      "localDateTime.beforeStartedOn": "La date ne peut pas être antérieure à la mise en service du bac",
+      "notAfterFirstReading": "La mise en service ne peut pas être après le premier relevé, le {date}"
     }
   }
 }

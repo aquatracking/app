@@ -1,0 +1,33 @@
+{
+  "title": "History",
+  "back": "Back to {name}",
+  "filter": {
+    "label": "Parameter",
+    "all": "All parameters"
+  },
+  "empty": "No reading yet.",
+  "empty_filtered": "No measure of this parameter.",
+  "pagination": {
+    "previous": "Newer",
+    "next": "Older",
+    "page": "Page {page} of {last}"
+  },
+  "reading": {
+    "new": "New reading",
+    "edit": "Edit",
+    "edit_title": "Edit the reading",
+    "measured_at": "Date and time",
+    "submit": "Save",
+    "cancel": "Cancel",
+    "no_tracked_measures": "This tank tracks no parameter: add tracked measures to enter a reading.",
+    "add_tracked_measures": "Add tracked measures",
+    "edit_hint": "Empty a field to delete its measure. To delete the whole reading, use “Delete the reading”.",
+    "created": "Reading saved ({count, plural, one {# measure} other {# measures}}).",
+    "updated": "Reading updated.",
+    "deleted": "Reading deleted ({count, plural, one {# measure} other {# measures}}).",
+    "delete": "Delete the reading",
+    "delete_title": "Delete the reading of {date}?",
+    "delete_description": "{count, plural, one {Its measure will be} other {Its # measures will be}} permanently deleted.",
+    "delete_submit": "Delete"
+  }
+}

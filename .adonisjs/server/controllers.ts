@@ -14,6 +14,7 @@ export const controllers = {
     Session: () => import('#controllers/auth/session_controller'),
   },
   HealthChecks: () => import('#controllers/health_checks_controller'),
+  Measures: () => import('#controllers/measures_controller'),
   Profile: () => import('#controllers/profile_controller'),
   Setup: () => import('#controllers/setup_controller'),
   TrackedMeasures: () => import('#controllers/tracked_measures_controller'),

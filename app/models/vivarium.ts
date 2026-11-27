@@ -1,5 +1,6 @@
 import { compose } from '@adonisjs/core/helpers'
 import { hasMany } from '@adonisjs/lucid/orm'
+import Measure from '#models/measure'
 import TrackedMeasure from '#models/tracked_measure'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 import { VivariumSchema } from '#database/schema'
@@ -47,6 +48,9 @@ export default class Vivarium extends compose(VivariumSchema, withUuidV7) {
 
   @hasMany(() => TrackedMeasure)
   declare trackedMeasures: HasMany<typeof TrackedMeasure>
+
+  @hasMany(() => Measure)
+  declare measures: HasMany<typeof Measure>
 
   get profile(): VivariumProfile {
     return { kind: this.kind, waterType: this.waterType, climate: this.climate }

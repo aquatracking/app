@@ -24,7 +24,15 @@
       "allowedByKind": "This field does not apply to this type of tank",
       "file": "Choose a file",
       "file.size": "The file must not exceed {size}",
-      "file.extname": "Choose a JPEG, PNG or WebP image"
+      "file.extname": "Choose a JPEG, PNG or WebP image",
+      "atLeastOneValue": "Enter at least one value",
+      "measureType": "This parameter is not part of this reading",
+      "measureDecimals": "{decimals, plural, =0 {Enter a whole number} one {Enter at most # decimal} other {Enter at most # decimals}}",
+      "localDateTime": "Enter a valid date and time",
+      "localDateTime.nonexistent": "This time does not exist in your time zone (change to summer time)",
+      "localDateTime.future": "The date cannot be in the future",
+      "localDateTime.beforeStartedOn": "The date cannot be before the set-up date of the tank",
+      "notAfterFirstReading": "The set-up date cannot be after the first reading, on {date}"
     }
   }
 }

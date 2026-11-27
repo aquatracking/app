@@ -22,5 +22,6 @@
   "E_VIVARIUM_ARCHIVED": "This tank is archived: unarchive it to change it.",
   "E_INVALID_IMAGE": "This image cannot be read. Try a JPEG, PNG or WebP file.",
   "E_TRACKED_MEASURE_ALREADY_EXISTS": "This parameter is already tracked on this tank.",
-  "E_INVALID_TRACKED_MEASURE_ORDER": "The list changed in the meantime: reload the page and try again."
+  "E_INVALID_TRACKED_MEASURE_ORDER": "The list changed in the meantime: reload the page and try again.",
+  "E_READING_CONFLICT": "This reading already has a value of {types} at this date and time. Edit the existing reading from the history."
 }

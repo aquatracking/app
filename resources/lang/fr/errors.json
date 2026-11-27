@@ -22,5 +22,6 @@
   "E_VIVARIUM_ARCHIVED": "Ce bac est archivé : désarchivez-le pour le modifier.",
   "E_INVALID_IMAGE": "Cette image est illisible. Essayez un fichier JPEG, PNG ou WebP.",
   "E_TRACKED_MEASURE_ALREADY_EXISTS": "Ce paramètre est déjà suivi sur ce bac.",
-  "E_INVALID_TRACKED_MEASURE_ORDER": "L'ordre a changé entre-temps : rechargez la page et réessayez."
+  "E_INVALID_TRACKED_MEASURE_ORDER": "L'ordre a changé entre-temps : rechargez la page et réessayez.",
+  "E_READING_CONFLICT": "Ce relevé a déjà une valeur de {types} à cette date et heure. Modifiez le relevé existant depuis l'historique."
 }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3'
-import { ListChecks, Pencil } from '@lucide/vue'
+import { History, ListChecks, Pencil } from '@lucide/vue'
 import AppLayout from '~/layouts/app.vue'
 import type { Data } from '@generated/data'
 import { Form, Link } from '@adonisjs/inertia/vue'
@@ -9,15 +9,21 @@ import { useI18n } from '~/composables/use_i18n'
 import { useVivarium } from '~/composables/use_vivarium'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import VivariumPicture from '~/components/vivariums/vivarium_picture.vue'
+import NewReadingDialog from '~/components/measures/new_reading_dialog.vue'
 import ArchiveVivariumDialog from '~/components/vivariums/archive_vivarium_dialog.vue'
 
 defineOptions({ layout: AppLayout })
 
 /**
- * Dashboard of a vivarium: its header, with the link to the tracked
- * measures (feature 05); their tiles come with feature 07.
+ * Dashboard of a vivarium: its header, with the links to the tracked
+ * measures (feature 05) and the history, and "New reading" (feature 06).
+ * The tiles of the tracked measures come with feature 07. On an archived
+ * vivarium, only "Unarchive" and the history remain.
  */
-const props = defineProps<{ vivarium: Data.Vivarium }>()
+const props = defineProps<{
+  vivarium: Data.Vivarium
+  readingFields: Data.MeasureTypeDefinition[]
+}>()
 
 const { t } = useI18n()
 const { profileLabel, ageLabel, volumeLabel } = useVivarium()
@@ -58,18 +64,30 @@ const { profileLabel, ageLabel, volumeLabel } = useVivarium()
         <p v-if="props.vivarium.description" class="whitespace-pre-line">
           {{ props.vivarium.description }}
         </p>
-        <div v-if="!props.vivarium.isArchived" class="mt-2 flex flex-wrap gap-2">
+        <div class="mt-2 flex flex-wrap gap-2">
+          <NewReadingDialog
+            v-if="!props.vivarium.isArchived"
+            :vivarium="props.vivarium"
+            :fields="props.readingFields"
+          />
           <Button variant="outline" size="sm" as-child>
-            <Link route="vivariums.edit" :params="{ id: props.vivarium.id }"
-              ><Pencil />{{ t('vivariums.edit') }}</Link
+            <Link route="measures.index" :params="{ id: props.vivarium.id }"
+              ><History />{{ t('vivariums.history') }}</Link
             >
           </Button>
-          <Button variant="outline" size="sm" as-child>
-            <Link route="tracked_measures.index" :params="{ id: props.vivarium.id }"
-              ><ListChecks />{{ t('tracked_measures.link') }}</Link
-            >
-          </Button>
-          <ArchiveVivariumDialog :vivarium="props.vivarium" />
+          <template v-if="!props.vivarium.isArchived">
+            <Button variant="outline" size="sm" as-child>
+              <Link route="vivariums.edit" :params="{ id: props.vivarium.id }"
+                ><Pencil />{{ t('vivariums.edit') }}</Link
+              >
+            </Button>
+            <Button variant="outline" size="sm" as-child>
+              <Link route="tracked_measures.index" :params="{ id: props.vivarium.id }"
+                ><ListChecks />{{ t('tracked_measures.link') }}</Link
+              >
+            </Button>
+            <ArchiveVivariumDialog :vivarium="props.vivarium" />
+          </template>
         </div>
       </div>
     </header>

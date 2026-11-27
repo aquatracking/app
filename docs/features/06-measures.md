@@ -16,7 +16,7 @@ Saisir en quelques secondes les valeurs d'un test, retrouver tous les relevés p
 - Champs : date et heure (défaut maintenant), saisies et affichées dans le **fuseau de l'utilisateur** ([CONTEXT](../CONTEXT.md)), puis un champ numérique par **mesure suivie**, dans l'ordre des mesures suivies, avec l'unité affichée et au plus le nombre de décimales du type ([05](05-tracked-measures.md), sens de `decimals`).
 - Les champs vides sont ignorés. Il faut au moins une valeur.
 - Un nouveau relevé ne peut contenir que des types **suivis** par le vivarium (la modification accepte en plus les types déjà présents dans le groupe, voir plus bas).
-- Chaque valeur doit être dans les bornes de plausibilité du type ([05](05-tracked-measures.md)). La virgule et le point sont acceptés comme séparateur décimal.
+- Chaque valeur doit être dans les bornes de plausibilité du type ([05](05-tracked-measures.md)). La virgule et le point sont acceptés comme séparateur décimal. Les zéros finaux ne comptent pas comme décimales (`25,30` vaut 25,3).
 - La date ne peut pas être dans le futur (tolérance 5 minutes) ni antérieure à la mise en service du vivarium. La comparaison avec la mise en service se fait sur la **date locale** du relevé, dans le fuseau de l'utilisateur.
 - **Changement d'heure** : l'heure saisie est convertie en instant avec les règles du fuseau à cette date (un relevé de janvier et un de juillet à « 18:00 » à Paris donnent 17:00 et 16:00 UTC).
   - Heure **inexistante** (passage à l'heure d'été, ex. 02:30 le dernier dimanche de mars à Paris) : refusée avec un message qui l'explique.
@@ -30,7 +30,7 @@ Saisir en quelques secondes les valeurs d'un test, retrouver tous les relevés p
 
 ### Historique
 - Page par vivarium, relevés les plus récents en premier : chaque groupe réunit les mesures de même `measured_at` (un groupe = un relevé).
-- Filtre par type de mesure (tous les types ayant au moins une mesure, suivis ou non).
+- Filtre par type de mesure (tous les types ayant au moins une mesure, suivis ou non). Un type inconnu dans l'URL (`?type=`) renvoie une liste vide.
 - Pagination **par relevés** : 20 relevés par page. Un relevé n'est jamais coupé entre deux pages.
 - Valeurs affichées telles que saisies, sans zéros forcés, et formatées selon la langue (`7,25` / `7.25`).
 
@@ -47,6 +47,7 @@ Saisir en quelques secondes les valeurs d'un test, retrouver tous les relevés p
 
 ### Supprimer un relevé
 - Depuis l'historique : supprime toutes les mesures du groupe (même vivarium, même `measured_at`), avec une confirmation qui indique le nombre de mesures.
+- Le bouton n'est pas proposé dans l'historique filtré par type : il supprimerait aussi les mesures des autres types, qui n'y sont pas affichées. « Modifier » y reste disponible.
 
 ### Vivarium archivé
 - Création, modification et suppression de relevés sont refusées.
