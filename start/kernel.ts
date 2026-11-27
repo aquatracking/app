@@ -33,12 +33,14 @@ router.use([
   () => import('@adonisjs/core/bodyparser_middleware'),
   () => import('@adonisjs/shield/shield_middleware'),
   () => import('#middleware/setup_middleware'),
+  () => import('#middleware/initialize_bouncer_middleware'),
 ])
 
 /**
  * Named middleware, applied route by route in start/routes.ts.
  */
 export const middleware = router.named({
+  admin: () => import('#middleware/admin_middleware'),
   auth: () => import('#middleware/auth_middleware'),
   guest: () => import('#middleware/guest_middleware'),
 })

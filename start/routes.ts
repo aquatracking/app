@@ -51,3 +51,33 @@ router
     router.put('/profile/password', [controllers.Profile, 'updatePassword'])
   })
   .use(middleware.auth())
+
+/**
+ * Administration (docs/features/03-admin.md): administrators only, others
+ * get 403.
+ */
+router
+  .group(() => {
+    router.get('/users', [controllers.admin.Users, 'index'])
+    router
+      .put('/users/:id/admin', [controllers.admin.Users, 'toggleAdmin'])
+      .where('id', router.matchers.uuid())
+    router
+      .delete('/users/:id', [controllers.admin.Users, 'destroy'])
+      .where('id', router.matchers.uuid())
+    router
+      .post('/users/:id/password-reset', [controllers.admin.Users, 'createPasswordReset'])
+      .where('id', router.matchers.uuid())
+
+    router.get('/invitations', [controllers.admin.Invitations, 'index'])
+    router.post('/invitations', [controllers.admin.Invitations, 'store'])
+    router
+      .post('/invitations/:id/renew', [controllers.admin.Invitations, 'renew'])
+      .where('id', router.matchers.uuid())
+    router
+      .delete('/invitations/:id', [controllers.admin.Invitations, 'destroy'])
+      .where('id', router.matchers.uuid())
+  })
+  .prefix('/admin')
+  .as('admin')
+  .use([middleware.auth(), middleware.admin()])

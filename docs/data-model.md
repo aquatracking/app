@@ -56,9 +56,9 @@ Table gérée par `@adonisjs/limiter` (store database), créée par sa migration
 | `email` | text | requis, unique, en minuscules |
 | `token_hash` | text | unique |
 | `expires_at` | timestamptz | création + 7 jours |
-| `invited_by_id` | uuid | FK `users`, `on delete set null`, nullable |
+| `invited_by_id` | uuid | FK `users`, `on delete set null`, nullable. Administrateur qui a créé l'invitation ou l'a renouvelée en dernier |
 
-Une invitation est supprimée quand elle est utilisée ou révoquée. La renouveler régénère le token et repousse `expires_at`.
+Une invitation est supprimée quand elle est utilisée ou révoquée. La renouveler régénère le token, repousse `expires_at` et remplace `invited_by_id` par l'administrateur qui renouvelle.
 
 ### `password_reset_tokens`
 | Colonne | Type | Règles |

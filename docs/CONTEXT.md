@@ -14,7 +14,7 @@ Termes utilisés dans les specs, le code et l'interface. Le code est en anglais 
 
 **Invitation** (`Invitation`) — Lien à usage unique, valable 7 jours, qui permet à une adresse email de créer un compte. C'est le seul moyen d'inscription. L'invitation prouve que l'adresse appartient à la personne : il n'y a pas de vérification d'email.
 
-**Invitant** (`User.invitedBy`) — Administrateur qui a envoyé l'invitation utilisée pour créer le compte. Les invitations acceptées sont supprimées : c'est l'utilisateur qui garde la trace de qui l'a invité, et sa date d'inscription celle de quand. Vide pour le premier administrateur ou si l'invitant a été supprimé.
+**Invitant** (`User.invitedBy`) — Administrateur qui a envoyé l'invitation utilisée pour créer le compte : celui qui l'a créée ou, si elle a été renouvelée, celui qui l'a renouvelée en dernier. Les invitations acceptées sont supprimées : c'est l'utilisateur qui garde la trace de qui l'a invité, et sa date d'inscription celle de quand. Vide pour le premier administrateur ou si l'invitant a été supprimé.
 
 **Lien de réinitialisation** (`PasswordResetToken`) — Lien à usage unique, valable 1 heure, qui permet de choisir un nouveau mot de passe. Demandé par l'utilisateur et envoyé par email si l'instance a un SMTP ; un administrateur peut aussi en générer un et le transmettre lui-même, avec ou sans SMTP.
 

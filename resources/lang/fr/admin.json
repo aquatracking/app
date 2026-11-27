@@ -1,0 +1,59 @@
+{
+  "title": "Administration",
+  "actions": "Actions",
+  "cancel": "Annuler",
+  "users": {
+    "title": "Utilisateurs",
+    "name": "Nom",
+    "email": "Email",
+    "role": "Rôle",
+    "admin": "Administrateur",
+    "invited_by": "Invité par",
+    "signed_up": "Inscription",
+    "last_seen": "Dernière activité",
+    "never_seen": "Jamais",
+    "password_reset": "Lien de réinitialisation",
+    "make_admin": "Nommer administrateur",
+    "remove_admin": "Retirer administrateur",
+    "admin_granted": "{name} est maintenant administrateur.",
+    "admin_removed": "{name} n'est plus administrateur.",
+    "delete": "Supprimer",
+    "delete_title": "Supprimer le compte de {name} ?",
+    "delete_description": "Ses vivariums, mesures et images sont aussi supprimés. C'est irréversible.",
+    "delete_confirm": "Saisissez {email} pour confirmer",
+    "delete_submit": "Supprimer le compte",
+    "deleted": "Le compte {email} a été supprimé."
+  },
+  "invitations": {
+    "title": "Invitations",
+    "create_title": "Inviter quelqu'un",
+    "create_description": "Le lien permet à cet email de créer un compte. Il est valable 7 jours.",
+    "submit": "Inviter",
+    "email": "Email",
+    "invited_by": "Invité par",
+    "expires_at": "Expiration",
+    "status": "Statut",
+    "pending": "En attente",
+    "expired": "Expirée",
+    "renew": "Renouveler",
+    "revoke": "Révoquer",
+    "revoked": "L'invitation de {email} a été révoquée.",
+    "empty": "Aucune invitation en attente."
+  },
+  "generated_link": {
+    "url": "Lien",
+    "copy": "Copier",
+    "copied": "Copié",
+    "close": "Fermer",
+    "once": "Ce lien n'est affiché qu'une fois.",
+    "emailed": "Il a aussi été envoyé par email à {email}.",
+    "invitation": {
+      "title": "Lien d'invitation",
+      "description": "Transmettez ce lien à {email} : il lui permet de créer son compte, dans les 7 jours."
+    },
+    "password_reset": {
+      "title": "Lien de réinitialisation",
+      "description": "Transmettez ce lien à {email} : il lui permet de choisir un nouveau mot de passe, dans l'heure. Les liens précédents ne fonctionnent plus."
+    }
+  }
+}

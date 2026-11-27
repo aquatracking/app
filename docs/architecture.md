@@ -25,7 +25,7 @@ On n'écrit pas ce que le framework fournit. Avant d'ajouter une abstraction, v�
 | Connexion, session, « se souvenir de moi » | `@adonisjs/auth` guard session + remember me tokens | `withAuthFinder` sur `User` |
 | Validation des entrées | VineJS, un validator par action | Messages traduits via i18n |
 | « Ce vivarium est-il à moi ? » | Bouncer, `VivariumPolicy` | Aucun contrôle de propriété écrit à la main dans les contrôleurs |
-| Réservé aux admins | Bouncer, `UserPolicy` / `InvitationPolicy` + middleware `admin` | |
+| Réservé aux admins | Bouncer, `UserPolicy` / `InvitationPolicy` + middleware `admin` | Le middleware vérifie l'ability `administer` (`app/abilities/main.ts`). Un refus répond 403 avec la page `errors/forbidden`, formulaires compris |
 | Forme des données envoyées aux pages | **Transformers** (`app/transformers/`) | Pas de DTO écrits à la main ; jamais de `serialize()` brut de modèle vers une page |
 | Typage des props de page | Props Inertia générées par Adonis 7 | `inertia.render` est vérifié à la compilation |
 | URLs | `urlFor` (serveur et client), routes nommées automatiquement `controller.method` | Jamais d'URL écrite en dur |
@@ -91,7 +91,7 @@ tests/functional/<feature>/…
 ## Rendu et formulaires
 
 - Formulaires avec le composant `<Form>` d'Inertia et routes typées ; les erreurs de validation reviennent par session.
-- Les messages de succès ou d'erreur métier passent par un flash `notification` partagé par le middleware Inertia.
+- Les messages de succès ou d'erreur métier passent par un flash `notification` partagé par le middleware Inertia. Un lien à usage unique généré par un administrateur (invitation, réinitialisation) passe par un flash `generatedLink`, seul moment où il est connu.
 - Données partagées à toutes les pages (`InertiaMiddleware`) : utilisateur courant (transformé), langue, fuseau de l'utilisateur, notification, `mailEnabled`.
 - **Fuseau horaire** : stocké sur l'utilisateur. Les formulaires d'installation et d'inscription le préremplissent avec `Intl.DateTimeFormat().resolvedOptions().timeZone` ; le serveur le valide (nom IANA) et l'enregistre. Rendu SSR et client utilisent ce même fuseau partagé : pas d'écart à l'hydratation. Pas de cookie ni de détection à chaque requête.
 - Interface pensée **mobile d'abord** : le relevé se fait souvent devant le bac, téléphone en main.

@@ -1,0 +1,59 @@
+{
+  "title": "Administration",
+  "actions": "Actions",
+  "cancel": "Cancel",
+  "users": {
+    "title": "Users",
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "admin": "Administrator",
+    "invited_by": "Invited by",
+    "signed_up": "Signed up",
+    "last_seen": "Last activity",
+    "never_seen": "Never",
+    "password_reset": "Password reset link",
+    "make_admin": "Make administrator",
+    "remove_admin": "Remove administrator",
+    "admin_granted": "{name} is now an administrator.",
+    "admin_removed": "{name} is no longer an administrator.",
+    "delete": "Delete",
+    "delete_title": "Delete the account of {name}?",
+    "delete_description": "Their vivariums, measures and images are deleted too. This cannot be undone.",
+    "delete_confirm": "Type {email} to confirm",
+    "delete_submit": "Delete the account",
+    "deleted": "The account {email} has been deleted."
+  },
+  "invitations": {
+    "title": "Invitations",
+    "create_title": "Invite someone",
+    "create_description": "The link lets this email create an account. It is valid for 7 days.",
+    "submit": "Invite",
+    "email": "Email",
+    "invited_by": "Invited by",
+    "expires_at": "Expires",
+    "status": "Status",
+    "pending": "Pending",
+    "expired": "Expired",
+    "renew": "Renew",
+    "revoke": "Revoke",
+    "revoked": "The invitation of {email} has been revoked.",
+    "empty": "No pending invitation."
+  },
+  "generated_link": {
+    "url": "Link",
+    "copy": "Copy",
+    "copied": "Copied",
+    "close": "Close",
+    "once": "This link is shown only once.",
+    "emailed": "It has also been emailed to {email}.",
+    "invitation": {
+      "title": "Invitation link",
+      "description": "Send this link to {email}: it lets them create their account, within 7 days."
+    },
+    "password_reset": {
+      "title": "Password reset link",
+      "description": "Send this link to {email}: it lets them choose a new password, within 1 hour. Previous links no longer work."
+    }
+  }
+}

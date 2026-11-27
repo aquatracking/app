@@ -9,6 +9,18 @@ import BaseInertiaMiddleware from '@adonisjs/inertia/inertia_middleware'
  */
 export type Notification = { type: 'success' | 'error'; message: string }
 
+/**
+ * Invitation or password reset link just created by an administrator,
+ * shown once in a window to copy it (docs/features/03-admin.md). The
+ * token is stored hashed: this is the only moment the link is known.
+ */
+export type GeneratedLink = {
+  kind: 'invitation' | 'password_reset'
+  email: string
+  url: string
+  emailed: boolean
+}
+
 export default class InertiaMiddleware extends BaseInertiaMiddleware {
   share(ctx: HttpContext) {
     /**
@@ -40,8 +52,9 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
      */
     const { session } = ctx as Partial<HttpContext>
     const notification: Notification | undefined = session?.flashMessages.get('notification')
+    const generatedLink: GeneratedLink | undefined = session?.flashMessages.get('generatedLink')
 
-    return { notification }
+    return { notification, generatedLink }
   }
 
   async handle(ctx: HttpContext, next: NextFn) {

@@ -17,6 +17,9 @@ const page = usePage()
       <div class="mx-auto flex h-14 max-w-5xl items-center gap-4 px-4">
         <Link route="home" class="font-semibold">{{ t('app.name') }}</Link>
         <nav v-if="page.props.user" class="ml-auto flex items-center gap-2">
+          <Button v-if="page.props.user.isAdmin" variant="ghost" size="sm" as-child>
+            <Link route="admin.users.index">{{ t('admin.title') }}</Link>
+          </Button>
           <Button variant="ghost" size="sm" as-child>
             <Link route="profile.edit">{{ page.props.user.firstName }}</Link>
           </Button>

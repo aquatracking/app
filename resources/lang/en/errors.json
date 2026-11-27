@@ -11,5 +11,12 @@
   "E_INVALID_CREDENTIALS": "Invalid credentials.",
   "E_LOGIN_BLOCKED": "Too many failed attempts. Please try again in {duration}.",
   "E_INVALID_INVITATION": "This invitation is invalid or expired.",
-  "E_INVALID_PASSWORD_RESET_TOKEN": "This link is invalid, expired or already used."
+  "E_INVALID_PASSWORD_RESET_TOKEN": "This link is invalid, expired or already used.",
+  "forbidden": {
+    "title": "Access denied",
+    "description": "This page is reserved to administrators."
+  },
+  "E_LAST_ADMIN": "There must remain at least one administrator.",
+  "E_OWN_ADMIN_RIGHTS": "You cannot remove your own administrator rights.",
+  "E_OWN_ACCOUNT_DELETION": "You cannot delete your own account from the administration."
 }

@@ -19,16 +19,16 @@ Permettre aux administrateurs d'inviter des personnes et de gérer les comptes d
 - Créer : un email. Refusé si un utilisateur a déjà cet email. Si une invitation existe déjà pour cet email, elle est renouvelée.
 - Après création ou renouvellement, l'interface **affiche le lien** avec un bouton « copier ». C'est le seul moment où le lien est visible : le token n'est stocké que haché.
 - Si SMTP est configuré, un email d'invitation est aussi envoyé (dans la langue de l'administrateur).
-- Renouveler : nouveau token, expiration repoussée à +7 jours, l'ancien lien ne fonctionne plus.
+- Renouveler : nouveau token, expiration repoussée à +7 jours, l'ancien lien ne fonctionne plus. L'administrateur qui renouvelle devient l'invitant (`invited_by_id`) : c'est lui qui a envoyé le lien valable.
 - Révoquer : supprime l'invitation.
 - Liste : email, invité par, date d'expiration, statut (en attente / expirée).
 
 ### Utilisateurs
-- Liste : nom affiché, email, administrateur oui/non, invité par (nom de l'invitant, ou « — » si `invited_by_id` est vide : premier administrateur ou invitant supprimé), date d'inscription, dernière activité (« il y a 3 jours »), nombre de vivariums.
+- Liste : nom affiché, email, administrateur oui/non, invité par (nom de l'invitant, ou « — » si `invited_by_id` est vide : premier administrateur ou invitant supprimé), date d'inscription, dernière activité (« il y a 3 jours »), nombre de vivariums. Le nombre de vivariums est ajouté par [04](04-vivariums.md), qui crée la table `vivariums`.
 - Une invitation acceptée n'est pas conservée : l'historique « qui a invité qui, et quand » est porté par l'utilisateur (`invited_by_id` et date d'inscription).
 - Nommer ou retirer administrateur. Impossible de retirer le dernier administrateur. Un administrateur ne peut pas se retirer lui-même ses droits.
-- Supprimer un compte : confirmation en saisissant l'email du compte. Supprime aussi ses vivariums, mesures et images. Impossible de supprimer son propre compte depuis cette page (ce qui garantit aussi qu'il reste un administrateur).
-- Générer un lien de réinitialisation pour un utilisateur : même logique que [02](02-auth-profile.md) (1 h, remplace les précédents ; l'administrateur en régénère un s'il a expiré avant d'être utilisé). Le lien est affiché avec « copier » et, si SMTP, peut aussi être envoyé par email.
+- Supprimer un compte : confirmation en saisissant l'email du compte (insensible à la casse). Supprime aussi ses vivariums, mesures et images (la suppression des fichiers images est ajoutée par [04](04-vivariums.md)). Impossible de supprimer son propre compte depuis cette page (ce qui garantit aussi qu'il reste un administrateur).
+- Générer un lien de réinitialisation pour un utilisateur : même logique que [02](02-auth-profile.md) (1 h, remplace les précédents ; l'administrateur en régénère un s'il a expiré avant d'être utilisé). Le lien est affiché avec « copier » et, si SMTP, est aussi envoyé par email à l'utilisateur, dans sa langue.
 
 ## Données
 `users` (lecture de `invited_by_id`, `created_at`, `last_seen_at`, nombre de vivariums ; mise à jour de `is_admin` ; suppression), `invitations`, `password_reset_tokens`. Supprimer un compte supprime en cascade ses `vivariums`, `tracked_measures`, `measures`, `remember_me_tokens`, `password_reset_tokens` et ses fichiers images ; les `invited_by_id` qui le désignaient passent à vide.
@@ -45,7 +45,9 @@ Permettre aux administrateurs d'inviter des personnes et de gérer les comptes d
 | POST | `/admin/invitations/:id/renew` | `admin/invitations.renew` | — |
 | DELETE | `/admin/invitations/:id` | `admin/invitations.destroy` | — |
 
-Le lien généré (invitation ou reset) revient à la page par un flash dédié, affiché dans une fenêtre avec bouton « copier ».
+Le lien généré (invitation ou reset) revient à la page par un flash dédié `generatedLink` (type de lien, email, URL, envoyé par email ou non), affiché dans une fenêtre avec bouton « copier ».
+
+Un refus d'accès (non-admin) répond 403 avec la page `errors/forbidden`, y compris pour les formulaires : Bouncer les redirigerait sinon vers la page précédente.
 
 ## Critères d'acceptation
 - **ADM-1** Un utilisateur non admin reçoit 403 sur toutes les routes `/admin/*`.
@@ -55,7 +57,7 @@ Le lien généré (invitation ou reset) revient à la page par un flash dédié,
 - **ADM-5** Avec SMTP, créer une invitation envoie un email à l'adresse invitée ; sans SMTP, aucun email n'est envoyé.
 - **ADM-6** Révoquer une invitation rend son lien invalide.
 - **ADM-7** Retirer les droits du dernier administrateur est refusé ; retirer ses propres droits est refusé.
-- **ADM-8** Supprimer un utilisateur supprime ses vivariums, ses mesures et ses fichiers images.
+- **ADM-8** Supprimer un utilisateur supprime ses vivariums, ses mesures et ses fichiers images. Testé en 03 sur le compte et ses tokens ; vivariums, mesures et images sont testés par [04](04-vivariums.md).
 - **ADM-9** Supprimer son propre compte depuis l'administration est refusé.
 - **ADM-10** Générer un lien de réinitialisation affiche un lien utilisable une fois ([AUTH-10](02-auth-profile.md)) et invalide les liens précédents.
 - **ADM-11** La page des utilisateurs n'expose ni noms ni contenus de vivariums.

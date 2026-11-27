@@ -41,6 +41,10 @@ Permettre à chaque utilisateur de décrire ses bacs (aquariums, terrariums, pal
 - Un utilisateur ne peut pas supprimer un vivarium : l'archivage est le seul moyen de le retirer de l'accueil, y compris pour un bac créé par erreur.
 - Les vivariums ne sont supprimés qu'avec le compte de leur propriétaire ([03-admin](03-admin.md)).
 
+### Administration ([03](03-admin.md))
+- La liste des utilisateurs de l'administration affiche le nombre de vivariums de chacun (un seul `count` groupé, pas de requête par utilisateur), sans aucune autre donnée de vivarium.
+- Supprimer un compte (`UserAdministrationService.delete`) supprime aussi les fichiers images de ses vivariums, après la suppression en base.
+
 ## Données
 `vivariums`, `tracked_measures` (création des défauts), `measures` (lecture : date du dernier relevé sur les cartes, plus ancien relevé pour la date de mise en service), fichiers Drive.
 
@@ -73,3 +77,4 @@ Le paramètre `:id` est contraint au format UUID (`router.matchers.uuid()`) sur 
 - **VIV-10** Aucune route ne permet à un utilisateur de supprimer un vivarium.
 - **VIV-11** Sur un vivarium archivé, la modification, le changement et le retrait de l'image sont refusés ; seul « Désarchiver » est accepté.
 - **VIV-12** Déplacer la mise en service après la date locale du plus ancien relevé est refusé ; à cette date ou avant, c'est accepté.
+- **VIV-13** ([ADM-8](03-admin.md)) Supprimer un utilisateur depuis l'administration supprime ses vivariums, ses mesures suivies, ses mesures et ses fichiers images ; la liste des utilisateurs affiche le nombre de vivariums de chacun.
