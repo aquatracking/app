@@ -36,6 +36,7 @@ Permettre à chaque utilisateur de décrire ses bacs (aquariums, terrariums, pal
 - Redimensionnée (côté le plus long 1600 px), convertie en WebP, métadonnées EXIF retirées (orientation appliquée avant).
 - Stockée sur le disque Drive `vivariums` sous `<vivarium_id>/<uuid>.webp`. Remplacer ou retirer l'image supprime l'ancien fichier.
 - Servie par une route protégée par la policy, avec cache navigateur (le nom de fichier change à chaque remplacement).
+- Si le fichier ne peut pas être chargé (absent du disque), les cartes et l'en-tête affichent l'illustration par défaut du type, comme sans image.
 
 ### Archivage
 - Archiver : `archived_at = maintenant`. Le vivarium disparaît de l'accueil et apparaît dans « Archivés ».
