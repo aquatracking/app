@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3'
-import { Pencil } from '@lucide/vue'
+import { ListChecks, Pencil } from '@lucide/vue'
 import AppLayout from '~/layouts/app.vue'
 import type { Data } from '@generated/data'
 import { Form, Link } from '@adonisjs/inertia/vue'
@@ -14,8 +14,8 @@ import ArchiveVivariumDialog from '~/components/vivariums/archive_vivarium_dialo
 defineOptions({ layout: AppLayout })
 
 /**
- * Dashboard of a vivarium. This feature shows its header; the tiles of
- * the tracked measures come with feature 07.
+ * Dashboard of a vivarium: its header, with the link to the tracked
+ * measures (feature 05); their tiles come with feature 07.
  */
 const props = defineProps<{ vivarium: Data.Vivarium }>()
 
@@ -62,6 +62,11 @@ const { profileLabel, ageLabel, volumeLabel } = useVivarium()
           <Button variant="outline" size="sm" as-child>
             <Link route="vivariums.edit" :params="{ id: props.vivarium.id }"
               ><Pencil />{{ t('vivariums.edit') }}</Link
+            >
+          </Button>
+          <Button variant="outline" size="sm" as-child>
+            <Link route="tracked_measures.index" :params="{ id: props.vivarium.id }"
+              ><ListChecks />{{ t('tracked_measures.link') }}</Link
             >
           </Button>
           <ArchiveVivariumDialog :vivarium="props.vivarium" />

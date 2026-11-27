@@ -1,0 +1,70 @@
+{
+  "temperature": {
+    "label": "Temperature",
+    "description": "Temperature of the water, or of the air for a terrarium."
+  },
+  "ph": {
+    "label": "pH",
+    "description": "Acidity of the water: below 7 acid, above 7 alkaline."
+  },
+  "gh": {
+    "label": "General hardness (GH)",
+    "description": "Calcium and magnesium content of the water."
+  },
+  "kh": {
+    "label": "Carbonate hardness (KH)",
+    "description": "Carbonate content, which keeps the pH stable."
+  },
+  "no2": {
+    "label": "Nitrite (NO₂)",
+    "description": "Toxic even at low levels, a sign of an incomplete nitrogen cycle."
+  },
+  "no3": {
+    "label": "Nitrate (NO₃)",
+    "description": "End product of the nitrogen cycle, removed by water changes and plants."
+  },
+  "nh3": {
+    "label": "Ammonia / ammonium (NH₃/NH₄⁺)",
+    "description": "Nitrogen waste of the animals, toxic as ammonia."
+  },
+  "po4": {
+    "label": "Phosphate (PO₄)",
+    "description": "Nutrient of algae, closely watched in reef tanks."
+  },
+  "salinity": {
+    "label": "Salinity",
+    "description": "Amount of dissolved salt, in parts per thousand (‰)."
+  },
+  "specific_gravity": {
+    "label": "Specific gravity",
+    "description": "Density of salt water, read with a refractometer or a hydrometer."
+  },
+  "ca": {
+    "label": "Calcium (Ca)",
+    "description": "Used by hard corals to build their skeleton."
+  },
+  "mg": {
+    "label": "Magnesium (Mg)",
+    "description": "Keeps calcium and KH in balance in reef tanks."
+  },
+  "co2": {
+    "label": "CO₂",
+    "description": "Dissolved carbon dioxide, needed by plants, harmful to fish in excess."
+  },
+  "fe": {
+    "label": "Iron (Fe)",
+    "description": "Trace element for aquatic plants."
+  },
+  "conductivity": {
+    "label": "Conductivity",
+    "description": "Amount of mineral salts dissolved in the water."
+  },
+  "humidity": {
+    "label": "Humidity",
+    "description": "Relative humidity of the air."
+  },
+  "illuminance": {
+    "label": "Illuminance",
+    "description": "Light received, measured with a lux meter."
+  }
+}

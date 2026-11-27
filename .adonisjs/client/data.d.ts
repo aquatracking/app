@@ -7,6 +7,8 @@
 import type { InferData, InferVariants } from '@adonisjs/core/types/transformers'
 import type { InferSharedProps, InferFlashData } from '@adonisjs/inertia/types'
 import type InvitationTransformer from '#transformers/invitation_transformer'
+import type MeasureTypeTransformer from '#transformers/measure_type_transformer'
+import type TrackedMeasureTransformer from '#transformers/tracked_measure_transformer'
 import type UserTransformer from '#transformers/user_transformer'
 import type VivariumTransformer from '#transformers/vivarium_transformer'
 import type InertiaMiddleware from '#middleware/inertia_middleware'
@@ -15,6 +17,14 @@ export namespace Data {
   export type Invitation = InferData<InvitationTransformer>
   export namespace Invitation {
     export type Variants = InferVariants<InvitationTransformer>
+  }
+  export type MeasureType = InferData<MeasureTypeTransformer>
+  export namespace MeasureType {
+    export type Variants = InferVariants<MeasureTypeTransformer>
+  }
+  export type TrackedMeasure = InferData<TrackedMeasureTransformer>
+  export namespace TrackedMeasure {
+    export type Variants = InferVariants<TrackedMeasureTransformer>
   }
   export type User = InferData<UserTransformer>
   export namespace User {

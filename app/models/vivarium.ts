@@ -1,4 +1,7 @@
 import { compose } from '@adonisjs/core/helpers'
+import { hasMany } from '@adonisjs/lucid/orm'
+import TrackedMeasure from '#models/tracked_measure'
+import type { HasMany } from '@adonisjs/lucid/types/relations'
 import { VivariumSchema } from '#database/schema'
 import { withUuidV7 } from '#models/mixins/with_uuid_v7'
 
@@ -27,10 +30,27 @@ export function hasClimate(kind: VivariumKind) {
   return kind !== 'aquarium'
 }
 
+/**
+ * Profile of a vivarium (docs/CONTEXT.md): its kind, water type and
+ * climate. Determines the default tracked measures.
+ */
+export interface VivariumProfile {
+  kind: VivariumKind
+  waterType: WaterType | null
+  climate: Climate | null
+}
+
 export default class Vivarium extends compose(VivariumSchema, withUuidV7) {
   declare kind: VivariumKind
   declare waterType: WaterType | null
   declare climate: Climate | null
+
+  @hasMany(() => TrackedMeasure)
+  declare trackedMeasures: HasMany<typeof TrackedMeasure>
+
+  get profile(): VivariumProfile {
+    return { kind: this.kind, waterType: this.waterType, climate: this.climate }
+  }
 
   /**
    * An archived vivarium is read-only, except for unarchiving it.

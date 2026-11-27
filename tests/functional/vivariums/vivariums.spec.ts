@@ -460,7 +460,10 @@ test.group('Vivariums', (group) => {
       .root.filter((route) => route.methods.includes('DELETE'))
       .map((route) => route.pattern)
       .filter((pattern) => pattern.startsWith('/vivariums'))
-    assert.deepEqual(deletions, ['/vivariums/:id/image'])
+    assert.deepEqual(deletions, [
+      '/vivariums/:id/image',
+      '/vivariums/:id/tracked-measures/:trackedMeasureId',
+    ])
 
     const user = await UserFactory.create()
     const vivarium = await VivariumFactory.merge({ userId: user.id }).create()

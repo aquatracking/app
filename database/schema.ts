@@ -26,6 +26,21 @@ export class InvitationSchema extends BaseModel {
   declare updatedAt: DateTime
 }
 
+export class MeasureTypeSchema extends BaseModel {
+  static $columns = ['code', 'decimals', 'id', 'position', 'unit'] as const
+  $columns = MeasureTypeSchema.$columns
+  @column()
+  declare code: string
+  @column()
+  declare decimals: number
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare position: number
+  @column()
+  declare unit: string
+}
+
 export class PasswordResetTokenSchema extends BaseModel {
   static $columns = ['createdAt', 'expiresAt', 'id', 'tokenHash', 'updatedAt', 'userId'] as const
   $columns = PasswordResetTokenSchema.$columns
@@ -41,6 +56,23 @@ export class PasswordResetTokenSchema extends BaseModel {
   declare updatedAt: DateTime
   @column()
   declare userId: string
+}
+
+export class TrackedMeasureSchema extends BaseModel {
+  static $columns = ['createdAt', 'id', 'measureTypeId', 'position', 'updatedAt', 'vivariumId'] as const
+  $columns = TrackedMeasureSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column({ isPrimary: true })
+  declare id: string
+  @column()
+  declare measureTypeId: string
+  @column()
+  declare position: number
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
+  @column()
+  declare vivariumId: string
 }
 
 export class UserSchema extends BaseModel {

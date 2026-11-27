@@ -359,6 +359,58 @@ export interface Registry {
       rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/vivarium_images_controller').default['show']>>>
     }
   }
+  'tracked_measures.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/vivariums/:id/tracked-measures'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/tracked_measures_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/tracked_measures_controller').default['index']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/tracked_measures_controller').default['index']>>>
+    }
+  }
+  'tracked_measures.store': {
+    methods: ["POST"]
+    pattern: '/vivariums/:id/tracked-measures'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/tracked_measure').addTrackedMeasureValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/tracked_measure').addTrackedMeasureValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/tracked_measures_controller').default['store']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/tracked_measures_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/tracked_measures_controller').default['store']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'tracked_measures.reorder': {
+    methods: ["PUT"]
+    pattern: '/vivariums/:id/tracked-measures/order'
+    types: {
+      body: ExtractBody<InferInput<(typeof import('#validators/tracked_measure').reorderTrackedMeasuresValidator)>>
+      paramsTuple: [ParamValue]
+      params: { id: ParamValue }
+      query: ExtractQuery<InferInput<(typeof import('#validators/tracked_measure').reorderTrackedMeasuresValidator)>>
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/tracked_measures_controller').default['reorder']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/tracked_measures_controller').default['reorder']>>> | { status: 422; response: { errors: SimpleError[] } }
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/tracked_measures_controller').default['reorder']>>> | { status: 422; response: { errors: SimpleError[] } }
+    }
+  }
+  'tracked_measures.destroy': {
+    methods: ["DELETE"]
+    pattern: '/vivariums/:id/tracked-measures/:trackedMeasureId'
+    types: {
+      body: {}
+      paramsTuple: [ParamValue, ParamValue]
+      params: { id: ParamValue; trackedMeasureId: ParamValue }
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/tracked_measures_controller').default['destroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/tracked_measures_controller').default['destroy']>>>
+      rawResponse: ExtractRawResponse<Awaited<ReturnType<import('#controllers/tracked_measures_controller').default['destroy']>>>
+    }
+  }
   'admin.users.index': {
     methods: ["GET","HEAD"]
     pattern: '/admin/users'

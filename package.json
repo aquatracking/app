@@ -17,6 +17,7 @@
     "typecheck": "tsc --noEmit && vue-tsc --noEmit --project inertia/tsconfig.json"
   },
   "imports": {
+    "#catalog/*": "./app/catalog/*.js",
     "#controllers/*": "./app/controllers/*.js",
     "#exceptions/*": "./app/exceptions/*.js",
     "#models/*": "./app/models/*.js",
@@ -96,6 +97,7 @@
     "sharp": "^0.35.5",
     "uuid": "^14.0.3",
     "vue": "^3.5.43",
+    "vue-draggable-plus": "0.6.1",
     "vue-sonner": "^2.0.9"
   },
   "hotHook": {
