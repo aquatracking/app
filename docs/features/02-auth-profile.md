@@ -25,7 +25,7 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 - Ces quatre pages sont réservées aux visiteurs : un utilisateur déjà connecté qui en ouvre une est redirigé vers l'accueil avec un message.
 
 ### Champs communs
-- Mêmes règles à l'installation ([01](01-installation.md)), à l'inscription et dans le profil : prénom requis (100 caractères maximum), nom facultatif (100 caractères maximum ; vide ou fait d'espaces, il est enregistré comme absent, `null`), email au format email de 254 caractères maximum (installation, mot de passe oublié), mot de passe d'au moins 8 caractères avec confirmation, langue `fr` ou `en`, fuseau de la liste des fuseaux.
+- Mêmes règles à l'installation ([01](01-installation.md)), à l'inscription et dans le profil : prénom requis (100 caractères maximum), nom facultatif (100 caractères maximum ; vide ou fait d'espaces, il est enregistré comme absent, `null` ; absent de la requête du profil, il reste inchangé), email au format email de 254 caractères maximum (installation, mot de passe oublié, invitation de [03](03-admin.md)), mot de passe d'au moins 8 caractères avec confirmation, langue `fr` ou `en`, fuseau de la liste des fuseaux.
 
 ### Inscription par invitation
 - Le lien contient un token. S'il est inconnu ou expiré, la page affiche « invitation invalide ou expirée » et un renvoi vers la connexion.
@@ -42,8 +42,9 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 
 ### Profil
 - Modifiable : prénom, nom, langue (fr ou en), fuseau horaire (liste IANA avec recherche, ex. « Europe/Paris »).
-- Si le fuseau du navigateur diffère du fuseau **enregistré** (et non de la valeur en cours de saisie), le profil le signale avec un bouton « Utiliser Europe/Paris » (utile après un déménagement). Rien n'est changé automatiquement.
-- **Liste des fuseaux** : `UTC` et les zones géographiques connues du serveur (`Intl.supportedValuesOf('timeZone')`). Le navigateur peut nommer sa zone autrement que le serveur (`Asia/Kolkata` pour `Asia/Calcutta`) : le formulaire retient alors le nom de la liste qui désigne la même zone.
+- Si la zone du navigateur diffère de la zone **enregistrée** (comparées en entrées de la liste, et non avec la valeur en cours de saisie), le profil le signale avec un bouton « Utiliser Europe/Paris » (utile après un déménagement). Rien n'est changé automatiquement.
+- **Liste des fuseaux** : `UTC` et les zones géographiques, sous leur nom IANA canonique (`Asia/Kolkata`, `Europe/Kyiv`, `America/Nuuk`). Elle est figée dans le code (`app/catalog/timezones.ts`) et non lue dans `Intl.supportedValuesOf('timeZone')`, qui donne des noms CLDR historiques (`Asia/Calcutta`, `Europe/Kiev`) variables selon la version d'ICU, dont certains sont inconnus de PostgreSQL (les graphes convertissent avec `AT TIME ZONE`). Chaque nom est reconnu par `Intl` et par PostgreSQL.
+- Le navigateur, ou un nom enregistré avant cette liste, peut désigner une zone sous un autre nom (`Asia/Calcutta`, `America/Montreal`) : le formulaire affiche, préremplit et propose alors l'entrée de la liste qui désigne la même zone (`Asia/Kolkata`, `America/Toronto`), jamais un nom hors de la liste.
 - Un fuseau hors de la liste est refusé, y compris un nom IANA qui ne désigne qu'un décalage fixe (`Etc/GMT+5`) ou une abréviation (`EST`, `CET`) : ils ignoreraient le changement d'heure. Les décalages écrits (`+01:00`, `UTC+1`) sont refusés aussi. La casse est corrigée (`europe/paris` devient `Europe/Paris`).
 - L'**email n'est pas modifiable** dans le périmètre 2.0 : c'est l'identifiant de connexion, et sans SMTP on ne peut pas vérifier une nouvelle adresse. Voir la piste dans [vision](../vision.md).
 - Changer le mot de passe demande le mot de passe actuel.
@@ -89,7 +90,8 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 - **AUTH-13** Une page protégée demandée sans connexion redirige vers la connexion.
 - **AUTH-14** L'inscription par invitation enregistre le fuseau soumis ; un nom hors de la liste des fuseaux (`Mars/Olympus`, `+01:00`, `Etc/GMT+5`, `EST`) est refusé avec un message sur le champ.
 - **AUTH-15** Modifier le fuseau dans le profil change l'heure affichée des mesures existantes sans modifier les instants stockés.
-- **AUTH-16** Enregistrer dans le profil un fuseau hors de la liste des fuseaux (`Mars/Olympus`, `+01:00`, `Etc/GMT+5`, `EST`) est refusé ; la page du profil propose exactement les fuseaux acceptés.
+- **AUTH-16** Enregistrer dans le profil un fuseau hors de la liste des fuseaux (`Mars/Olympus`, `+01:00`, `Etc/GMT+5`, `EST`, `Asia/Calcutta`) est refusé ; la page du profil propose exactement la liste des fuseaux, dont chaque nom est reconnu par `Intl` et par PostgreSQL (`AT TIME ZONE`).
 - **AUTH-17** Après 20 échecs depuis une même IP sur des emails différents, toute tentative depuis cette IP est refusée, y compris pour un autre compte.
 - **AUTH-18** Un deuxième blocage de la même clé dure 30 minutes, un troisième 1 heure ; la durée ne dépasse jamais 24 heures.
 - **AUTH-19** Une connexion réussie remet à zéro le compteur IP + email.
+- **AUTH-20** Dans « mot de passe oublié », un email de plus de 254 caractères est refusé avec un message sur le champ, sans envoi.
