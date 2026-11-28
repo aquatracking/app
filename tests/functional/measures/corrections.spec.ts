@@ -182,7 +182,15 @@ test.group('Reading corrections', (group) => {
     await storeMeasures(vivarium, '2026-01-16T18:00:00Z', { ph: 7.2 })
 
     const edited = await client
-      .put(`${readingUrl(vivarium, '2026-01-15T18:00:00Z')}?type=ph&page=2`)
+      .put(`${readingUrl(vivarium, '2026-01-15T18:00:00Z')}?type=ph&page=2&other=1`)
+      .withInertia()
+      .header('referer', `/vivariums/${vivarium.id}/measures`)
+      .json({ measuredAt: '2026-01-15T18:00', values: { ph: '7.1' } })
+      .withCsrfToken()
+      .loginAs(user)
+      .redirects(0)
+    const editedInvalidPage = await client
+      .put(`${readingUrl(vivarium, '2026-01-15T18:00:00Z')}?page=abc`)
       .withInertia()
       .header('referer', `/vivariums/${vivarium.id}/measures`)
       .json({ measuredAt: '2026-01-15T18:00', values: { ph: '7.1' } })
@@ -205,8 +213,9 @@ test.group('Reading corrections', (group) => {
       .loginAs(user)
       .redirects(0)
 
-    edited.assertHeader('location', `/vivariums/${vivarium.id}/measures?type=ph&page=2`)
     // Only the filter and the page are carried back, cleaned
+    edited.assertHeader('location', `/vivariums/${vivarium.id}/measures?type=ph&page=2`)
+    editedInvalidPage.assertHeader('location', `/vivariums/${vivarium.id}/measures`)
     deleted.assertHeader('location', `/vivariums/${vivarium.id}/measures?page=2`)
     invalidPage.assertHeader('location', `/vivariums/${vivarium.id}/measures`)
     assert.deepEqual(await measuresOf(vivarium), ['2026-01-15T18:00:00Z ph=7.1'])
