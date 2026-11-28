@@ -65,6 +65,7 @@ export default class HttpExceptionHandler extends ExceptionHandler {
       return ctx.response
         .redirect()
         .withIntendedUrl()
+        .withQs(false)
         .toPath(error.redirectTo || '/')
     }
 

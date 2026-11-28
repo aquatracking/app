@@ -221,6 +221,60 @@ test.group('Reading corrections', (group) => {
     assert.deepEqual(await measuresOf(vivarium), ['2026-01-15T18:00:00Z ph=7.1'])
   })
 
+  test('MEA-26 a refused edit or deletion goes back to the page it came from, filter and page included', async ({
+    client,
+    assert,
+  }) => {
+    const { user, vivarium } = await vivariumTracking(['ph'])
+    await storeMeasures(vivarium, '2026-01-15T18:00:00Z', { ph: 7 })
+    await storeMeasures(vivarium, '2026-01-16T18:00:00Z', { ph: 7.2 })
+    const editPage = `${readingUrl(vivarium, '2026-01-15T18:00:00Z')}/edit?type=ph&page=2`
+    const historyPage = `/vivariums/${vivarium.id}/measures?type=ph&page=2`
+
+    /**
+     * Moved to the minute of the other reading: a conflict.
+     */
+    const conflict = await client
+      .put(`${readingUrl(vivarium, '2026-01-15T18:00:00Z')}?type=ph&page=2`)
+      .withInertia()
+      .header('referer', editPage)
+      .json({ measuredAt: '2026-01-16T18:00', values: { ph: '7.1' } })
+      .withCsrfToken()
+      .loginAs(user)
+      .redirects(0)
+    conflict.assertHeader('location', editPage)
+
+    await vivarium.merge({ archivedAt: DateTime.now() }).save()
+    const archivedEdit = await client
+      .put(`${readingUrl(vivarium, '2026-01-15T18:00:00Z')}?type=ph&page=2`)
+      .withInertia()
+      .header('referer', editPage)
+      .json({ measuredAt: '2026-01-15T18:00', values: { ph: '7.1' } })
+      .withCsrfToken()
+      .loginAs(user)
+      .redirects(0)
+    const archivedDeletion = await client
+      .delete(`${readingUrl(vivarium, '2026-01-15T18:00:00Z')}?page=2`)
+      .withInertia()
+      .header('referer', historyPage)
+      .withCsrfToken()
+      .loginAs(user)
+      .redirects(0)
+
+    archivedEdit.assertHeader('location', editPage)
+    archivedDeletion.assertHeader('location', historyPage)
+    for (const response of [archivedEdit, archivedDeletion]) {
+      response.assertFlashMessage('notification', {
+        type: 'error',
+        message: 'This tank is archived: unarchive it to change it.',
+      })
+    }
+    assert.deepEqual(await measuresOf(vivarium), [
+      '2026-01-15T18:00:00Z ph=7',
+      '2026-01-16T18:00:00Z ph=7.2',
+    ])
+  })
+
   test('MEA-27 the routes of a reading accept the instant with encoded colons, as built by the client', async ({
     client,
     assert,

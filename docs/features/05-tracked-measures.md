@@ -59,7 +59,7 @@ Justification des décimales notables : pH au 0,01 (pH-mètres, suivi récifal) 
 - Changer le type d'eau ou le climat d'un vivarium ne touche pas aux mesures suivies.
 
 ## Données
-`measure_types` (lecture), `tracked_measures`.
+`measure_types` (lecture), `tracked_measures`, `vivariums` (relu sous verrou partagé dans la transaction d'une modification des mesures suivies, pour revérifier `archived_at`).
 
 ## Routes et pages
 | Méthode | Route | Action | Page |

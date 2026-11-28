@@ -66,19 +66,23 @@ export default class Vivarium extends compose(VivariumSchema, withUuidV7) {
   }
 
   /**
-   * Locks the row of the vivarium in shared mode until the end of the
-   * transaction of a change of its content (readings, tracked measures),
-   * then checks again that it is not archived. Archiving, which writes
-   * the row, waits for these transactions; a change that waited for an
-   * archiving is refused (docs/features/04-vivariums.md).
+   * Locks the row of the vivarium until the end of the transaction of a
+   * change, then checks again that it is not archived. Archiving, which
+   * writes the row, waits for these transactions; a change that waited
+   * for an archiving is refused (docs/features/04-vivariums.md).
+   *
+   * In shared mode for a change of its content (readings, tracked
+   * measures), which does not write the row; for writing when the change
+   * writes it (form), so that two of them cannot deadlock.
    *
    * @throws ArchivedVivariumException when it was archived meanwhile
    */
-  async lockUnarchived(trx: TransactionClientContract) {
+  async lockUnarchived(trx: TransactionClientContract, mode: 'share' | 'update' = 'share') {
     const locked = await Vivarium.query({ client: trx })
       .where('id', this.id)
       .select('archived_at')
-      .forShare()
+      .if(mode === 'share', (query) => query.forShare())
+      .if(mode === 'update', (query) => query.forUpdate())
       .firstOrFail()
     if (locked.isArchived) {
       throw new ArchivedVivariumException()

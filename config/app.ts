@@ -60,12 +60,13 @@ export const http = defineConfig({
    */
   redirect: {
     /**
-     * Redirects do not carry over the query string of the current
-     * request: no redirection needs it as is. Those that keep some of it
-     * pass it explicitly (history filter and page after editing a
-     * reading).
+     * Redirects carry over the query string: "back()" keeps the one of
+     * the previous page (filter and page of the history after a refused
+     * change). A redirection that must not forward it as is opts out
+     * with withQs(false). The redirection of a guest to the login page
+     * never takes it (HttpExceptionHandler).
      */
-    forwardQueryString: false,
+    forwardQueryString: true,
   },
 
   /**

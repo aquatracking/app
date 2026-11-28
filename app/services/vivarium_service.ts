@@ -5,7 +5,7 @@ import Vivarium from '#models/vivarium'
 import db from '@adonisjs/lucid/services/db'
 import type { Infer } from '@vinejs/vine/types'
 import { ReadingService } from '#services/reading_service'
-import type { createVivariumValidator } from '#validators/vivarium'
+import type { createVivariumValidator, updateVivariumValidator } from '#validators/vivarium'
 import { TrackedMeasureService } from '#services/tracked_measure_service'
 
 /**
@@ -33,6 +33,19 @@ export class VivariumService {
   }
 
   /**
+   * Saves the form of the vivarium. Refused when it was archived after
+   * the request was authorized (Vivarium.lockUnarchived).
+   *
+   * @throws ArchivedVivariumException when it was archived meanwhile
+   */
+  async update(vivarium: Vivarium, data: Infer<typeof updateVivariumValidator>) {
+    await db.transaction(async (trx) => {
+      await vivarium.lockUnarchived(trx, 'update')
+      await vivarium.useTransaction(trx).merge(data).save()
+    })
+  }
+
+  /**
    * Instant of the oldest reading of the vivarium in the given time zone,
    * null without any: its local date is the latest set-up date allowed
    * (docs/features/06-measures.md).
@@ -45,8 +58,8 @@ export class VivariumService {
   /**
    * Archives the vivarium: it leaves the home page and becomes read-only.
    * Updating its row locks it for writing: the archiving waits for the
-   * changes of readings and tracked measures under way, which hold it in
-   * shared mode, and those that come after find it archived
+   * changes under way (readings, tracked measures, form), which hold a
+   * lock on it, and those that come after find it archived
    * (Vivarium.lockUnarchived).
    */
   async archive(vivarium: Vivarium) {
