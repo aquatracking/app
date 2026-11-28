@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon'
-import Vivarium from '#models/vivarium'
+import Vivarium, { CLIMATES, VIVARIUM_KINDS, WATER_TYPES } from '#models/vivarium'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import VivariumPolicy from '#policies/vivarium_policy'
@@ -53,6 +53,9 @@ export default class VivariumsController {
   async create({ auth, inertia }: HttpContext) {
     return inertia.render('vivariums/create', {
       today: DateTime.now().setZone(auth.getUserOrFail().timezone).toISODate()!,
+      kinds: [...VIVARIUM_KINDS],
+      waterTypes: [...WATER_TYPES],
+      climates: [...CLIMATES],
     })
   }
 
@@ -99,6 +102,8 @@ export default class VivariumsController {
     return inertia.render('vivariums/edit', {
       vivarium: VivariumTransformer.transform(vivarium),
       today: DateTime.now().setZone(auth.getUserOrFail().timezone).toISODate()!,
+      waterTypes: [...WATER_TYPES],
+      climates: [...CLIMATES],
     })
   }
 

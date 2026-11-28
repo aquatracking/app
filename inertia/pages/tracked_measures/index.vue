@@ -6,6 +6,7 @@ import type { Data } from '@generated/data'
 import { Button } from '~/components/ui/button'
 import { VueDraggable } from 'vue-draggable-plus'
 import { useI18n } from '~/composables/use_i18n'
+import { useMeasures } from '~/composables/use_measures'
 import { Alert, AlertDescription } from '~/components/ui/alert'
 import { Form, Link, useRouter } from '@adonisjs/inertia/vue'
 import { ArrowDown, ArrowUp, GripVertical, Plus, X } from '@lucide/vue'
@@ -26,6 +27,7 @@ const props = defineProps<{
 }>()
 
 const { t } = useI18n()
+const { typeLabel } = useMeasures()
 const router = useRouter()
 
 /**
@@ -37,10 +39,6 @@ watch(
   () => props.trackedMeasures,
   (trackedMeasures) => (items.value = [...trackedMeasures])
 )
-
-function label(measureType: Data.MeasureType) {
-  return t(`measure_types.${measureType.code}.label`)
-}
 
 function saveOrder() {
   router.put(
@@ -90,7 +88,7 @@ function move(index: number, offset: number) {
     <ul v-else-if="props.vivarium.isArchived" class="divide-y rounded-lg border">
       <li v-for="item in items" :key="item.id" class="flex items-center gap-3 px-4 py-3">
         <span class="flex min-w-0 flex-1 flex-col">
-          <span>{{ label(item.measureType) }}</span>
+          <span>{{ typeLabel(item.measureType) }}</span>
           <span class="text-sm text-muted-foreground">{{
             t(`measure_types.${item.measureType.code}.description`)
           }}</span>
@@ -118,12 +116,12 @@ function move(index: number, offset: number) {
           data-drag-handle
           class="cursor-grab touch-none p-2 text-muted-foreground"
           aria-hidden="true"
-          :title="t('tracked_measures.drag', { name: label(item.measureType) })"
+          :title="t('tracked_measures.drag', { name: typeLabel(item.measureType) })"
         >
           <GripVertical class="size-4" />
         </span>
         <span class="flex min-w-0 flex-1 flex-col">
-          <span>{{ label(item.measureType) }}</span>
+          <span>{{ typeLabel(item.measureType) }}</span>
           <span class="text-sm text-muted-foreground">{{
             t(`measure_types.${item.measureType.code}.description`)
           }}</span>
@@ -133,7 +131,7 @@ function move(index: number, offset: number) {
           variant="ghost"
           size="icon"
           :disabled="index === 0"
-          :aria-label="t('tracked_measures.move_up', { name: label(item.measureType) })"
+          :aria-label="t('tracked_measures.move_up', { name: typeLabel(item.measureType) })"
           @click="move(index, -1)"
         >
           <ArrowUp />
@@ -142,7 +140,7 @@ function move(index: number, offset: number) {
           variant="ghost"
           size="icon"
           :disabled="index === items.length - 1"
-          :aria-label="t('tracked_measures.move_down', { name: label(item.measureType) })"
+          :aria-label="t('tracked_measures.move_down', { name: typeLabel(item.measureType) })"
           @click="move(index, 1)"
         >
           <ArrowDown />
@@ -156,7 +154,7 @@ function move(index: number, offset: number) {
             type="submit"
             variant="ghost"
             size="icon"
-            :aria-label="t('tracked_measures.remove', { name: label(item.measureType) })"
+            :aria-label="t('tracked_measures.remove', { name: typeLabel(item.measureType) })"
           >
             <X />
           </Button>
@@ -195,7 +193,7 @@ function move(index: number, offset: number) {
                 :key="measureType.code"
                 :value="measureType.code"
               >
-                {{ label(measureType) }}{{ measureType.unit ? ` (${measureType.unit})` : '' }}
+                {{ typeLabel(measureType) }}{{ measureType.unit ? ` (${measureType.unit})` : '' }}
               </NativeSelectOption>
             </NativeSelect>
             <Button type="submit" :disabled="processing"

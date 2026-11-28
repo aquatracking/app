@@ -10,7 +10,12 @@ import { useVivarium } from '~/composables/use_vivarium'
 
 defineOptions({ layout: AppLayout })
 
-const props = defineProps<{ vivarium: Data.Vivarium; today: string }>()
+const props = defineProps<{
+  vivarium: Data.Vivarium
+  today: string
+  waterTypes: NonNullable<Data.Vivarium['waterType']>[]
+  climates: NonNullable<Data.Vivarium['climate']>[]
+}>()
 
 const { t } = useI18n()
 const { profileLabel } = useVivarium()
@@ -28,7 +33,12 @@ const title = t('vivariums.form.edit_title', { name: props.vivarium.name })
         <CardDescription>{{ profileLabel(props.vivarium) }}</CardDescription>
       </CardHeader>
       <CardContent>
-        <VivariumForm :vivarium="props.vivarium" :today="props.today" />
+        <VivariumForm
+          :vivarium="props.vivarium"
+          :today="props.today"
+          :water-types="props.waterTypes"
+          :climates="props.climates"
+        />
       </CardContent>
     </Card>
     <Card>

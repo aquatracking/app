@@ -1,4 +1,5 @@
 import { inject } from '@adonisjs/core'
+import { LOCALES } from '#models/user'
 import { TIMEZONES } from '#catalog/timezones'
 import type { HttpContext } from '@adonisjs/core/http'
 import i18nManager from '@adonisjs/i18n/services/main'
@@ -12,7 +13,7 @@ import { updatePasswordValidator, updateProfileValidator } from '#validators/pro
  */
 export default class ProfileController {
   async edit({ inertia }: HttpContext) {
-    return inertia.render('profile/edit', { timezones: TIMEZONES })
+    return inertia.render('profile/edit', { locales: [...LOCALES], timezones: TIMEZONES })
   }
 
   /**

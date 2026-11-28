@@ -2,11 +2,11 @@
 import { Head } from '@inertiajs/vue3'
 import AppLayout from '~/layouts/app.vue'
 import { Form, Link } from '@adonisjs/inertia/vue'
-import { Input } from '~/components/ui/input'
 import { Button } from '~/components/ui/button'
 import { useI18n } from '~/composables/use_i18n'
+import PasswordFields from '~/components/users/password_fields.vue'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field'
+import { FieldGroup } from '~/components/ui/field'
 
 defineOptions({ layout: AppLayout })
 
@@ -50,34 +50,7 @@ const { t } = useI18n()
         :params="{ token: props.token }"
       >
         <FieldGroup>
-          <Field :data-invalid="!!errors.password">
-            <FieldLabel for="password">{{ t('auth.reset_password.password') }}</FieldLabel>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              autocomplete="new-password"
-              required
-              :aria-invalid="!!errors.password"
-            />
-            <FieldDescription>{{ t('auth.password_hint') }}</FieldDescription>
-            <FieldError :errors="[errors.password]" />
-          </Field>
-
-          <Field :data-invalid="!!errors.passwordConfirmation">
-            <FieldLabel for="passwordConfirmation">
-              {{ t('auth.password_confirmation') }}
-            </FieldLabel>
-            <Input
-              id="passwordConfirmation"
-              name="passwordConfirmation"
-              type="password"
-              autocomplete="new-password"
-              required
-              :aria-invalid="!!errors.passwordConfirmation"
-            />
-            <FieldError :errors="[errors.passwordConfirmation]" />
-          </Field>
+          <PasswordFields :errors="errors" :label="t('auth.reset_password.password')" />
 
           <Button type="submit" :disabled="processing">
             {{ t('auth.reset_password.submit') }}
