@@ -4,9 +4,9 @@ name: Release
 # is pushed, then creates the GitHub Release:
 #   version       the tag matches package.json, is on main; computes the tags
 #   ci            ci.yml replayed on the tagged commit
-#   publish       multi-arch image pushed by digest only, without any tag
-#   smoke-test    that digest started on native amd64 and arm64 runners
-#   tag           version and floating tags set on the tested digest
+#   publish       publish.yml: multi-arch image pushed by digest only, that
+#                 digest started on native amd64 and arm64 runners, then the
+#                 version and floating tags set on the tested digest
 #   github-release
 # A failed run must be re-run with "Re-run all jobs" (docs/architecture.md).
 on:
@@ -21,9 +21,6 @@ concurrency:
   group: release
   cancel-in-progress: false
 
-env:
-  IMAGE: ghcr.io/aquatracking/app
-
 jobs:
   version:
     name: Check the tag
@@ -32,6 +29,7 @@ jobs:
       contents: read
     outputs:
       tags: ${{ steps.tags.outputs.tags }}
+      version: ${{ steps.tags.outputs.version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -73,6 +71,7 @@ jobs:
             if [ "$version" = "$(highest '')" ]; then tags="$tags latest"; fi
           fi
           echo "tags=$tags" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "$GITHUB_REF_NAME: $tags"
 
   # Same checks as on a pull request (lint, typecheck, tests on PostgreSQL 16
@@ -83,155 +82,23 @@ jobs:
       contents: read
     uses: ./.github/workflows/ci.yml
 
-  # Pushes the image by digest only: no tag points to it until it has passed
-  # the smoke test
+  # Push by digest, smoke test on amd64 and arm64, then the version and
+  # floating tags set on the tested digest
   publish:
-    name: Push the image by digest
-    needs: ci
-    runs-on: ubuntu-latest
+    needs: [version, ci]
+    # A fork has no access to the image
+    if: github.repository == 'aquatracking/app'
     permissions:
       contents: read
       packages: write
-    outputs:
-      digest: ${{ steps.build.outputs.digest }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      # Labels and annotations carry the OCI source, version and revision
-      - id: meta
-        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
-        env:
-          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
-        with:
-          images: ${{ env.IMAGE }}
-          tags: type=semver,pattern={{version}}
-          labels: |
-            org.opencontainers.image.title=AquaTracking
-            org.opencontainers.image.description=Self-hosted tracking of aquarium, terrarium and paludarium parameters
-          annotations: |
-            org.opencontainers.image.title=AquaTracking
-            org.opencontainers.image.description=Self-hosted tracking of aquarium, terrarium and paludarium parameters
-
-      # arm64 is emulated, but only "pnpm install --prod" runs emulated: the
-      # build stages of the Dockerfile run on the runner's platform
-      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
-      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
-
-      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      # No build cache: nothing written by an earlier job can end up in the
-      # published image
-      - id: build
-        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
-        with:
-          context: .
-          platforms: linux/amd64,linux/arm64
-          outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true
-          labels: ${{ steps.meta.outputs.labels }}
-          annotations: ${{ steps.meta.outputs.annotations }}
-          provenance: mode=max
-          sbom: true
-
-  # Starts the pushed digest on each architecture
-  smoke-test:
-    name: Smoke test (${{ matrix.platform }})
-    needs: publish
-    strategy:
-      matrix:
-        include:
-          - platform: linux/amd64
-            runner: ubuntu-latest
-          - platform: linux/arm64
-            runner: ubuntu-24.04-arm
-    runs-on: ${{ matrix.runner }}
-    permissions:
-      packages: read
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: aquatracking
-          POSTGRES_PASSWORD: aquatracking
-          POSTGRES_DB: aquatracking
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U aquatracking"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
-    steps:
-      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Migrations, catalog seeder and server
-        env:
-          IMAGE_REF: ${{ env.IMAGE }}@${{ needs.publish.outputs.digest }}
-          PLATFORM: ${{ matrix.platform }}
-        run: |
-          docker run -d --name app --network host --platform "$PLATFORM" \
-            -e APP_KEY=ci-only-app-key-not-a-secret-000 \
-            -e APP_URL=http://localhost:3333 \
-            -e DB_HOST=127.0.0.1 -e DB_USER=aquatracking \
-            -e DB_PASSWORD=aquatracking -e DB_DATABASE=aquatracking \
-            "$IMAGE_REF"
-          for _ in $(seq 1 30); do
-            if curl -fsS http://localhost:3333/health/live; then
-              curl -fsS http://localhost:3333/ > /dev/null
-              # Node reports x64 for amd64
-              arch="$(docker exec app node -p process.arch)"
-              echo "Running on $arch"
-              case "$PLATFORM:$arch" in
-                linux/amd64:x64 | linux/arm64:arm64) exit 0 ;;
-                *) echo "::error::Expected $PLATFORM, got $arch"; exit 1 ;;
-              esac
-            fi
-            sleep 2
-          done
-          docker logs app
-          exit 1
-
-  # Points the version and floating tags to the tested digest
-  tag:
-    name: Tag the image
-    needs: [version, publish, smoke-test]
-    runs-on: ubuntu-latest
-    permissions:
-      packages: write
-    steps:
-      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
-
-      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set the tags on the digest
-        env:
-          TAGS: ${{ needs.version.outputs.tags }}
-          SOURCE: ${{ env.IMAGE }}@${{ needs.publish.outputs.digest }}
-        run: |
-          args=""
-          for tag in $TAGS; do
-            args="$args --tag $IMAGE:$tag"
-          done
-          # shellcheck disable=SC2086 # one word per argument
-          docker buildx imagetools create $args "$SOURCE"
-          docker buildx imagetools inspect "$IMAGE:${GITHUB_REF_NAME#v}"
+    uses: ./.github/workflows/publish.yml
+    with:
+      tags: ${{ needs.version.outputs.tags }}
+      version: ${{ needs.version.outputs.version }}
 
   github-release:
     name: GitHub Release
-    needs: tag
+    needs: publish
     runs-on: ubuntu-latest
     permissions:
       contents: write

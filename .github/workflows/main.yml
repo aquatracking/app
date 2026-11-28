@@ -1,0 +1,66 @@
+name: Main
+
+# Runs the CI on each push to main, then publishes its image on GHCR for the
+# integration server (ADR 0007), never for production:
+#   version       computes the tags and the OCI version
+#   ci            ci.yml on the pushed commit
+#   publish       publish.yml: multi-arch image pushed by digest only, that
+#                 digest started on native amd64 and arm64 runners, then
+#                 sha-<short sha> set on the tested digest, and main if the
+#                 commit is still the head of main
+# Never latest nor a version tag: those are set by release.yml only.
+on:
+  push:
+    branches: [main]
+
+permissions: {}
+
+# One run at a time, in push order, separate from the release group (which
+# writes other tags). GitHub keeps only the latest pending run: a commit whose
+# run is cancelled gets no sha- tag, and main goes to a newer commit anyway.
+concurrency:
+  group: main-image
+  cancel-in-progress: false
+
+jobs:
+  version:
+    name: Image tags
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      short-sha: ${{ steps.version.outputs.short-sha }}
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The version is never mistaken for a release: 2.0.0-main.afd1564
+      - id: version
+        run: |
+          short="${GITHUB_SHA::7}"
+          version="$(jq -r .version package.json)-main.$short"
+          echo "short-sha=$short" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "$GITHUB_SHA: sha-$short main, version $version"
+
+  # Lint, typecheck, tests on PostgreSQL 16 and 18, image smoke test: the
+  # only CI run of a push to main (ci.yml has no push trigger)
+  ci:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    needs: [version, ci]
+    # A fork has no access to the image
+    if: github.repository == 'aquatracking/app'
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/publish.yml
+    with:
+      tags: sha-${{ needs.version.outputs.short-sha }}
+      main-head-tags: main
+      version: ${{ needs.version.outputs.version }}

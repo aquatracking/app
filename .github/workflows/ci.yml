@@ -2,9 +2,8 @@ name: CI
 
 on:
   pull_request:
-  push:
-    branches: [main]
-  # Replayed on the tagged commit by release.yml before publishing
+  # Run on each push to main by main.yml, and replayed on the tagged commit by
+  # release.yml, before publishing
   workflow_call:
 
 permissions:
