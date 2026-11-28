@@ -19,10 +19,12 @@ export class UserAdministrationService {
   /**
    * Names or removes an administrator. There always remains one: an
    * administrator cannot remove their own rights, nor those of the last
-   * administrator.
+   * administrator. The actor must still be an administrator when the
+   * change is saved, as for "delete".
    *
    * @throws OwnAdminRightsException when the actor removes their own rights
    * @throws LastAdminException when no other administrator would remain
+   * @throws E_AUTHORIZATION_FAILURE when the actor was deleted or lost their rights
    */
   async setAdmin(actor: User, target: User, isAdmin: boolean) {
     if (!isAdmin && actor.id === target.id) {
@@ -30,19 +32,27 @@ export class UserAdministrationService {
     }
 
     await db.transaction(async (trx) => {
-      if (!isAdmin) {
-        /**
-         * The administrators stay locked until the end of the
-         * transaction: two administrators removing each other's rights
-         * at the same time cannot leave the instance without one.
-         */
-        const admins = await User.query({ client: trx })
-          .where('is_admin', true)
-          .select('id')
-          .forUpdate()
-        if (!admins.some((admin) => admin.id !== target.id)) {
-          throw new LastAdminException()
-        }
+      /**
+       * The administrators stay locked until the end of the transaction,
+       * in the same order as in "delete" so that the two cannot deadlock:
+       * two administrators removing each other's rights at the same time
+       * cannot leave the instance without one, and an actor who lost
+       * their rights meanwhile is refused.
+       */
+      const admins = await User.query({ client: trx })
+        .where('is_admin', true)
+        .select('id')
+        .orderBy('id')
+        .forUpdate()
+      /**
+       * Checked first: of two administrators removing each other's
+       * rights, the second one is told that one must remain (ADM-7).
+       */
+      if (!isAdmin && !admins.some((admin) => admin.id !== target.id)) {
+        throw new LastAdminException()
+      }
+      if (!admins.some((admin) => admin.id === actor.id)) {
+        throw new bouncerErrors.E_AUTHORIZATION_FAILURE(AuthorizationResponse.deny())
       }
 
       target.useTransaction(trx)
@@ -73,8 +83,9 @@ export class UserAdministrationService {
     const vivariums = await db.transaction(async (trx) => {
       /**
        * The administrators stay locked until the end of the transaction,
-       * as in "setAdmin": of two administrators deleting each other, the
-       * second one waits, then finds that they no longer exist.
+       * in the same order as in "setAdmin": of two administrators deleting
+       * each other, the second one waits, then finds that they no longer
+       * exist.
        */
       const admins = await User.query({ client: trx })
         .where('is_admin', true)

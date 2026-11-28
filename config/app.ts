@@ -60,9 +60,11 @@ export const http = defineConfig({
    */
   redirect: {
     /**
-     * When enabled, all redirects automatically carry over the current
-     * request's query string parameters to the redirect destination.
-     * Use withQs(false) to opt out for a specific redirect.
+     * Redirects carry over the query string: "back()" keeps the one of
+     * the previous page (filter and page of the history after a refused
+     * change). A redirection that must not forward it as is opts out
+     * with withQs(false). The redirection of a guest to the login page
+     * never takes it (HttpExceptionHandler).
      */
     forwardQueryString: true,
   },

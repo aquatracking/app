@@ -129,4 +129,66 @@ test.group('Administration on several connections', (group) => {
       const refused = responses[notifications.indexOf('error')]
       refused.assertFlashMessage('notification', { type: 'error', message })
     })
+
+  test(
+    'ADM-15 an administrator who loses their rights while their request waits can no longer {action} (403)'
+  )
+    .with([
+      { action: 'name an administrator', isAdmin: true },
+      { action: "remove an administrator's rights", isAdmin: false },
+    ])
+    .run(async ({ client, assert }, { isAdmin }) => {
+      /**
+       * Seen recently: recording their activity does not write to their
+       * row, which the test locks.
+       */
+      const [ada, grace] = await UserFactory.merge({
+        isAdmin: true,
+        lastSeenAt: DateTime.now(),
+      }).createMany(2)
+      /**
+       * An administrator remains besides the target: removing its rights
+       * would be accepted, but for the actor.
+       */
+      const target = await UserFactory.merge({ isAdmin: !isAdmin }).create()
+
+      /**
+       * Ada removes the rights of Grace, whose request has passed the
+       * "admin" middleware and waits for the lock on the administrators.
+       */
+      const blocker = await db.transaction()
+      let response: ApiResponse
+      try {
+        await blocker.rawQuery('update users set is_admin = false where id = ?', [grace.id])
+        /**
+         * A request is sent when awaited: Promise.resolve sends it now.
+         */
+        const change = Promise.resolve(
+          client
+            .put(`/admin/users/${target.id}/admin`)
+            .withInertia()
+            .header('referer', '/admin/users')
+            .form({ isAdmin: String(isAdmin) })
+            .withCsrfToken()
+            .loginAs(grace)
+            .redirects(0)
+        )
+        await waitForLockWaiters(1)
+        await blocker.commit()
+        response = await change
+      } finally {
+        if (!blocker.isCompleted) {
+          await blocker.rollback()
+        }
+      }
+
+      response.assertStatus(403)
+      await target.refresh()
+      assert.equal(target.isAdmin, !isAdmin)
+      const admins = await User.query().where('is_admin', true)
+      assert.sameMembers(
+        admins.map(({ id }) => id),
+        isAdmin ? [ada.id] : [ada.id, target.id]
+      )
+    })
 })

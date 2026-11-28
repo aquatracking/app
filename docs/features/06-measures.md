@@ -45,6 +45,7 @@ Saisir en quelques secondes les valeurs d'un test, retrouver tous les relevés p
   - champ vidé → la mesure est supprimée ;
   - date ou heure modifiée → toutes les mesures du groupe sont déplacées.
 - Mêmes règles qu'à la création : au moins une valeur, bornes, décimales, dates, troncature à la minute, unicité. Déplacer un relevé vers une minute qui contient déjà un des mêmes types est refusé ; vers une minute qui ne contient que d'autres types, les deux relevés n'en forment plus qu'un.
+- **Changement d'heure** : si la date et l'heure envoyées sont celles qu'affiche le relevé dans le fuseau de l'utilisateur, l'instant enregistré est conservé. Un relevé situé dans la seconde occurrence d'une heure répétée (passage à l'heure d'hiver, par exemple `2027-10-31T01:30Z`, affiché « 02:30 » à Paris) ne recule donc pas à la première occurrence quand on l'enregistre sans changer sa date. Une date ou une heure modifiée suit la règle de la création.
 - Si le relevé n'existe plus au moment d'enregistrer (supprimé ou déplacé entre-temps, par exemple depuis un autre onglet), l'enregistrement répond 404 et ne recrée aucune mesure.
 - Pour tout supprimer, on utilise « Supprimer le relevé » et non un formulaire vide.
 
@@ -54,6 +55,7 @@ Saisir en quelques secondes les valeurs d'un test, retrouver tous les relevés p
 
 ### Vivarium archivé
 - Création, modification et suppression de relevés sont refusées.
+- Y compris pour une requête envoyée au moment de l'archivage : la transaction du relevé verrouille le bac en lecture et revérifie qu'il n'est pas archivé. L'archivage attend la fin des transactions en cours ; un relevé qui a attendu l'archivage est refusé, avec la même notification.
 
 ### Ajouts à la feature 04
 La 04 a été livrée avant la table `measures`. La 06 y ajoute :
@@ -61,7 +63,7 @@ La 04 a été livrée avant la table `measures`. La 06 y ajoute :
 - la règle de modification de la mise en service ([04](04-vivariums.md)) : la nouvelle date `started_on` ne peut pas être postérieure à la date locale (fuseau de l'utilisateur) du plus ancien relevé du vivarium ; le message indique cette date (critère VIV-12, reporté ici). La règle ne s'applique que si `started_on` change : une modification qui garde la date enregistrée est acceptée.
 
 ## Données
-`measures` (création, lecture, modification et suppression par relevé), `tracked_measures` et `measure_types` (lecture), `vivariums` (lecture : `started_on`, `archived_at` ; validation de la modification de `started_on`).
+`measures` (création, lecture, modification et suppression par relevé), `tracked_measures` et `measure_types` (lecture), `vivariums` (lecture : `started_on`, `archived_at`, relu sous verrou partagé dans la transaction d'un relevé ; validation de la modification de `started_on`).
 
 ## Routes et pages
 | Méthode | Route | Action | Page |
@@ -103,3 +105,5 @@ La 04 a été livrée avant la table `measures`. La 06 y ajoute :
 - **MEA-26** Après la modification ou la suppression d'un relevé, l'historique revient avec le filtre et la page d'où elle a été faite.
 - **MEA-27** Les routes d'un relevé acceptent l'instant avec les « : » encodés (`%3A`).
 - **MEA-28** L'historique filtré par type ne propose pas « Supprimer le relevé », seulement « Modifier » ; l'historique sans filtre propose les deux. Vérifié sur la page rendue par le serveur (SSR).
+- **MEA-29** Pour un utilisateur en `Europe/Paris`, un relevé stocké à `2027-10-31T01:30Z` (seconde occurrence de 02:30, affichée « 02:30 ») et enregistré de nouveau sans changer sa date ni son heure garde son instant, au lieu de reculer à 00:30 UTC comme un nouveau relevé saisi à « 02:30 » (MEA-14).
+- **MEA-30** Un relevé (création, modification, suppression) envoyé pendant l'archivage du bac, qui attend la fin de l'archivage, est refusé avec la notification « bac archivé », et rien n'est modifié.

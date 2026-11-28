@@ -122,6 +122,7 @@ export default class MeasuresController {
     return {
       timezone,
       startedOn: vivarium.startedOn.toISODate()!,
+      editedMeasuredAt: reading?.measuredAt ?? null,
       measureTypes: await this.readingService.fieldTypes(vivarium, reading),
     }
   }

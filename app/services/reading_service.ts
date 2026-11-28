@@ -35,7 +35,8 @@ const READINGS_PER_PAGE = 20
 /**
  * Operations on the readings of a vivarium, callable outside HTTP
  * (docs/features/06-measures.md, ADR 0006). The caller authorizes with
- * VivariumPolicy (an archived vivarium has no reading change) and
+ * VivariumPolicy (an archived vivarium has no reading change; each
+ * change checks it again under lock, against a concurrent archiving) and
  * validates the data with "readingValidator", given the catalog entries
  * of "fieldTypes".
  *
@@ -89,6 +90,7 @@ export class ReadingService {
     const types = await this.typesByCode(Object.keys(values))
 
     return this.inTransaction(Object.keys(values), async (trx) => {
+      await vivarium.lockUnarchived(trx)
       await this.assertFree(trx, vivarium, measuredAt, types)
       return Measure.createMany(
         Object.entries(values).map(([code, value]) => ({
@@ -119,6 +121,7 @@ export class ReadingService {
     const types = await this.typesByCode(Object.keys(values))
 
     await this.inTransaction(Object.keys(values), async (trx) => {
+      await vivarium.lockUnarchived(trx)
       const measures = await this.measuresQuery(vivarium, trx)
         .where('measured_at', reading.measuredAt.toISO()!)
         .forUpdate()
@@ -164,11 +167,14 @@ export class ReadingService {
    * Deletes all the measures of the reading. Returns their number.
    */
   async destroy(vivarium: Vivarium, reading: Reading) {
-    const deleted = await Measure.query()
-      .where('vivarium_id', vivarium.id)
-      .where('measured_at', reading.measuredAt.toISO()!)
-      .delete()
-    return Number(deleted[0])
+    return db.transaction(async (trx) => {
+      await vivarium.lockUnarchived(trx)
+      const deleted = await Measure.query({ client: trx })
+        .where('vivarium_id', vivarium.id)
+        .where('measured_at', reading.measuredAt.toISO()!)
+        .delete()
+      return Number(deleted[0])
+    })
   }
 
   /**

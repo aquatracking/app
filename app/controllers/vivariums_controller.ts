@@ -127,8 +127,7 @@ export default class VivariumsController {
       },
     })
 
-    vivarium.merge(data)
-    await vivarium.save()
+    await this.vivariumService.update(vivarium, data)
 
     session.notify('success', i18n.t('vivariums.saved', { name: vivarium.name }))
     return response.redirect().toRoute('vivariums.show', { id: vivarium.id })

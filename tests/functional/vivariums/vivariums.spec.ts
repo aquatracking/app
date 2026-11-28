@@ -8,7 +8,7 @@ import type { ApiClient } from '@japa/api-client'
 import { UserFactory } from '#database/factories/user_factory'
 import { VivariumFactory } from '#database/factories/vivarium_factory'
 import { fieldErrors } from '#tests/helpers/responses'
-import { createVivarium } from '#tests/helpers/vivariums'
+import { createVivarium, sendDuringArchiving } from '#tests/helpers/vivariums'
 
 function vivariumForm(overrides: Record<string, string> = {}) {
   return {
@@ -551,5 +551,45 @@ test.group('Vivariums', (group) => {
 
     response.assertStatus(200)
     response.assertInertiaPropsContains({ vivarium: { id: vivarium.id, isArchived: true } })
+  })
+})
+
+/**
+ * Changes of a vivarium that overlap its archiving, on several
+ * connections. The database is emptied by truncation rather than rolled
+ * back, as a global transaction would merge the connections into one
+ * (docs/architecture.md). The truncation also empties the measure type
+ * catalog, seeded again for the other groups.
+ */
+test.group('Vivariums on several connections', (group) => {
+  group.each.setup(() => testUtils.db().truncate())
+  group.teardown(() => testUtils.db().seed())
+
+  test('VIV-18 the form saved while the vivarium is archived is refused once the archiving is done', async ({
+    client,
+    assert,
+  }) => {
+    const user = await UserFactory.create()
+    const vivarium = await VivariumFactory.merge({
+      userId: user.id,
+      kind: 'aquarium',
+      waterType: 'salt',
+      climate: null,
+      name: 'Old',
+      startedOn: DateTime.fromISO('2025-03-14'),
+    }).create()
+
+    const response = await sendDuringArchiving(vivarium, () =>
+      updateVivarium(client, user, vivarium, vivariumForm({ name: 'Renamed' }))
+    )
+
+    response.assertHeader('location', `/vivariums/${vivarium.id}/edit`)
+    response.assertFlashMessage('notification', {
+      type: 'error',
+      message: 'This tank is archived: unarchive it to change it.',
+    })
+    await vivarium.refresh()
+    assert.equal(vivarium.name, 'Old')
+    assert.isTrue(vivarium.isArchived)
   })
 })

@@ -4,6 +4,7 @@ import type { ApiResponse } from '@japa/api-client'
 import testUtils from '@adonisjs/core/services/test_utils'
 import { waitForLockWaiters } from '#tests/helpers/locks'
 import {
+  deleteReading,
   measuresOf,
   postReading,
   putReading,
@@ -11,6 +12,7 @@ import {
   vivariumTracking,
 } from '#tests/helpers/measures'
 import { fieldErrors } from '#tests/helpers/responses'
+import { sendDuringArchiving } from '#tests/helpers/vivariums'
 
 /**
  * Changes of readings that overlap, on several connections
@@ -118,4 +120,34 @@ test.group('Readings on several connections', (group) => {
     response.assertStatus(404)
     assert.deepEqual(await measuresOf(vivarium), ['2026-01-15T19:00:00Z ph=7'])
   })
+
+  test(
+    'MEA-30 a reading {$self} sent while the vivarium is archived is refused once the archiving is done'
+  )
+    .with(['creation', 'edit', 'deletion'] as const)
+    .run(async ({ client, assert }, action) => {
+      const { user, vivarium } = await vivariumTracking(['ph'])
+      await storeMeasures(vivarium, '2026-01-15T18:00:00Z', { ph: 7 })
+      const reading = { measuredAt: '2026-01-15T18:00', values: { ph: '7.2' } }
+
+      const response = await sendDuringArchiving(vivarium, () => {
+        switch (action) {
+          case 'creation':
+            return postReading(client, user, vivarium, {
+              ...reading,
+              measuredAt: '2026-01-16T18:00',
+            })
+          case 'edit':
+            return putReading(client, user, vivarium, '2026-01-15T18:00:00Z', reading)
+          case 'deletion':
+            return deleteReading(client, user, vivarium, '2026-01-15T18:00:00Z')
+        }
+      })
+
+      response.assertFlashMessage('notification', {
+        type: 'error',
+        message: 'This tank is archived: unarchive it to change it.',
+      })
+      assert.deepEqual(await measuresOf(vivarium), ['2026-01-15T18:00:00Z ph=7'])
+    })
 })

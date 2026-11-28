@@ -12,13 +12,19 @@ const LOCAL_DATE_TIME = /^(\d{4}-\d{2}-\d{2})T\d{2}:\d{2}(:\d{2}(\.\d{1,3})?)?$/
  * of the zone on that date (docs/features/06-measures.md). Null when the
  * time does not exist there (skipped by the change to summer time). An
  * ambiguous time (repeated by the change to winter time) gives its first
- * occurrence, under the summer offset.
+ * occurrence, under the summer offset, unless "kept" is its other
+ * occurrence: the instant of an edited reading whose local time is sent
+ * back unchanged stays the same.
  *
  * Luxon moves a missing time forward and resolves an ambiguous one to
  * its second occurrence: each offset of the zone around the date is tried
  * instead, keeping those that give back the same local time.
  */
-export function resolveLocalDateTime(text: string, zone: string): DateTime | null {
+export function resolveLocalDateTime(
+  text: string,
+  zone: string,
+  kept?: DateTime | null
+): DateTime | null {
   if (!LOCAL_DATE_TIME.test(text)) {
     return null
   }
@@ -37,7 +43,15 @@ export function resolveLocalDateTime(text: string, zone: string): DateTime | nul
         wallClock.toFormat("yyyy-MM-dd'T'HH:mm:ss.SSS")
     )
     .sort((a, b) => a.toMillis() - b.toMillis())
-  return candidates[0]?.toUTC() ?? null
+  /**
+   * Compared to the minute: the instant of a reading is truncated to it.
+   */
+  const keptCandidate =
+    kept &&
+    candidates.find(
+      (instant) => instant.startOf('minute').toMillis() === kept.startOf('minute').toMillis()
+    )
+  return (keptCandidate ?? candidates[0])?.toUTC() ?? null
 }
 
 /**
@@ -54,6 +68,11 @@ type Options = {
    * Earliest local date ("YYYY-MM-DD") accepted.
    */
   notBefore: (meta: any) => string
+  /**
+   * Instant kept when the date and time are its local time
+   * ("resolveLocalDateTime").
+   */
+  kept: (meta: any) => DateTime | null
 }
 
 /**
@@ -71,7 +90,11 @@ export const localDateTime = vine.createRule((value, options: Options, field) =>
     field.report('The {{ field }} field must be a date and time', 'localDateTime', field)
     return
   }
-  const instant = resolveLocalDateTime(value, options.timezone(field.meta))
+  const instant = resolveLocalDateTime(
+    value,
+    options.timezone(field.meta),
+    options.kept(field.meta)
+  )
   if (!instant) {
     field.report(
       'The {{ field }} field is a time that does not exist in this time zone',
