@@ -7,8 +7,10 @@
 | service validates the environment variables and also cast values
 | to JavaScript data types.
 |
-| Any value can be read from a file with the "file:" prefix, for Docker
-| secrets: APP_KEY=file:/run/secrets/app_key
+| A value written in a .env file can be read from another file with the
+| "file:" prefix, for Docker secrets: APP_KEY=file:/run/secrets/app_key.
+| The prefix is not resolved in variables set by the process environment
+| (docker run -e, Compose "environment"), see docs/deployment.md.
 |
 */
 

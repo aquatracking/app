@@ -3,7 +3,7 @@
 Instructions pour toute personne ou IA qui travaille sur AquaTracking. À lire avant de modifier le code.
 
 ## Le projet
-Application auto-hébergée de suivi des paramètres d'aquariums, terrariums et paludariums. AdonisJS 7, Inertia + Vue, PostgreSQL. Version en cours : **2.0.0-alpha**, développée sur `main` avec une PR par feature.
+Application auto-hébergée de suivi des paramètres d'aquariums, terrariums et paludariums. AdonisJS 7, Inertia + Vue, PostgreSQL. Version en cours : **2.0.0**, développée sur `main` avec une PR par feature. Publication : pousser un tag `vX.Y.Z` égal à la version de `package.json` (voir [architecture](docs/architecture.md#ci-github-actions)).
 
 ## Où trouver quoi
 | Besoin | Fichier |
@@ -11,6 +11,7 @@ Application auto-hébergée de suivi des paramètres d'aquariums, terrariums et 
 | Pourquoi, pour qui, périmètre | [docs/vision.md](docs/vision.md) |
 | Vocabulaire du domaine | [docs/CONTEXT.md](docs/CONTEXT.md) |
 | Stack, conventions de code, tests, CI | [docs/architecture.md](docs/architecture.md) |
+| Installation en production, sauvegarde, mise à jour | [docs/deployment.md](docs/deployment.md) |
 | Tables et règles d'intégrité | [docs/data-model.md](docs/data-model.md) |
 | Décisions et leurs raisons | [docs/adr/](docs/adr/) |
 | Comportement attendu d'une feature | [docs/features/](docs/features/) |

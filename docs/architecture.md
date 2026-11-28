@@ -35,7 +35,7 @@ On n'écrit pas ce que le framework fournit. Avant d'ajouter une abstraction, v�
 | Traductions | `@adonisjs/i18n` (serveur) + mêmes fichiers côté Vue | Un seul jeu de fichiers `resources/lang/{fr,en}/*.json`. Le client ne charge que la langue de la page (un chunk par langue), avant de la rendre, et jamais `emails.json` ni `validator.json`, utilisés seulement par le serveur (`inertia/composables/use_i18n.ts`) |
 | Fichiers | Drive, disque `vivariums` local | Servis par un contrôleur protégé par la policy |
 | Santé | Route `/health/live` seulement, servie par un contrôleur simple (`HealthChecksController`) qui répond 200 | Sonde de vivacité pour Docker et les orchestrateurs : elle dit seulement que le serveur HTTP répond, il n'y a rien à vérifier. La classe `HealthChecks` d'Adonis sert aux rapports de disponibilité (base, mémoire, disque), qu'on n'expose pas : pas de `/health/ready` public, son rapport expose des détails du serveur (versions, mémoire, disque) |
-| Variables d'environnement | `start/env.ts`, `Env.schema` | Secrets en `Env.schema.secret()`, support `file:` pour Docker secrets |
+| Variables d'environnement | `start/env.ts`, `Env.schema` | Secrets en `Env.schema.secret()`. Le préfixe `file:` (Docker secrets) n'est résolu que dans un fichier `.env`, pas dans l'environnement du processus ([déploiement](deployment.md#secrets-dans-des-fichiers)) |
 | Données de référence | Seeder idempotent du catalogue | Lancé à chaque démarrage, comme les migrations |
 | Mise à jour en direct *(après 2.0)* | `@adonisjs/transmit` (SSE) + `router.reload({ only })` d'Inertia | Canal `vivariums/:id` autorisé par `VivariumPolicy` ; le serveur recalcule les props, aucune logique dupliquée côté client. Transport en mémoire pour une instance, Redis si plusieurs. Le reverse proxy doit désactiver le buffering sur la route SSE |
 
@@ -121,11 +121,13 @@ tests/functional/<feature>/…
 
 ## Démarrage et déploiement
 
+Guide d'installation, de mise à jour, de sauvegarde et de restauration : [deployment.md](deployment.md).
+
 - **Dev** : `compose.yml` fournit PostgreSQL et Mailpit. `node ace migration:run`, `node ace db:seed` (catalogue, à relancer quand il change), puis `node ace serve --hmr`. Les tests lancent eux-mêmes migrations et seeder.
-- **Image Docker** unique, multi-étapes. Au démarrage : `migration:run --force` (le flag confirme l'exécution en production, où Adonis la refuse sinon ; il ne rejoue ni ne supprime rien), puis `db:seed --files catalog_seeder`, puis le serveur. Les deux premières étapes sont idempotentes.
+- **Image Docker** unique, multi-étapes, pour `linux/amd64` et `linux/arm64`. Les étapes de build tournent sur la plateforme de la machine de build (leur résultat ne dépend pas de l'architecture) ; seules les dépendances de production, qui contiennent des binaires natifs (`sharp`), sont installées pour la plateforme cible. Utilisateur non root `node`, `HEALTHCHECK` sur `/health/live`. Au démarrage : `migration:run --force` (le flag confirme l'exécution en production, où Adonis la refuse sinon ; il ne rejoue ni ne supprime rien), puis `db:seed --files catalog_seeder`, puis le serveur. Les deux premières étapes sont idempotentes.
 - Volume à persister : `DRIVE_ROOT`.
 - **HTTPS obligatoire** : en production, les cookies de session sont `Secure` et HSTS est actif ; servie en HTTP, l'application ne garde pas la session. Déploiement prévu derrière un reverse proxy (Traefik, Nginx, Caddy…) qui termine le HTTPS, avec `TRUSTED_PROXIES` renseigné.
-- **Sauvegardes** : il n'y a ni corbeille ni soft delete, la doc de déploiement doit donc expliquer comment sauvegarder régulièrement la base (`pg_dump`) et le dossier `DRIVE_ROOT`, et comment restaurer.
+- **Sauvegardes** : il n'y a ni corbeille ni soft delete. La [doc de déploiement](deployment.md#sauvegarde) explique comment sauvegarder ensemble la base (`pg_dump`) et le dossier `DRIVE_ROOT`, et comment restaurer.
 
 ## Tests
 
@@ -141,4 +143,10 @@ tests/functional/<feature>/…
   - `typecheck`, après avoir vérifié que les fichiers générés de `.adonisjs/` sont à jour ;
   - `test` sur PostgreSQL 16 (version minimale, [ADR 0002](adr/0002-postgresql-uuidv7.md)) et 18, puis vérification que `database/schema.ts` correspond aux migrations ;
   - `build` de l'image, puis démarrage contre PostgreSQL (migrations, seeder, `/health/live` et `/`).
-- Sur un tag `v2.*` : publication de l'image sur GHCR et Docker Hub (`aquatracking/app`).
+- Sur un tag `v2.*` (`.github/workflows/release.yml`) :
+  - vérification que le tag correspond à la version de `package.json` ;
+  - les vérifications ci-dessus, rejouées sur le commit tagué (`ci.yml` est appelé comme workflow réutilisable) ;
+  - publication de l'image sur **GHCR seul** (`ghcr.io/aquatracking/app`), pour `linux/amd64` et `linux/arm64`, avec les tags `X.Y.Z`, `X.Y`, `X` et `latest` ([ADR 0007](adr/0007-versionnement-v2.md)). Une pré-version (`2.1.0-rc.1`) n'a que son propre tag. Labels OCI (source, version, révision) posés par `docker/metadata-action` ;
+  - création de la GitHub Release avec des notes générées (marquée pré-version si le tag en est une).
+- Le workflow n'utilise que `GITHUB_TOKEN`, avec les permissions minimales de chaque job (`packages: write` pour la publication, `contents: write` pour la Release). Les actions sont épinglées par SHA de commit.
+- Docker Hub n'est pas utilisé pour l'instant : il pourra être ajouté plus tard (secret d'accès, second nom d'image dans `docker/metadata-action`).
