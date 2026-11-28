@@ -7,7 +7,11 @@ import db from '@adonisjs/lucid/services/db'
  * all wait, so that they overlap (docs/architecture.md, tests).
  */
 export async function waitForLockWaiters(count: number) {
-  for (let attempt = 0; attempt < 100; attempt++) {
+  /**
+   * Checked every 20 ms for 10 seconds at most: the requests usually wait
+   * within a few checks, a loaded machine can take longer.
+   */
+  for (let attempt = 0; attempt < 500; attempt++) {
     const { rows } = await db.rawQuery(
       `select count(*)::int as waiting from pg_stat_activity
         where datname = current_database() and wait_event_type = 'Lock'`

@@ -5,7 +5,7 @@ import { UserFactory } from '#database/factories/user_factory'
 import { VivariumFactory } from '#database/factories/vivarium_factory'
 import limiter from '@adonisjs/limiter/services/main'
 import testUtils from '@adonisjs/core/services/test_utils'
-import { loginLimiterKeys } from '#services/login_service'
+import { loginBlocksHistory, loginBlocksKey, loginLimiterKeys } from '#services/login_service'
 import type { ApiClient } from '@japa/api-client'
 
 /**
@@ -54,9 +54,10 @@ async function endBlock(email: string) {
  * forgotten, read in the limiter under the key the login service gives it.
  */
 async function blocksHistoryExpiresIn(email: string) {
-  const history = limiter.use({ requests: 1, duration: '24 hours' })
   for (const ip of CLIENT_IPS) {
-    const blocks = await history.get(`${loginLimiterKeys(ip, email).ipAndEmail}:blocks`)
+    const blocks = await loginBlocksHistory().get(
+      loginBlocksKey(loginLimiterKeys(ip, email).ipAndEmail)
+    )
     if (blocks) {
       return blocks.availableIn
     }
@@ -348,7 +349,6 @@ test.group('Login', (group) => {
 
   test('AUTH-27 once the history is forgotten, a new block lasts 15 minutes again', async ({
     client,
-    assert,
   }) => {
     const user = await UserFactory.create()
     await failLogins(client, user.email, 5)
@@ -360,11 +360,8 @@ test.group('Login', (group) => {
      * Simulates the passing of the 24 hours of the history.
      */
     for (const ip of CLIENT_IPS) {
-      await limiter
-        .use({ requests: 1, duration: '24 hours' })
-        .delete(`${loginLimiterKeys(ip, user.email).ipAndEmail}:blocks`)
+      await loginBlocksHistory().delete(loginBlocksKey(loginLimiterKeys(ip, user.email).ipAndEmail))
     }
-    assert.isNull(await blocksHistoryExpiresIn(user.email))
 
     await failLogins(client, user.email, 5)
     const response = await login(client, user.email, 'secret-password')

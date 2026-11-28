@@ -36,18 +36,23 @@ export function loginLimiterKeys(ip: string, email: string) {
 
 /**
  * Number of blocks of a key, stored by the limiter under its own key.
+ * Exported for the tests, which read and forget the history of a key.
  */
-function blocksKey(key: string) {
+export function loginBlocksKey(key: string) {
   return `${key}:blocks`
 }
 
+/**
+ * Counts the blocks of each key. Only its "set", "get" and "delete" are
+ * used, with their own expiry: the number of allowed requests and the
+ * duration of the limiter play no role. Exported for the tests.
+ */
+export function loginBlocksHistory() {
+  return limiter.use({ requests: 1, duration: BLOCKS_HISTORY_SECONDS })
+}
+
 export class LoginService {
-  /**
-   * Counts the blocks of each key. Only its "set" and "get" are used, with
-   * their own expiry: the number of allowed requests and the duration of
-   * the limiter play no role.
-   */
-  protected blocksHistory = limiter.use({ requests: 1, duration: BLOCKS_HISTORY_SECONDS })
+  protected blocksHistory = loginBlocksHistory()
 
   /**
    * Checks the credentials of a login attempt from the given IP.
@@ -131,7 +136,7 @@ export class LoginService {
    * Duration in seconds of a new block of the key, recorded in its history.
    */
   protected async nextBlockDuration(key: string): Promise<number> {
-    const history = await this.blocksHistory.get(blocksKey(key))
+    const history = await this.blocksHistory.get(loginBlocksKey(key))
     const previousBlocks = history?.consumed ?? 0
     const duration = Math.min(FIRST_BLOCK_SECONDS * 2 ** previousBlocks, MAX_BLOCK_SECONDS)
 
@@ -139,7 +144,7 @@ export class LoginService {
      * Kept 24 hours after the end of the block, not its start.
      */
     await this.blocksHistory.set(
-      blocksKey(key),
+      loginBlocksKey(key),
       previousBlocks + 1,
       duration + BLOCKS_HISTORY_SECONDS
     )
