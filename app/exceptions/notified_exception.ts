@@ -1,6 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { Exception } from '@adonisjs/core/exceptions'
-import type { Notification } from '#middleware/inertia_middleware'
 
 /**
  * Business error shown to the user as a notification on the previous page.
@@ -17,11 +16,10 @@ export default abstract class NotifiedException extends Exception {
   }
 
   async handle(error: this, ctx: HttpContext) {
-    const notification: Notification = {
-      type: 'error',
-      message: ctx.i18n.t(`errors.${error.code}`, error.translationData(ctx), error.message),
-    }
-    ctx.session.flash('notification', notification)
+    ctx.session.notify(
+      'error',
+      ctx.i18n.t(`errors.${error.code}`, error.translationData(ctx), error.message)
+    )
     return ctx.response.redirect().back()
   }
 }

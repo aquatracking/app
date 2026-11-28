@@ -4,7 +4,6 @@ import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import drive from '@adonisjs/drive/services/main'
 import VivariumPolicy from '#policies/vivarium_policy'
-import type { Notification } from '#middleware/inertia_middleware'
 import { updateVivariumImageValidator } from '#validators/vivarium'
 import { VivariumImageService } from '#services/vivarium_image_service'
 
@@ -42,8 +41,7 @@ export default class VivariumImagesController {
 
     await vivariumImageService.replace(vivarium, image.tmpPath!)
 
-    const notification: Notification = { type: 'success', message: i18n.t('vivariums.image.saved') }
-    session.flash('notification', notification)
+    session.notify('success', i18n.t('vivariums.image.saved'))
     return response.redirect().toRoute('vivariums.show', { id: vivarium.id })
   }
 
@@ -57,11 +55,7 @@ export default class VivariumImagesController {
 
     await vivariumImageService.remove(vivarium)
 
-    const notification: Notification = {
-      type: 'success',
-      message: i18n.t('vivariums.image.removed'),
-    }
-    session.flash('notification', notification)
+    session.notify('success', i18n.t('vivariums.image.removed'))
     return response.redirect().toRoute('vivariums.show', { id: vivarium.id })
   }
 }

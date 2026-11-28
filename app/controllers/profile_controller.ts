@@ -3,7 +3,6 @@ import { TIMEZONES } from '#catalog/timezones'
 import type { HttpContext } from '@adonisjs/core/http'
 import i18nManager from '@adonisjs/i18n/services/main'
 import { ProfileService } from '#services/profile_service'
-import type { Notification } from '#middleware/inertia_middleware'
 import { updatePasswordValidator, updateProfileValidator } from '#validators/profile'
 
 /**
@@ -30,11 +29,7 @@ export default class ProfileController {
     /**
      * Already in the language just chosen, like the next page.
      */
-    const notification: Notification = {
-      type: 'success',
-      message: i18nManager.locale(user.locale).t('profile.saved'),
-    }
-    session.flash('notification', notification)
+    session.notify('success', i18nManager.locale(user.locale).t('profile.saved'))
     return response.redirect().toRoute('profile.edit')
   }
 
@@ -56,11 +51,7 @@ export default class ProfileController {
       request.encryptedCookie(guard.rememberMeKeyName)
     )
 
-    const notification: Notification = {
-      type: 'success',
-      message: i18n.t('profile.password_changed'),
-    }
-    session.flash('notification', notification)
+    session.notify('success', i18n.t('profile.password_changed'))
     return response.redirect().toRoute('profile.edit')
   }
 }

@@ -1,6 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
-import type { Notification } from '#middleware/inertia_middleware'
 
 /**
  * Pages meant for visitors who are not signed in (login, invitation,
@@ -9,11 +8,7 @@ import type { Notification } from '#middleware/inertia_middleware'
 export default class GuestMiddleware {
   async handle(ctx: HttpContext, next: NextFn) {
     if (ctx.auth.isAuthenticated) {
-      const notification: Notification = {
-        type: 'error',
-        message: ctx.i18n.t('auth.already_signed_in'),
-      }
-      ctx.session.flash('notification', notification)
+      ctx.session.notify('error', ctx.i18n.t('auth.already_signed_in'))
       return ctx.response.redirect().toRoute('vivariums.index')
     }
 

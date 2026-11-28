@@ -2,7 +2,6 @@ import app from '@adonisjs/core/services/app'
 import { errors as authErrors } from '@adonisjs/auth'
 import { errors as bouncerErrors } from '@adonisjs/bouncer'
 import { errors as limiterErrors } from '@adonisjs/limiter'
-import type { Notification } from '#middleware/inertia_middleware'
 import { type HttpContext, ExceptionHandler } from '@adonisjs/core/http'
 import type { StatusPageRange, StatusPageRenderer } from '@adonisjs/core/types/http'
 
@@ -39,8 +38,7 @@ export default class HttpExceptionHandler extends ExceptionHandler {
      * the limit is reported as a notification on the page instead.
      */
     if (error instanceof limiterErrors.E_TOO_MANY_REQUESTS && ctx.request.header('x-inertia')) {
-      const notification: Notification = { type: 'error', message: error.getResponseMessage(ctx) }
-      ctx.session.flash('notification', notification)
+      ctx.session.notify('error', error.getResponseMessage(ctx))
       return ctx.response.redirect().back()
     }
 
@@ -49,11 +47,7 @@ export default class HttpExceptionHandler extends ExceptionHandler {
      * like the other business errors.
      */
     if (error instanceof authErrors.E_INVALID_CREDENTIALS) {
-      const notification: Notification = {
-        type: 'error',
-        message: error.getResponseMessage(error, ctx),
-      }
-      ctx.session.flash('notification', notification)
+      ctx.session.notify('error', error.getResponseMessage(error, ctx))
       return ctx.response.redirect().back()
     }
 
@@ -71,11 +65,7 @@ export default class HttpExceptionHandler extends ExceptionHandler {
         return ctx.response.status(404).send(await ctx.inertia.render('errors/not_found', {}))
       }
       if (error.response.translation) {
-        const notification: Notification = {
-          type: 'error',
-          message: error.getResponseMessage(ctx),
-        }
-        ctx.session.flash('notification', notification)
+        ctx.session.notify('error', error.getResponseMessage(ctx))
         return ctx.response.redirect().back()
       }
       return ctx.response.status(403).send(await ctx.inertia.render('errors/forbidden', {}))

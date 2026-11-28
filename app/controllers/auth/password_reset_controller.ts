@@ -1,7 +1,6 @@
 import { inject } from '@adonisjs/core'
 import app from '@adonisjs/core/services/app'
 import type { HttpContext } from '@adonisjs/core/http'
-import type { Notification } from '#middleware/inertia_middleware'
 import { PasswordResetService } from '#services/password_reset_service'
 import { forgotPasswordValidator, resetPasswordValidator } from '#validators/auth'
 
@@ -33,11 +32,7 @@ export default class PasswordResetController {
     const { email } = await request.validateUsing(forgotPasswordValidator)
     await passwordResetService.sendLink(email)
 
-    const notification: Notification = {
-      type: 'success',
-      message: i18n.t('auth.forgot_password.sent'),
-    }
-    session.flash('notification', notification)
+    session.notify('success', i18n.t('auth.forgot_password.sent'))
     return response.redirect().back()
   }
 
@@ -61,11 +56,7 @@ export default class PasswordResetController {
     const user = await passwordResetService.reset(params.token, password)
 
     await auth.use('web').login(user)
-    const notification: Notification = {
-      type: 'success',
-      message: i18n.t('auth.reset_password.done'),
-    }
-    session.flash('notification', notification)
+    session.notify('success', i18n.t('auth.reset_password.done'))
     return response.redirect().toRoute('vivariums.index')
   }
 }

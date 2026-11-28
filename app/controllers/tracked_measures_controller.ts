@@ -4,7 +4,6 @@ import type { HttpContext } from '@adonisjs/core/http'
 import TrackedMeasure from '#models/tracked_measure'
 import VivariumPolicy from '#policies/vivarium_policy'
 import { MeasureTypeCatalog } from '#catalog/measure_types'
-import type { Notification } from '#middleware/inertia_middleware'
 import VivariumTransformer from '#transformers/vivarium_transformer'
 import { TrackedMeasureService } from '#services/tracked_measure_service'
 import MeasureTypeTransformer from '#transformers/measure_type_transformer'
@@ -50,13 +49,10 @@ export default class TrackedMeasuresController {
 
     await this.trackedMeasureService.add(vivarium, code)
 
-    const notification: Notification = {
-      type: 'success',
-      message: i18n.t('tracked_measures.added', {
-        name: i18n.t(`measure_types.${code}.label`),
-      }),
-    }
-    session.flash('notification', notification)
+    session.notify(
+      'success',
+      i18n.t('tracked_measures.added', { name: i18n.t(`measure_types.${code}.label`) })
+    )
     return response.redirect().toRoute('tracked_measures.index', { id: vivarium.id })
   }
 
@@ -84,13 +80,12 @@ export default class TrackedMeasuresController {
 
     await this.trackedMeasureService.remove(trackedMeasure)
 
-    const notification: Notification = {
-      type: 'success',
-      message: i18n.t('tracked_measures.removed', {
+    session.notify(
+      'success',
+      i18n.t('tracked_measures.removed', {
         name: i18n.t(`measure_types.${trackedMeasure.measureType.code}.label`),
-      }),
-    }
-    session.flash('notification', notification)
+      })
+    )
     return response.redirect().toRoute('tracked_measures.index', { id: vivarium.id })
   }
 }

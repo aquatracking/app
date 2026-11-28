@@ -7,7 +7,6 @@ import { VivariumService } from '#services/vivarium_service'
 import { ReadingService } from '#services/reading_service'
 import TileTransformer from '#transformers/tile_transformer'
 import { MeasureSeriesService } from '#services/measure_series_service'
-import type { Notification } from '#middleware/inertia_middleware'
 import VivariumTransformer from '#transformers/vivarium_transformer'
 import type { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
 import MeasureTypeDefinitionTransformer from '#transformers/measure_type_definition_transformer'
@@ -66,11 +65,7 @@ export default class VivariumsController {
 
     const vivarium = await vivariumService.create(user, data)
 
-    const notification: Notification = {
-      type: 'success',
-      message: i18n.t('vivariums.created', { name: vivarium.name }),
-    }
-    session.flash('notification', notification)
+    session.notify('success', i18n.t('vivariums.created', { name: vivarium.name }))
     return response.redirect().toRoute('vivariums.show', { id: vivarium.id })
   }
 
@@ -132,11 +127,7 @@ export default class VivariumsController {
     vivarium.merge(data)
     await vivarium.save()
 
-    const notification: Notification = {
-      type: 'success',
-      message: i18n.t('vivariums.saved', { name: vivarium.name }),
-    }
-    session.flash('notification', notification)
+    session.notify('success', i18n.t('vivariums.saved', { name: vivarium.name }))
     return response.redirect().toRoute('vivariums.show', { id: vivarium.id })
   }
 
@@ -147,11 +138,7 @@ export default class VivariumsController {
     vivarium.archivedAt = DateTime.now()
     await vivarium.save()
 
-    const notification: Notification = {
-      type: 'success',
-      message: i18n.t('vivariums.archived_notice', { name: vivarium.name }),
-    }
-    session.flash('notification', notification)
+    session.notify('success', i18n.t('vivariums.archived_notice', { name: vivarium.name }))
     return response.redirect().toRoute('vivariums.show', { id: vivarium.id })
   }
 
@@ -162,11 +149,7 @@ export default class VivariumsController {
     vivarium.archivedAt = null
     await vivarium.save()
 
-    const notification: Notification = {
-      type: 'success',
-      message: i18n.t('vivariums.unarchived_notice', { name: vivarium.name }),
-    }
-    session.flash('notification', notification)
+    session.notify('success', i18n.t('vivariums.unarchived_notice', { name: vivarium.name }))
     return response.redirect().toRoute('vivariums.show', { id: vivarium.id })
   }
 
