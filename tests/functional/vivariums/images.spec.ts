@@ -18,6 +18,7 @@ import { UserFactory } from '#database/factories/user_factory'
 import { VivariumFactory } from '#database/factories/vivarium_factory'
 import { fieldErrors } from '#tests/helpers/responses'
 import { waitForLockWaiters } from '#tests/helpers/locks'
+import { sendDuringArchiving } from '#tests/helpers/vivariums'
 import { uploadedFiles, useUploadDirectory } from '#tests/helpers/uploads'
 
 /**
@@ -581,5 +582,55 @@ test.group('Vivarium images on several connections', (group) => {
     response.assertStatus(404)
     assert.deepEqual(await imageFiles(vivarium), [])
     assert.deepEqual(await uploadedFiles(), [])
+  })
+
+  test('VIV-19 a replacement of the image sent while the vivarium is archived is refused once the archiving is done', async ({
+    client,
+    assert,
+  }) => {
+    const user = await UserFactory.create()
+    const vivarium = await VivariumFactory.merge({ userId: user.id }).create()
+    await uploadImage(client, user, vivarium, await photo())
+    await vivarium.refresh()
+    const imagePath = vivarium.imagePath!
+    const jpeg = await photo()
+
+    const response = await sendDuringArchiving(vivarium, () =>
+      uploadImage(client, user, vivarium, jpeg)
+    )
+
+    response.assertHeader('location', `/vivariums/${vivarium.id}/edit`)
+    response.assertFlashMessage('notification', {
+      type: 'error',
+      message: 'This tank is archived: unarchive it to change it.',
+    })
+    await vivarium.refresh()
+    assert.isTrue(vivarium.isArchived)
+    assert.equal(vivarium.imagePath, imagePath)
+    assert.deepEqual(await imageFiles(vivarium), [imagePath])
+    assert.deepEqual(await uploadedFiles(), [])
+  })
+
+  test('VIV-19 a removal of the image sent while the vivarium is archived is refused once the archiving is done', async ({
+    client,
+    assert,
+  }) => {
+    const user = await UserFactory.create()
+    const vivarium = await VivariumFactory.merge({ userId: user.id }).create()
+    await uploadImage(client, user, vivarium, await photo())
+    await vivarium.refresh()
+    const imagePath = vivarium.imagePath!
+
+    const response = await sendDuringArchiving(vivarium, () => removeImage(client, user, vivarium))
+
+    response.assertHeader('location', `/vivariums/${vivarium.id}/edit`)
+    response.assertFlashMessage('notification', {
+      type: 'error',
+      message: 'This tank is archived: unarchive it to change it.',
+    })
+    await vivarium.refresh()
+    assert.isTrue(vivarium.isArchived)
+    assert.equal(vivarium.imagePath, imagePath)
+    assert.deepEqual(await imageFiles(vivarium), [imagePath])
   })
 })

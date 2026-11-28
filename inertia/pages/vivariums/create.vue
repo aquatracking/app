@@ -10,7 +10,7 @@ defineOptions({ layout: AppLayout })
 
 const props = defineProps<{
   today: string
-  kinds: Data.Vivarium['kind'][]
+  kinds: Data.VivariumKind[]
   waterTypes: NonNullable<Data.Vivarium['waterType']>[]
   climates: NonNullable<Data.Vivarium['climate']>[]
 }>()

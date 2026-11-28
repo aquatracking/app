@@ -8,6 +8,7 @@ import { ReadingService } from '#services/reading_service'
 import TileTransformer from '#transformers/tile_transformer'
 import { MeasureSeriesService } from '#services/measure_series_service'
 import VivariumTransformer from '#transformers/vivarium_transformer'
+import VivariumKindTransformer from '#transformers/vivarium_kind_transformer'
 import type { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
 import MeasureTypeDefinitionTransformer from '#transformers/measure_type_definition_transformer'
 import { createVivariumValidator, updateVivariumValidator } from '#validators/vivarium'
@@ -30,9 +31,16 @@ export default class VivariumsController {
   async index({ auth, inertia }: HttpContext) {
     const user = auth.getUserOrFail()
     const vivariums = await this.withLastReading(
-      user.related('vivariums').query().whereNull('archived_at')
+      user
+        .related('vivariums')
+        .query()
+        .withScopes((scopes) => scopes.active())
     )
-    const archived = await user.related('vivariums').query().whereNotNull('archived_at').first()
+    const archived = await user
+      .related('vivariums')
+      .query()
+      .withScopes((scopes) => scopes.archived())
+      .first()
 
     return inertia.render('vivariums/index', {
       vivariums: VivariumTransformer.transform(vivariums).useVariant('forCard'),
@@ -42,7 +50,11 @@ export default class VivariumsController {
 
   async archived({ auth, inertia }: HttpContext) {
     const vivariums = await this.withLastReading(
-      auth.getUserOrFail().related('vivariums').query().whereNotNull('archived_at')
+      auth
+        .getUserOrFail()
+        .related('vivariums')
+        .query()
+        .withScopes((scopes) => scopes.archived())
     )
 
     return inertia.render('vivariums/archived', {
@@ -53,7 +65,7 @@ export default class VivariumsController {
   async create({ auth, inertia }: HttpContext) {
     return inertia.render('vivariums/create', {
       today: DateTime.now().setZone(auth.getUserOrFail().timezone).toISODate()!,
-      kinds: [...VIVARIUM_KINDS],
+      kinds: VivariumKindTransformer.transform([...VIVARIUM_KINDS]),
       waterTypes: [...WATER_TYPES],
       climates: [...CLIMATES],
     })
@@ -102,6 +114,7 @@ export default class VivariumsController {
     return inertia.render('vivariums/edit', {
       vivarium: VivariumTransformer.transform(vivarium),
       today: DateTime.now().setZone(auth.getUserOrFail().timezone).toISODate()!,
+      kinds: VivariumKindTransformer.transform([...VIVARIUM_KINDS]),
       waterTypes: [...WATER_TYPES],
       climates: [...CLIMATES],
     })

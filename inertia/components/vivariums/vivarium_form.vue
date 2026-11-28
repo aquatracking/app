@@ -7,7 +7,6 @@ import { Button } from '~/components/ui/button'
 import { Textarea } from '~/components/ui/textarea'
 import { useI18n } from '~/composables/use_i18n'
 import { NativeSelect, NativeSelectOption } from '~/components/ui/native-select'
-import { hasClimate, hasWaterType, type VivariumKind } from '~/composables/use_vivarium'
 import {
   Field,
   FieldDescription,
@@ -21,20 +20,21 @@ import {
 /**
  * Creation (no vivarium) or update form of a vivarium. Only the fields of
  * the chosen kind are shown; the kind is chosen on creation only. The
- * kinds, water types and climates are those of the server
- * (app/models/vivarium.ts).
+ * kinds, with the fields each one has, water types and climates are those
+ * of the server (app/models/vivarium.ts).
  */
 const props = defineProps<{
   vivarium?: Data.Vivarium
   today: string
-  kinds?: readonly VivariumKind[]
+  kinds: readonly Data.VivariumKind[]
   waterTypes: readonly NonNullable<Data.Vivarium['waterType']>[]
   climates: readonly NonNullable<Data.Vivarium['climate']>[]
 }>()
 
 const { t } = useI18n()
 
-const kind = ref<VivariumKind>(props.vivarium?.kind ?? 'aquarium')
+const kind = ref<Data.Vivarium['kind']>(props.vivarium?.kind ?? 'aquarium')
+const fieldsOfKind = computed(() => props.kinds.find((value) => value.kind === kind.value))
 
 /**
  * Water types and climates are lowercase in the translations, to fit in
@@ -86,8 +86,8 @@ const suggestedVolume = computed(() => {
           class="w-full"
           :aria-invalid="!!errors.kind"
         >
-          <NativeSelectOption v-for="value in props.kinds" :key="value" :value="value">
-            {{ t(`vivariums.kinds.${value}`) }}
+          <NativeSelectOption v-for="value in props.kinds" :key="value.kind" :value="value.kind">
+            {{ t(`vivariums.kinds.${value.kind}`) }}
           </NativeSelectOption>
         </NativeSelect>
         <FieldDescription>{{ t('vivariums.form.kind_hint') }}</FieldDescription>
@@ -107,7 +107,7 @@ const suggestedVolume = computed(() => {
         <FieldError :errors="[errors.name]" />
       </Field>
 
-      <Field v-if="hasWaterType(kind)" :data-invalid="!!errors.waterType">
+      <Field v-if="fieldsOfKind?.hasWaterType" :data-invalid="!!errors.waterType">
         <FieldLabel for="waterType">{{ t('vivariums.form.water_type') }}</FieldLabel>
         <NativeSelect
           id="waterType"
@@ -127,7 +127,7 @@ const suggestedVolume = computed(() => {
         <FieldError :errors="[errors.waterType]" />
       </Field>
 
-      <Field v-if="hasClimate(kind)" :data-invalid="!!errors.climate">
+      <Field v-if="fieldsOfKind?.hasClimate" :data-invalid="!!errors.climate">
         <FieldLabel for="climate">{{ t('vivariums.form.climate') }}</FieldLabel>
         <NativeSelect
           id="climate"

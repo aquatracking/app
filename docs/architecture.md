@@ -70,13 +70,14 @@ app/
     measures_controller.ts       # relevé, historique, correction
     charts_controller.ts
   exceptions/                    # handler.ts, NotifiedException et une classe par erreur métier (code E_…)
+  helpers/instants.ts            # instants et points de séries envoyés aux pages (ISO, UTC), partagés par les transformers
   mails/                         # invitation_notification, password_reset_notification
   models/                        # user, invitation, password_reset_token, vivarium, measure_type, tracked_measure, measure
     mixins/                      # with_uuid_v7, with_one_time_token
   policies/                      # vivarium_policy, user_policy, invitation_policy
   transformers/                  # une classe par forme de données exposée
   validators/                    # un fichier par ressource, un validator par action
-    rules/                       # règles Vine propres au projet (fuseau, valeur de mesure…)
+    rules/                       # règles Vine propres au projet (fuseau, valeur de mesure, format d'image…)
   services/                      # opérations métier appelables hors HTTP, une classe par domaine :
                                  # setup, login, registration, invitation, password_reset, profile,
                                  # user_administration, vivarium, vivarium_image, tracked_measure,
@@ -117,7 +118,7 @@ tests/helpers/
 ## Rendu et formulaires
 
 - Formulaires avec le composant `<Form>` d'Inertia et routes typées ; les erreurs de validation reviennent par session.
-- Les messages de succès ou d'erreur métier passent par un flash `notification` partagé par le middleware Inertia, posé avec `session.notify(type, message)` (macro de `start/session.ts`). Un lien à usage unique généré par un administrateur (invitation, réinitialisation) passe par un flash `generatedLink`, seul moment où il est connu.
+- Les messages de succès ou d'erreur métier passent par un flash `notification` partagé par le middleware Inertia, posé avec `session.notify(type, message)` (macro de `start/session.ts`). Un lien à usage unique généré par un administrateur (invitation, réinitialisation) passe par un flash `generatedLink`, seul moment où il est connu, posé avec `session.showLink(link)` (macro du même fichier).
 - Données partagées à toutes les pages (`InertiaMiddleware`) : utilisateur courant (transformé), langue, fuseau de l'utilisateur, notification, `mailEnabled` et `now`, l'instant de la réponse. Les durées relatives (« il y a 3 h ») et la date du jour (âge d'un vivarium) se calculent à partir de `now` pendant le rendu SSR et l'hydratation, qui donnent ainsi le même texte ; une fois la page montée, elles suivent l'horloge du navigateur, rafraîchie chaque minute, y compris sur une page restaurée par un retour arrière sans requête (`useNow`, `inertia/composables/use_now.ts`).
 - Les listes de valeurs que le serveur accepte (langues, fuseaux, kinds, types d'eau, climats) arrivent aux pages qui en ont besoin dans leurs props, depuis les constantes du serveur (`LOCALES`, `TIMEZONES`, `VIVARIUM_KINDS`…) : elles ne sont pas recopiées côté client.
 - **Fuseau horaire** : stocké sur l'utilisateur. Les formulaires d'installation, d'inscription et de profil le font choisir dans une liste avec recherche, fournie par le serveur (`app/catalog/timezones.ts` : `UTC` et une entrée par zone géographique de `zone.tab` (IANA), sous le nom qu'il lui donne à une exception près (`America/Coral_Harbour`, voir [02](features/02-auth-profile.md#profil)), figée pour ne pas dépendre de la version d'ICU et rester reconnue par PostgreSQL ; c'est la liste que le validateur accepte). L'installation et l'inscription la préremplissent après montage avec `Intl.DateTimeFormat().resolvedOptions().timeZone`, ramené à l'entrée de la liste qui désigne la même zone, comme un nom enregistré qui n'est pas dans la liste ; le serveur refuse tout nom hors de la liste et l'enregistre. Rendu SSR et client utilisent ce même fuseau partagé : pas d'écart à l'hydratation. Pas de cookie ni de détection à chaque requête.

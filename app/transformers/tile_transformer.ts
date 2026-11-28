@@ -1,7 +1,7 @@
-import type { DateTime } from 'luxon'
+import { iso, point } from '#helpers/instants'
 import { BaseTransformer } from '@adonisjs/core/transformers'
 import MeasureTypeTransformer from '#transformers/measure_type_transformer'
-import type { SeriesPoint, Tile } from '#services/measure_series_service'
+import type { Tile } from '#services/measure_series_service'
 
 /**
  * A tile of the dashboard. Instants in UTC, values as numbers: shown
@@ -22,12 +22,4 @@ export default class TileTransformer extends BaseTransformer<Tile> {
       },
     }
   }
-}
-
-export function iso(instant: DateTime) {
-  return instant.toUTC().toISO({ suppressMilliseconds: true })!
-}
-
-export function point({ measuredAt, value }: SeriesPoint) {
-  return { measuredAt: iso(measuredAt), value }
 }

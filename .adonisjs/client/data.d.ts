@@ -15,6 +15,7 @@ import type ReadingTransformer from '#transformers/reading_transformer'
 import type TileTransformer from '#transformers/tile_transformer'
 import type TrackedMeasureTransformer from '#transformers/tracked_measure_transformer'
 import type UserTransformer from '#transformers/user_transformer'
+import type VivariumKindTransformer from '#transformers/vivarium_kind_transformer'
 import type VivariumTransformer from '#transformers/vivarium_transformer'
 import type InertiaMiddleware from '#middleware/inertia_middleware'
 
@@ -54,6 +55,10 @@ export namespace Data {
   export type User = InferData<UserTransformer>
   export namespace User {
     export type Variants = InferVariants<UserTransformer>
+  }
+  export type VivariumKind = InferData<VivariumKindTransformer>
+  export namespace VivariumKind {
+    export type Variants = InferVariants<VivariumKindTransformer>
   }
   export type Vivarium = InferData<VivariumTransformer>
   export namespace Vivarium {

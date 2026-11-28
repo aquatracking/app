@@ -6,7 +6,6 @@ import UserTransformer from '#transformers/user_transformer'
 import { PasswordResetService } from '#services/password_reset_service'
 import { deleteUserValidator, updateAdminValidator } from '#validators/admin'
 import { UserAdministrationService } from '#services/user_administration_service'
-import type { GeneratedLink } from '#middleware/inertia_middleware'
 
 /**
  * Accounts of the instance, managed by administrators
@@ -75,13 +74,7 @@ export default class UsersController {
 
     const { url, emailed } = await passwordResetService.createLink(target)
 
-    const generatedLink: GeneratedLink = {
-      kind: 'password_reset',
-      email: target.email,
-      url,
-      emailed,
-    }
-    session.flash('generatedLink', generatedLink)
+    session.showLink({ kind: 'password_reset', email: target.email, url, emailed })
     return response.redirect().toRoute('admin.users.index')
   }
 }

@@ -3,20 +3,6 @@ import type { Data } from '@generated/data'
 import { useNow } from '~/composables/use_now'
 import { useI18n } from '~/composables/use_i18n'
 
-export type VivariumKind = Data.Vivarium['kind']
-
-/**
- * Whether a kind of vivarium has a water type and a climate, as checked
- * by the server (app/models/vivarium.ts).
- */
-export function hasWaterType(kind: VivariumKind) {
-  return kind !== 'terrarium'
-}
-
-export function hasClimate(kind: VivariumKind) {
-  return kind !== 'aquarium'
-}
-
 /**
  * Date ("YYYY-MM-DD") of an instant in the time zone of the user.
  */

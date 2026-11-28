@@ -4,8 +4,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import InvitationPolicy from '#policies/invitation_policy'
 import { createInvitationValidator } from '#validators/admin'
 import InvitationTransformer from '#transformers/invitation_transformer'
-import type { GeneratedLink } from '#middleware/inertia_middleware'
-import { type InvitationLink, InvitationService } from '#services/invitation_service'
+import { InvitationService } from '#services/invitation_service'
 
 /**
  * Pending invitations, managed by administrators
@@ -23,21 +22,31 @@ export default class InvitationsController {
   }
 
   @inject()
-  async store(ctx: HttpContext, invitationService: InvitationService) {
-    await ctx.bouncer.with(InvitationPolicy).authorize('create')
-    const { email } = await ctx.request.validateUsing(createInvitationValidator)
+  async store(
+    { auth, bouncer, request, response, session }: HttpContext,
+    invitationService: InvitationService
+  ) {
+    await bouncer.with(InvitationPolicy).authorize('create')
+    const { email } = await request.validateUsing(createInvitationValidator)
 
-    const link = await invitationService.invite(ctx.auth.getUserOrFail(), email)
-    return this.showLink(ctx, link)
+    const { invitation, url, emailed } = await invitationService.invite(auth.getUserOrFail(), email)
+
+    session.showLink({ kind: 'invitation', email: invitation.email, url, emailed })
+    return response.redirect().toRoute('admin.invitations.index')
   }
 
   @inject()
-  async renew(ctx: HttpContext, invitationService: InvitationService) {
-    const invitation = await Invitation.findOrFail(ctx.params.id)
-    await ctx.bouncer.with(InvitationPolicy).authorize('renew', invitation)
+  async renew(
+    { params, auth, bouncer, response, session }: HttpContext,
+    invitationService: InvitationService
+  ) {
+    const invitation = await Invitation.findOrFail(params.id)
+    await bouncer.with(InvitationPolicy).authorize('renew', invitation)
 
-    const link = await invitationService.renew(ctx.auth.getUserOrFail(), invitation)
-    return this.showLink(ctx, link)
+    const { url, emailed } = await invitationService.renew(auth.getUserOrFail(), invitation)
+
+    session.showLink({ kind: 'invitation', email: invitation.email, url, emailed })
+    return response.redirect().toRoute('admin.invitations.index')
   }
 
   @inject()
@@ -51,20 +60,6 @@ export default class InvitationsController {
     await invitationService.revoke(invitation)
 
     session.notify('success', i18n.t('admin.invitations.revoked', { email: invitation.email }))
-    return response.redirect().toRoute('admin.invitations.index')
-  }
-
-  /**
-   * Back to the list, with the link of the invitation shown once.
-   */
-  protected showLink({ response, session }: HttpContext, link: InvitationLink) {
-    const generatedLink: GeneratedLink = {
-      kind: 'invitation',
-      email: link.invitation.email,
-      url: link.url,
-      emailed: link.emailed,
-    }
-    session.flash('generatedLink', generatedLink)
     return response.redirect().toRoute('admin.invitations.index')
   }
 }
