@@ -2,12 +2,14 @@ name: Release
 
 # Publishes the Docker image of a version on GHCR (ADR 0007) when a tag v2.*
 # is pushed, then creates the GitHub Release:
-#   version       the tag matches package.json, is on main; computes the tags
+#   version       the tag matches package.json, is on main; computes the tags,
+#                 and finds the digest of X.Y.Z if it is already published
 #   ci            ci.yml replayed on the tagged commit
-#   publish       publish.yml: multi-arch image pushed by digest only, that
-#                 digest started on native amd64 and arm64 runners, then the
-#                 version and floating tags set on the tested digest
-#   github-release
+#   publish       publish.yml: multi-arch image pushed by digest only (or the
+#                 already published digest, never rebuilt), that digest
+#                 started on native amd64 and arm64 runners, then the version
+#                 and floating tags set on the tested digest
+#   github-release  created if it does not exist yet
 # A failed run must be re-run with "Re-run all jobs" (docs/architecture.md).
 on:
   push:
@@ -27,9 +29,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      # Inspects ghcr.io/aquatracking/app:X.Y.Z
+      packages: read
     outputs:
       tags: ${{ steps.tags.outputs.tags }}
       version: ${{ steps.tags.outputs.version }}
+      digest: ${{ steps.published.outputs.digest }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -74,6 +79,39 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "$GITHUB_REF_NAME: $tags"
 
+      - if: github.repository == 'aquatracking/app'
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # X.Y.Z never changes (ADR 0007): if a previous run of this tag already
+      # set it, that digest is tagged again instead of a rebuild, which would
+      # get another digest. Only "not found" means it is not published: any
+      # other error stops the run rather than risk a rebuild
+      - id: published
+        name: Already published version
+        if: github.repository == 'aquatracking/app'
+        env:
+          TAG: ghcr.io/aquatracking/app:${{ steps.tags.outputs.version }}
+        run: |
+          if ! output="$(docker buildx imagetools inspect "$TAG" --format '{{json .Manifest}}' 2>&1)"; then
+            case "$output" in
+              *": not found") echo "$TAG is not published yet"; exit 0 ;;
+              *) echo "$output"; echo "::error::Cannot inspect $TAG"; exit 1 ;;
+            esac
+          fi
+          digest="$(echo "$output" | jq -r .digest)"
+          revision="$(docker buildx imagetools inspect "$TAG" \
+            --format '{{ index (index .Image "linux/amd64").Config.Labels "org.opencontainers.image.revision" }}')"
+          if [ "$revision" != "$GITHUB_SHA" ]; then
+            echo "::error::$TAG is already published from $revision, not $GITHUB_SHA"
+            exit 1
+          fi
+          echo "::notice::$TAG already published ($digest): not rebuilt, its tags are set again"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+
   # Same checks as on a pull request (lint, typecheck, tests on PostgreSQL 16
   # and 18, image smoke test), replayed on the tagged commit
   ci:
@@ -82,8 +120,8 @@ jobs:
       contents: read
     uses: ./.github/workflows/ci.yml
 
-  # Push by digest, smoke test on amd64 and arm64, then the version and
-  # floating tags set on the tested digest
+  # Push by digest (or the already published digest), smoke test on amd64
+  # and arm64, then the version and floating tags set on the tested digest
   publish:
     needs: [version, ci]
     # A fork has no access to the image
@@ -95,6 +133,7 @@ jobs:
     with:
       tags: ${{ needs.version.outputs.tags }}
       version: ${{ needs.version.outputs.version }}
+      digest: ${{ needs.version.outputs.digest }}
 
   github-release:
     name: GitHub Release
@@ -103,10 +142,21 @@ jobs:
     permissions:
       contents: write
     steps:
+      # Releases are immutable: one created by a previous run (or by hand) is
+      # kept as is
       - name: Create the release with generated notes
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          if output="$(gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --json url --jq .url 2>&1)"; then
+            echo "::notice::Release $GITHUB_REF_NAME already exists: $output"
+            exit 0
+          fi
+          if [ "$output" != "release not found" ]; then
+            echo "$output"
+            echo "::error::Cannot read the release $GITHUB_REF_NAME"
+            exit 1
+          fi
           prerelease=""
           case "$GITHUB_REF_NAME" in *-*) prerelease="--prerelease" ;; esac
           gh release create "$GITHUB_REF_NAME" \

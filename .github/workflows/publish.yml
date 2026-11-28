@@ -2,7 +2,8 @@ name: Publish
 
 # Publishes the image of the calling commit on GHCR (ADR 0007). Called by
 # release.yml (version tags) and main.yml (main tags), once their CI passed:
-#   publish       multi-arch image pushed by digest only, without any tag
+#   publish       multi-arch image pushed by digest only, without any tag;
+#                 skipped when the caller gives an already published digest
 #   smoke-test    that digest started on native amd64 and arm64 runners
 #   tag           the requested tags set on the tested digest
 # The caller sets the concurrency and grants the permissions of these jobs:
@@ -22,6 +23,10 @@ on:
         description: Value of the org.opencontainers.image.version label and annotation
         type: string
         required: true
+      digest:
+        description: Digest of an image already published from this commit. Nothing is built; that digest is smoke tested and tagged
+        type: string
+        default: ''
 
 permissions: {}
 
@@ -33,6 +38,7 @@ jobs:
   # the smoke test
   publish:
     name: Push the image by digest
+    if: inputs.digest == ''
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -84,10 +90,12 @@ jobs:
           provenance: mode=max
           sbom: true
 
-  # Starts the pushed digest on each architecture
+  # Starts the pushed (or given) digest on each architecture
   smoke-test:
     name: Smoke test (${{ matrix.platform }})
     needs: publish
+    # Also when publish is skipped because a digest is given
+    if: ${{ !cancelled() && (needs.publish.result == 'success' || (needs.publish.result == 'skipped' && inputs.digest != '')) }}
     strategy:
       matrix:
         include:
@@ -97,10 +105,13 @@ jobs:
             runner: ubuntu-24.04-arm
     runs-on: ${{ matrix.runner }}
     permissions:
+      # Checkout of the smoke test script
+      contents: read
       packages: read
     services:
       postgres:
-        image: postgres:16
+        # Pinned by digest, updated by hand like in ci.yml
+        image: postgres:16@sha256:ce81150802644ddfac1db4da9e63be6f2a3818aa6ee98a7a28838aeea65dc37a
         env:
           POSTGRES_USER: aquatracking
           POSTGRES_PASSWORD: aquatracking
@@ -113,15 +124,22 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
       - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Migrations, catalog seeder and server
+      # Migrations, catalog seeder, then the setup page rendered by the server
+      # with its assets (.github/scripts/smoke_test.sh), on the expected
+      # architecture
+      - name: Smoke test
         env:
-          IMAGE_REF: ${{ env.IMAGE }}@${{ needs.publish.outputs.digest }}
+          IMAGE_REF: ${{ env.IMAGE }}@${{ inputs.digest || needs.publish.outputs.digest }}
           PLATFORM: ${{ matrix.platform }}
         run: |
           docker run -d --name app --network host --platform "$PLATFORM" \
@@ -130,26 +148,23 @@ jobs:
             -e DB_HOST=127.0.0.1 -e DB_USER=aquatracking \
             -e DB_PASSWORD=aquatracking -e DB_DATABASE=aquatracking \
             "$IMAGE_REF"
-          for _ in $(seq 1 30); do
-            if curl -fsS http://localhost:3333/health/live; then
-              curl -fsS http://localhost:3333/ > /dev/null
-              # Node reports x64 for amd64
-              arch="$(docker exec app node -p process.arch)"
-              echo "Running on $arch"
-              case "$PLATFORM:$arch" in
-                linux/amd64:x64 | linux/arm64:arm64) exit 0 ;;
-                *) echo "::error::Expected $PLATFORM, got $arch"; exit 1 ;;
-              esac
-            fi
-            sleep 2
-          done
-          docker logs app
-          exit 1
+          if ! .github/scripts/smoke_test.sh http://localhost:3333; then
+            docker logs app
+            exit 1
+          fi
+          # Node reports x64 for amd64
+          arch="$(docker exec app node -p process.arch)"
+          echo "Running on $arch"
+          case "$PLATFORM:$arch" in
+            linux/amd64:x64 | linux/arm64:arm64) ;;
+            *) echo "::error::Expected $PLATFORM, got $arch"; exit 1 ;;
+          esac
 
   # Points the requested tags to the tested digest
   tag:
     name: Tag the image
     needs: [publish, smoke-test]
+    if: ${{ !cancelled() && needs.smoke-test.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       # Reads the head of main for main-head-tags
@@ -171,7 +186,7 @@ jobs:
         env:
           TAGS: ${{ inputs.tags }}
           MAIN_HEAD_TAGS: ${{ inputs.main-head-tags }}
-          SOURCE: ${{ env.IMAGE }}@${{ needs.publish.outputs.digest }}
+          SOURCE: ${{ env.IMAGE }}@${{ inputs.digest || needs.publish.outputs.digest }}
           GH_TOKEN: ${{ github.token }}
         run: |
           if [ -n "$MAIN_HEAD_TAGS" ]; then

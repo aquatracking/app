@@ -26,7 +26,7 @@ Les tags `main` (dernière image publiée de la branche `main`, après sa CI) et
 
 Ce que fait l'image :
 
-- elle tourne avec l'utilisateur non root `node` (uid et gid `1000`) ;
+- elle tourne avec l'utilisateur non root `node` (uid et gid `1000`), qui ne peut modifier que `/app/storage` : le code de l'application appartient à `root` ;
 - elle écoute sur le port `3333` (`HOST=0.0.0.0`, `PORT=3333`) ;
 - à **chaque démarrage**, elle applique les migrations (`node ace migration:run --force`), synchronise le catalogue des types de mesure (`node ace db:seed --files database/seeders/catalog_seeder.js`), puis lance le serveur. Les deux premières étapes sont idempotentes : elles ne font rien si la base est déjà à jour. Si l'une échoue (base injoignable, par exemple), le serveur ne démarre pas et le conteneur s'arrête, puis redémarre selon sa politique `restart` ;
 - elle déclare un `HEALTHCHECK` sur `GET /health/live`, qui répond 200 dès que le serveur HTTP répond ;

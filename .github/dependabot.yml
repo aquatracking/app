@@ -12,6 +12,39 @@ updates:
     commit-message:
       prefix: chore
 
+  # Base image of the Dockerfile (node:26-alpine), pinned by digest next to
+  # its tag: Dependabot updates the digest when the tag gets a new image. The
+  # Node major follows .node-version and is upgraded on purpose
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      docker:
+        patterns: ['*']
+    commit-message:
+      prefix: chore
+    ignore:
+      - dependency-name: node
+        update-types: ['version-update:semver-major']
+
+  # Development services of compose.yml (PostgreSQL, Mailpit), pinned the
+  # same way. A PostgreSQL major needs a data migration: never proposed. The
+  # PostgreSQL images of the workflows are not read by Dependabot and are
+  # updated by hand (docs/architecture.md)
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      docker-compose:
+        patterns: ['*']
+    commit-message:
+      prefix: chore
+    ignore:
+      - dependency-name: postgres
+        update-types: ['version-update:semver-major']
+
   # npm dependencies (pnpm-lock.yaml). Minor and patch updates are grouped so
   # that packages released together are upgraded together; each major update
   # gets its own pull request, since it needs a review

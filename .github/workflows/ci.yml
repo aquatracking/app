@@ -53,14 +53,22 @@ jobs:
       - run: pnpm typecheck
 
   test:
+    # test (16), test (18): the pinned image stays out of the name
+    name: test (${{ matrix.postgres }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # 16 is the minimum supported version (ADR 0002), 18 the one of compose.yml
-        postgres: [16, 18]
+        # 16 is the minimum supported version (ADR 0002), 18 the one of
+        # compose.yml. Images pinned by digest, updated by hand: Dependabot
+        # does not read the images of workflows (docs/architecture.md)
+        include:
+          - postgres: 16
+            image: postgres:16@sha256:ce81150802644ddfac1db4da9e63be6f2a3818aa6ee98a7a28838aeea65dc37a
+          - postgres: 18
+            image: postgres:18@sha256:64c8b0d31e4ab6ea665e8426ea406a94bf52de3c05b3a4a8bf713704eefa9328
     services:
       postgres:
-        image: postgres:${{ matrix.postgres }}
+        image: ${{ matrix.image }}
         env:
           POSTGRES_USER: aquatracking
           POSTGRES_PASSWORD: aquatracking
@@ -103,7 +111,8 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16
+        # Pinned by digest, updated by hand like the test matrix
+        image: postgres:16@sha256:ce81150802644ddfac1db4da9e63be6f2a3818aa6ee98a7a28838aeea65dc37a
         env:
           POSTGRES_USER: aquatracking
           POSTGRES_PASSWORD: aquatracking
@@ -127,7 +136,9 @@ jobs:
           tags: aquatracking:ci
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      - name: Smoke test (migrations, catalog seeder, server)
+      # Migrations, catalog seeder, then the setup page rendered by the server
+      # with its assets (.github/scripts/smoke_test.sh)
+      - name: Smoke test
         run: |
           docker run -d --name app --network host \
             -e APP_KEY=ci-only-app-key-not-a-secret-000 \
@@ -135,12 +146,7 @@ jobs:
             -e DB_HOST=127.0.0.1 -e DB_USER=aquatracking \
             -e DB_PASSWORD=aquatracking -e DB_DATABASE=aquatracking \
             aquatracking:ci
-          for _ in $(seq 1 30); do
-            if curl -fsS http://localhost:3333/health/live; then
-              curl -fsS http://localhost:3333/ > /dev/null
-              exit 0
-            fi
-            sleep 2
-          done
-          docker logs app
-          exit 1
+          if ! .github/scripts/smoke_test.sh http://localhost:3333; then
+            docker logs app
+            exit 1
+          fi

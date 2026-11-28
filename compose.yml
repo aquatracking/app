@@ -1,9 +1,11 @@
 # Development services: PostgreSQL and Mailpit (SMTP catcher).
 # Ports are bound to 127.0.0.1: the known password must not be reachable from
 # the network. For production, see docs/deployment.md.
+# Images pinned by digest next to their tag, updated by Dependabot
+# (docker-compose ecosystem, .github/dependabot.yml).
 services:
   postgres:
-    image: postgres:18
+    image: postgres:18@sha256:64c8b0d31e4ab6ea665e8426ea406a94bf52de3c05b3a4a8bf713704eefa9328
     environment:
       POSTGRES_USER: aquatracking
       POSTGRES_PASSWORD: aquatracking
@@ -20,7 +22,7 @@ services:
       retries: 10
 
   mailpit:
-    image: axllent/mailpit:v1.34
+    image: axllent/mailpit:v1.34@sha256:23a2ef85bc50853ab3093645d1d64679afd8887e89da5e48a88940c172591a4e
     ports:
       - '127.0.0.1:1025:1025' # SMTP
       - '127.0.0.1:8025:8025' # Web UI: http://localhost:8025
