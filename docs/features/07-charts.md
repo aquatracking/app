@@ -42,7 +42,7 @@ Voir d'un coup d'œil l'état actuel d'un bac et l'évolution de chaque paramèt
 - Lecture seule : consultable aussi sur un vivarium archivé.
 
 ### Performance
-- Le tableau de bord exécute un nombre de requêtes **constant**, quel que soit le nombre de mesures suivies : dernières valeurs avec `DISTINCT ON`, valeurs précédentes et mini-courbes en une requête chacune (pas de N+1, cf. le correctif de la v0.1.1).
+- Le tableau de bord exécute un nombre de requêtes **constant**, quel que soit le nombre de mesures suivies : une requête `LATERAL` pour la dernière et l'avant-dernière valeur de chaque mesure suivie (deux lignes par type, lues à rebours sur l'index unique), une requête pour les mini-courbes (pas de N+1, cf. le correctif de la v0.1.1).
 - La série d'un graphe est calculée par `MeasureSeriesService` et testée unitairement (agrégation, statistiques).
 
 ## Données

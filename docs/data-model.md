@@ -126,7 +126,7 @@ Unique (`vivarium_id`, `measure_type_id`). Accueillera plus tard `min_value`, `m
 
 Index **unique** (`vivarium_id`, `measure_type_id`, `measured_at`) : interdit deux mesures du même type au même instant sur un vivarium, et sert à la dernière valeur, à l'historique filtré et aux graphes (PostgreSQL le parcourt aussi en ordre décroissant). Les mesures manuelles ont un `measured_at` tronqué à la minute.
 
-Index (`vivarium_id`, `measured_at`) : sert aux lectures de toutes les mesures d'un vivarium par date, sans filtre de type (historique non filtré, date du dernier et du plus ancien relevé, types mesurés).
+Index (`vivarium_id`, `measured_at`) : sert aux lectures de toutes les mesures d'un vivarium par date, sans filtre de type (historique non filtré, date du dernier et du plus ancien relevé).
 
 Une mesure peut exister pour un type qui n'est plus suivi : l'historique reste consultable.
 

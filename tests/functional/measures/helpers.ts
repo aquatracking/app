@@ -55,6 +55,12 @@ export async function storeMeasures(
  * Makes the database refuse every insertion or update of a measure of
  * this type, to fail a change of readings after its first writes. Only
  * within the global transaction of a test, which drops the trigger.
+ *
+ * Inside the global transaction, the "db.transaction" of the service is a
+ * savepoint: the failure rolls back to it and the test then finds the
+ * measures unchanged. Without it, the failure aborts the global
+ * transaction itself, so the test fails on its next query ("current
+ * transaction is aborted") rather than on its assertion.
  */
 export async function failWritesOf(code: string) {
   const type = await MeasureType.findByOrFail('code', code)
