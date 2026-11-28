@@ -6,14 +6,17 @@ import InvalidImageException from '#exceptions/invalid_image_exception'
 import { VivariumImageService } from '#services/vivarium_image_service'
 import { test } from '@japa/runner'
 import { DateTime } from 'luxon'
+import Vivarium from '#models/vivarium'
+import db from '@adonisjs/lucid/services/db'
 import type User from '#models/user'
-import type Vivarium from '#models/vivarium'
 import drive from '@adonisjs/drive/services/main'
-import type { ApiClient } from '@japa/api-client'
+import type { ApiClient, ApiResponse } from '@japa/api-client'
 import testUtils from '@adonisjs/core/services/test_utils'
 import { UserFactory } from '#database/factories/user_factory'
 import { VivariumFactory } from '#database/factories/vivarium_factory'
 import { fieldErrors } from '#tests/helpers/responses'
+import { waitForLockWaiters } from '#tests/helpers/locks'
+import { uploadedFiles, useUploadDirectory } from '#tests/helpers/uploads'
 
 /**
  * A JPEG photo of 3000 × 2000 px, with EXIF data and an orientation
@@ -64,12 +67,21 @@ function removeImage(client: ApiClient, user: User, vivarium: Vivarium) {
     .redirects(0)
 }
 
+/**
+ * Paths of the image files of a vivarium on the disk.
+ */
+async function imageFiles(vivarium: Vivarium) {
+  const list = await drive.use('vivariums').listAll(vivarium.id)
+  return [...list.objects].map((object) => (object.isFile ? object.key : object.prefix))
+}
+
 test.group('Vivarium images', (group) => {
   group.each.setup(() => testUtils.db().withGlobalTransaction())
   group.each.setup(() => {
     drive.fake('vivariums')
     return () => drive.restore('vivariums')
   })
+  group.each.setup(() => useUploadDirectory())
 
   test('VIV-7 a valid image is stored as a WebP of 1600 px at most, without EXIF', async ({
     client,
@@ -369,5 +381,186 @@ test.group('Vivarium images', (group) => {
     stale.assertStatus(404)
     foreign.assertStatus(404)
     guest.assertHeader('location', '/login')
+  })
+  test('VIV-16 an accepted image leaves no temporary file', async ({ client, assert }) => {
+    const user = await UserFactory.create()
+    const vivarium = await VivariumFactory.merge({ userId: user.id }).create()
+
+    const response = await uploadImage(client, user, vivarium, await photo())
+
+    response.assertHeader('location', `/vivariums/${vivarium.id}`)
+    await vivarium.refresh()
+    assert.isNotNull(vivarium.imagePath)
+    assert.deepEqual(await uploadedFiles(), [])
+  })
+
+  test('VIV-16 a refused image leaves no temporary file', async ({ client, assert }) => {
+    const owner = await UserFactory.create()
+    const user = await UserFactory.create()
+    const vivarium = await VivariumFactory.merge({ userId: user.id }).create()
+    const archived = await VivariumFactory.merge({
+      userId: user.id,
+      archivedAt: DateTime.now(),
+    }).create()
+    const foreign = await VivariumFactory.merge({ userId: owner.id }).create()
+    const jpeg = await photo()
+
+    /**
+     * Refused by the validator, by the image service, by the policy, as
+     * archived, and before the controller: beyond the limit of the body
+     * (16 MB), or without session nor CSRF token.
+     */
+    const notAnImage = await uploadImage(client, user, vivarium, Buffer.from('text'), 'notes.txt')
+    const unreadable = await uploadImage(client, user, vivarium, jpeg.subarray(0, 300))
+    const ofAnotherUser = await uploadImage(client, user, foreign, jpeg)
+    const ofArchived = await uploadImage(client, user, archived, jpeg)
+    const beyondLimit = await uploadImage(
+      client,
+      user,
+      vivarium,
+      Buffer.concat([jpeg, Buffer.alloc(16 * 1024 * 1024)])
+    )
+    const anonymous = await client
+      .put(`/vivariums/${vivarium.id}/image`)
+      .file('image', jpeg, { filename: 'photo.jpg' })
+      .redirects(0)
+
+    assert.deepEqual(fieldErrors(notAnImage, 'image'), ['Choose a JPEG, PNG or WebP image'])
+    unreadable.assertFlashMessage('notification', {
+      type: 'error',
+      message: 'This image cannot be read. Try a JPEG, PNG or WebP file.',
+    })
+    ofAnotherUser.assertStatus(404)
+    ofArchived.assertFlashMessage('notification', {
+      type: 'error',
+      message: 'This tank is archived: unarchive it to change it.',
+    })
+    beyondLimit.assertStatus(413)
+    anonymous.assertStatus(302)
+    for (const refused of [vivarium, archived, foreign]) {
+      await refused.refresh()
+      assert.isNull(refused.imagePath)
+    }
+    assert.deepEqual(await uploadedFiles(), [])
+  })
+
+  test('VIV-16 a multipart body sent to another route is not read, and writes no file', async ({
+    client,
+    assert,
+  }) => {
+    const user = await UserFactory.create()
+    const jpeg = await photo()
+
+    const login = await client
+      .post('/login')
+      .fields({ email: user.email, password: 'secret-password' })
+      .file('image', jpeg, { filename: 'photo.jpg' })
+      .redirects(0)
+    /**
+     * A complete form, which would create the vivarium if it were read.
+     */
+    const creation = await client
+      .post('/vivariums')
+      .withInertia()
+      .header('referer', '/vivariums/create')
+      .fields({
+        kind: 'aquarium',
+        name: 'Reef',
+        description: 'Corals',
+        waterType: 'salt',
+        lengthCm: '100',
+        widthCm: '50',
+        heightCm: '60',
+        volumeLiters: '280',
+        startedOn: '2025-03-14',
+      })
+      .file('image', jpeg, { filename: 'photo.jpg' })
+      .withCsrfToken()
+      .loginAs(user)
+      .redirects(0)
+
+    login.assertStatus(302)
+    creation.assertHeader('location', '/vivariums/create')
+    assert.isNull(await Vivarium.findBy('user_id', user.id))
+    assert.deepEqual(await uploadedFiles(), [])
+  })
+})
+
+/**
+ * Replacements of the image that overlap, on several connections. The
+ * database is emptied by truncation rather than rolled back, as a global
+ * transaction would merge the connections into one (docs/architecture.md).
+ */
+test.group('Vivarium images on several connections', (group) => {
+  group.each.setup(() => testUtils.db().truncate())
+  group.each.setup(() => testUtils.db().seed())
+  group.teardown(() => testUtils.db().seed())
+  group.each.setup(() => {
+    drive.fake('vivariums')
+    return () => drive.restore('vivariums')
+  })
+  group.each.setup(() => useUploadDirectory())
+
+  test('VIV-17 two simultaneous replacements of the image leave only the file of the saved one', async ({
+    client,
+    assert,
+  }) => {
+    const user = await UserFactory.create()
+    const vivarium = await VivariumFactory.merge({ userId: user.id }).create()
+    await uploadImage(client, user, vivarium, await photo())
+    const jpeg = await photo()
+
+    /**
+     * Both requests store their file, then wait for the vivarium, which
+     * the blocker holds, to read the previous image.
+     */
+    const blocker = await db.transaction()
+    let responses: ApiResponse[]
+    try {
+      await blocker.rawQuery('select id from vivariums where id = ? for update', [vivarium.id])
+      const replacements = Promise.all([1, 2].map(() => uploadImage(client, user, vivarium, jpeg)))
+      await waitForLockWaiters(2)
+      await blocker.commit()
+      responses = await replacements
+    } finally {
+      if (!blocker.isCompleted) {
+        await blocker.rollback()
+      }
+    }
+
+    for (const response of responses) {
+      response.assertHeader('location', `/vivariums/${vivarium.id}`)
+    }
+    await vivarium.refresh()
+    assert.deepEqual(await imageFiles(vivarium), [vivarium.imagePath!])
+    assert.deepEqual(await uploadedFiles(), [])
+  })
+
+  test('VIV-17 a replacement whose save fails deletes its new file', async ({ client, assert }) => {
+    const user = await UserFactory.create()
+    const vivarium = await VivariumFactory.merge({ userId: user.id }).create()
+
+    /**
+     * The vivarium is deleted (with the account, for instance) while the
+     * replacement waits to save its new file.
+     */
+    const blocker = await db.transaction()
+    let response: ApiResponse
+    try {
+      await blocker.rawQuery('select id from vivariums where id = ? for update', [vivarium.id])
+      const replacement = Promise.resolve(uploadImage(client, user, vivarium, await photo()))
+      await waitForLockWaiters(1)
+      await blocker.rawQuery('delete from vivariums where id = ?', [vivarium.id])
+      await blocker.commit()
+      response = await replacement
+    } finally {
+      if (!blocker.isCompleted) {
+        await blocker.rollback()
+      }
+    }
+
+    response.assertStatus(404)
+    assert.deepEqual(await imageFiles(vivarium), [])
+    assert.deepEqual(await uploadedFiles(), [])
   })
 })
