@@ -1,5 +1,5 @@
 import vine from '@vinejs/vine'
-import { TIMEZONES } from '#models/user'
+import { TIMEZONES } from '#catalog/timezones'
 
 /**
  * Names of the list of time zones, by their lowercase form.

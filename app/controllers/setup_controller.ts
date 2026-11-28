@@ -1,5 +1,5 @@
 import { inject } from '@adonisjs/core'
-import { TIMEZONES } from '#models/user'
+import { TIMEZONES } from '#catalog/timezones'
 import { setupValidator } from '#validators/setup'
 import type { HttpContext } from '@adonisjs/core/http'
 import { SetupService } from '#services/setup_service'

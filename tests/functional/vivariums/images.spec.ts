@@ -1,6 +1,6 @@
 import sharp from 'sharp'
 import { join } from 'node:path'
-import { mkdir, rm } from 'node:fs/promises'
+import { mkdir, rm, writeFile } from 'node:fs/promises'
 import app from '@adonisjs/core/services/app'
 import InvalidImageException from '#exceptions/invalid_image_exception'
 import { VivariumImageService } from '#services/vivarium_image_service'
@@ -23,6 +23,17 @@ function photo() {
     .jpeg()
     .withMetadata({ orientation: 6, exif: { IFD0: { Copyright: 'Ada Lovelace' } } })
     .toBuffer()
+}
+
+/**
+ * An SVG of more than 4100 bytes, which sharp would decode if allowed.
+ */
+function largeSvg() {
+  return Buffer.from(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">` +
+      `<!-- ${'padding '.repeat(600)} -->` +
+      `<rect width="200" height="200" fill="#2a9df4"/></svg>`
+  )
 }
 
 function uploadImage(
@@ -150,16 +161,10 @@ test.group('Vivarium images', (group) => {
 
     /**
      * An SVG has no binary signature: beyond the first 4100 bytes read to
-     * find one, the type falls back on the file name. sharp decodes it.
+     * find one, the type falls back on the file name.
      */
-    const svg = Buffer.from(
-      `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">` +
-        `<!-- ${'padding '.repeat(600)} -->` +
-        `<rect width="200" height="200" fill="#2a9df4"/></svg>`
-    )
+    const svg = largeSvg()
     assert.isAbove(svg.length, 4100)
-    const { format } = await sharp(svg).metadata()
-    assert.equal(format, 'svg')
 
     const response = await uploadImage(client, user, vivarium, svg, 'photo.png')
 
@@ -176,28 +181,36 @@ test.group('Vivarium images', (group) => {
     )
   })
 
-  test('VIV-7 the image service refuses a format other than JPEG, PNG or WebP', async ({
-    assert,
-  }) => {
-    const user = await UserFactory.create()
-    const vivarium = await VivariumFactory.merge({ userId: user.id }).create()
-    const path = join(app.tmpPath(), `${vivarium.id}.png`)
-    await mkdir(app.tmpPath(), { recursive: true })
-    await sharp({ create: { width: 10, height: 10, channels: 3, background: '#000' } })
-      .gif()
-      .toFile(path)
-
-    try {
-      await assert.rejects(
-        () => new VivariumImageService().replace(vivarium, path),
-        InvalidImageException
+  test('VIV-7 the image service does not decode another format than JPEG, PNG or WebP')
+    .with(['svg', 'gif'] as const)
+    .run(async ({ assert }, format) => {
+      const user = await UserFactory.create()
+      const vivarium = await VivariumFactory.merge({ userId: user.id }).create()
+      const path = join(app.tmpPath(), `${vivarium.id}.png`)
+      await mkdir(app.tmpPath(), { recursive: true })
+      /**
+       * The SVG and GIF loaders of sharp are blocked (start/image_decoders.ts).
+       */
+      await writeFile(
+        path,
+        format === 'svg'
+          ? largeSvg()
+          : await sharp({ create: { width: 10, height: 10, channels: 3, background: '#000' } })
+              .gif()
+              .toBuffer()
       )
-    } finally {
-      await rm(path)
-    }
-    await vivarium.refresh()
-    assert.isNull(vivarium.imagePath)
-  })
+
+      try {
+        await assert.rejects(
+          () => new VivariumImageService().replace(vivarium, path),
+          InvalidImageException
+        )
+      } finally {
+        await rm(path)
+      }
+      await vivarium.refresh()
+      assert.isNull(vivarium.imagePath)
+    })
 
   test('VIV-7 an image of more than 15 MB is refused', async ({ client, assert }) => {
     const user = await UserFactory.create()

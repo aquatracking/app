@@ -1,4 +1,5 @@
 import sharp from 'sharp'
+import { open } from 'node:fs/promises'
 import { v7 as uuidv7 } from 'uuid'
 import type Vivarium from '#models/vivarium'
 import drive from '@adonisjs/drive/services/main'
@@ -9,23 +10,26 @@ import InvalidImageException from '#exceptions/invalid_image_exception'
  */
 const MAX_IMAGE_SIZE = 1600
 
-/**
- * Formats accepted for an image, as read by sharp from the content of the
- * file (docs/features/04-vivariums.md). sharp decodes others too (SVG,
- * GIF, TIFF…), which are refused.
- */
-export const IMAGE_FORMATS = ['jpeg', 'png', 'webp']
+const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
 
 /**
- * Format of an image read from its content, or undefined when sharp does
- * not recognize it.
+ * Tells whether a file starts with the signature of an accepted format
+ * (docs/features/04-vivariums.md): JPEG, PNG or WebP. Only the first
+ * bytes are read, nothing is decoded. sharp only decodes these formats
+ * (start/image_decoders.ts).
  */
-export async function imageFormatOf(path: string): Promise<string | undefined> {
+export async function hasImageSignature(path: string): Promise<boolean> {
+  const handle = await open(path)
   try {
-    const { format } = await sharp(path).metadata()
-    return format
-  } catch {
-    return undefined
+    const { buffer, bytesRead } = await handle.read(Buffer.alloc(12), 0, 12, 0)
+    const bytes = buffer.subarray(0, bytesRead)
+    const ascii = (start: number, end: number) => bytes.subarray(start, end).toString('latin1')
+    const jpeg = bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff
+    const png = bytes.subarray(0, 8).equals(PNG_SIGNATURE)
+    const webp = ascii(0, 4) === 'RIFF' && ascii(8, 12) === 'WEBP'
+    return jpeg || png || webp
+  } finally {
+    await handle.close()
   }
 }
 
@@ -44,14 +48,10 @@ export class VivariumImageService {
    * metadata (sharp drops EXIF unless asked to keep it; the orientation
    * is applied before), then deletes the previous image.
    *
-   * @throws InvalidImageException when the file is not in an accepted
-   * format or cannot be decoded
+   * @throws InvalidImageException when the file cannot be decoded, which
+   * includes any format other than JPEG, PNG or WebP
    */
   async replace(vivarium: Vivarium, sourcePath: string) {
-    if (!IMAGE_FORMATS.includes((await imageFormatOf(sourcePath)) ?? '')) {
-      throw new InvalidImageException()
-    }
-
     let contents: Buffer
     try {
       contents = await sharp(sourcePath)

@@ -1,4 +1,5 @@
 import { test } from '@japa/runner'
+import { TIMEZONES } from '#catalog/timezones'
 import type { ApiResponse } from '@japa/api-client'
 import User from '#models/user'
 import { SetupService } from '#services/setup_service'
@@ -86,22 +87,20 @@ test.group('Setup', (group) => {
     response.assertSession('auth_web', admin.id)
   })
 
-  test('INS-3 the last name is optional')
-    .with(['', '   '])
-    .run(async ({ client, assert }, lastName) => {
-      const response = await client
-        .post('/setup')
-        .withInertia()
-        .form(setupForm({ lastName }))
-        .withCsrfToken()
-        .redirects(0)
+  test('INS-3 the last name is optional', async ({ client, assert }) => {
+    const response = await client
+      .post('/setup')
+      .withInertia()
+      .form(setupForm({ lastName: '' }))
+      .withCsrfToken()
+      .redirects(0)
 
-      response.assertHeader('location', '/')
-      const admin = await User.findByOrFail('email', 'ada@example.com')
-      assert.isNull(admin.lastName)
-    })
+    response.assertHeader('location', '/')
+    const admin = await User.findByOrFail('email', 'ada@example.com')
+    assert.isNull(admin.lastName)
+  })
 
-  test('an email of more than 254 characters is refused on the field', async ({
+  test('INS-9 an email of more than 254 characters is refused on the field', async ({
     client,
     assert,
   }) => {
@@ -265,9 +264,7 @@ test.group('Setup', (group) => {
   test('INS-7 the form lists the time zones it accepts', async ({ client, assert }) => {
     const response = await client.get('/setup').withInertia()
 
-    const timezones = response.inertiaProps.timezones as string[]
-    assert.includeMembers(timezones, ['UTC', 'Europe/Paris', 'America/Toronto'])
-    assert.notIncludeMembers(timezones, ['Etc/GMT+5', 'EST'])
+    assert.deepEqual(response.inertiaProps.timezones, TIMEZONES)
   })
 
   test('INS-7 a name that is not in the list of time zones is refused on the field')

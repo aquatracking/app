@@ -134,6 +134,7 @@ onMounted(() => {
               id="timezone"
               v-model="timezone"
               name="timezone"
+              :label="t('setup.timezone')"
               :timezones="props.timezones"
               :invalid="!!errors.timezone"
             />

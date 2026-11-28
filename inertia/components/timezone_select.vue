@@ -1,7 +1,9 @@
 <script setup lang="ts">
 /**
  * Time zone field: a list with search of the time zones accepted by the
- * server (docs/CONTEXT.md), submitted under "name".
+ * server (docs/CONTEXT.md), submitted under "name". The button is named
+ * by the label of the field and the chosen zone ("Time zone Europe/Paris"),
+ * instead of the "Show popup" of the combobox trigger.
  */
 import { computed, ref } from 'vue'
 import { CheckIcon, ChevronsUpDownIcon } from '@lucide/vue'
@@ -22,6 +24,7 @@ import {
 const props = defineProps<{
   id: string
   name: string
+  label: string
   timezones: readonly string[]
   invalid?: boolean
 }>()
@@ -55,6 +58,7 @@ const filtered = computed(() => {
           type="button"
           variant="outline"
           class="w-full justify-between font-normal"
+          :aria-label="`${label} ${model}`"
           :aria-invalid="invalid"
         >
           {{ model }}

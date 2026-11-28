@@ -19,14 +19,6 @@ export const LOCALES = ['en', 'fr'] as const
 export type Locale = (typeof LOCALES)[number]
 
 /**
- * List of the time zones (docs/CONTEXT.md): "UTC" and the geographic IANA
- * zones known by the runtime. The fixed offsets ("Etc/GMT+5") and the
- * abbreviations ("EST") are not part of it: they would ignore daylight
- * saving time.
- */
-export const TIMEZONES: string[] = ['UTC', ...Intl.supportedValuesOf('timeZone')]
-
-/**
  * The last activity is known to the hour (docs/CONTEXT.md).
  */
 const LAST_SEEN_PRECISION = { hours: 1 }

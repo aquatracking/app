@@ -10,7 +10,7 @@ import {
   hasWaterType,
   type VivariumKind,
 } from '#models/vivarium'
-import { IMAGE_FORMATS, imageFormatOf } from '#services/vivarium_image_service'
+import { hasImageSignature } from '#services/vivarium_image_service'
 
 /**
  * Metadata of the vivarium validators: the time zone of the user, whose
@@ -130,19 +130,18 @@ export const updateVivariumValidator = vine
   .create(fields)
 
 /**
- * Refuses a file whose content, as read by sharp, is not in an accepted
+ * Refuses a file that does not start with the signature of an accepted
  * format. The type checked by "extnames" comes from the first bytes of
  * the file, or from its name when they are not recognized: a large SVG
- * named "photo.png" passes it. A file that sharp cannot read is left to
- * the image service, which refuses it as an image that cannot be read.
+ * named "photo.png" passes it. A file with the right signature that does
+ * not decode is refused by the image service.
  */
 const imageFormat = vine.createRule(
   async (value, _, field) => {
     if (!(value instanceof MultipartFile) || !value.tmpPath) {
       return
     }
-    const format = await imageFormatOf(value.tmpPath)
-    if (format && !IMAGE_FORMATS.includes(format)) {
+    if (!(await hasImageSignature(value.tmpPath))) {
       field.report('The {{ field }} field must be a JPEG, PNG or WebP image', 'imageFormat', field)
     }
   },

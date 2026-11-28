@@ -134,7 +134,7 @@ test.group('Password reset', (group) => {
     mails.assertNoneSent()
   })
 
-  test('AUTH-7 an email of more than 254 characters is refused on the field', async ({
+  test('AUTH-20 an email of more than 254 characters is refused on the field', async ({
     client,
     assert,
   }) => {

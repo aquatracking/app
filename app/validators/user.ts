@@ -29,19 +29,14 @@ export function newPassword() {
 }
 
 /**
- * Name, language and time zone. A last name left empty, or made of spaces
- * only, is saved as none.
+ * Name, language and time zone. The last name is optional: an empty one
+ * arrives as null (the bodyparser trims the fields and turns empty strings
+ * into null), a missing one leaves the profile unchanged.
  */
 export function identity() {
   return {
     firstName: vine.string().trim().minLength(1).maxLength(100),
-    lastName: vine
-      .string()
-      .trim()
-      .maxLength(100)
-      .nullable()
-      .optional()
-      .transform((value) => value || null),
+    lastName: vine.string().trim().maxLength(100).nullable().optional(),
     locale: vine.enum(LOCALES),
     timezone: vine.string().trim().use(timezone()),
   }

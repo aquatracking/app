@@ -27,23 +27,29 @@ const locales = ['en', 'fr'] as const
 const timezone = ref(page.props.timezone)
 
 /**
- * The browser's time zone, known once mounted. When it differs from the
- * saved one (after a move, for example), the page offers to use it;
- * nothing changes until the user saves. The comparison is with the saved
- * zone, not with the field being edited.
+ * The saved zone as an entry of the list: a name saved before the list
+ * ("Asia/Calcutta", "America/Montreal") becomes the entry that designates
+ * the same zone ("Asia/Kolkata", "America/Toronto"). Kept as is when no
+ * entry matches: saving it is then refused.
+ */
+function listedSavedTimezone() {
+  return listedTimezone(page.props.timezone, props.timezones) ?? page.props.timezone
+}
+
+/**
+ * The browser's time zone, known once mounted. When its zone differs from
+ * the saved one (after a move, for example), the page offers to use it;
+ * nothing changes until the user saves. Both are compared as entries of
+ * the list, and with the saved zone, not with the field being edited.
  */
 const browserZone = ref<string | null>(null)
 const suggestedTimezone = computed(() =>
-  browserZone.value && browserZone.value !== page.props.timezone ? browserZone.value : null
+  browserZone.value && browserZone.value !== listedSavedTimezone() ? browserZone.value : null
 )
 
 onMounted(() => {
   browserZone.value = browserTimezone(props.timezones)
-  /**
-   * A zone saved under a name that is no longer in the list (renamed by
-   * an update of the runtime) is shown under its name in the list.
-   */
-  timezone.value = listedTimezone(timezone.value, props.timezones) ?? timezone.value
+  timezone.value = listedSavedTimezone()
 })
 </script>
 
@@ -117,6 +123,7 @@ onMounted(() => {
                 id="timezone"
                 v-model="timezone"
                 name="timezone"
+                :label="t('auth.timezone')"
                 :timezones="props.timezones"
                 :invalid="!!errors.timezone"
               />
