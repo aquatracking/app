@@ -54,6 +54,6 @@ AquaTracking a connu une version stable publique : la **1.x** (application Flutt
 
 - `2.0.0-alpha.N` pendant le développement du périmètre 2.0 ;
 - `2.0.0` quand les 7 features sont livrées ;
-- semver ensuite. Les images Docker sont publiées sur GHCR (`ghcr.io/aquatracking/app`) et taguées `2`, `2.0`, `2.0.0` et `latest` ; une pré-version n'a que son propre tag. Docker Hub pourra être ajouté plus tard.
+- semver ensuite. Les images Docker sont publiées sur GHCR (`ghcr.io/aquatracking/app`) et taguées `2`, `2.0`, `2.0.0` et `latest` ; une pré-version n'a que son propre tag. Chaque commit de `main` est aussi publié (tags `main` et `sha-<commit>`) pour l'intégration, jamais pour la production. Docker Hub pourra être ajouté plus tard.
 
 Voir [ADR 0007](adr/0007-versionnement-v2.md).

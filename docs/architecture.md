@@ -125,6 +125,7 @@ Guide d'installation, de mise à jour, de sauvegarde et de restauration : [deplo
 
 - **Dev** : `compose.yml` fournit PostgreSQL et Mailpit. `node ace migration:run`, `node ace db:seed` (catalogue, à relancer quand il change), puis `node ace serve --hmr`. Les tests lancent eux-mêmes migrations et seeder.
 - **Image Docker** unique, multi-étapes, pour `linux/amd64` et `linux/arm64`. Les étapes de build tournent sur la plateforme de la machine de build (leur résultat ne dépend pas de l'architecture) ; seules les dépendances de production, qui contiennent des binaires natifs (`sharp`), sont installées pour la plateforme cible. Utilisateur non root `node`, `HEALTHCHECK` sur `/health/live`. Au démarrage : `migration:run --force` (le flag confirme l'exécution en production, où Adonis la refuse sinon ; il ne rejoue ni ne supprime rien), puis `db:seed --files catalog_seeder`, puis le serveur. Les deux premières étapes sont idempotentes.
+- **Migrations** : une migration fusionnée sur `main` n'est plus jamais modifiée. Tout changement de schéma passe par une nouvelle migration : le serveur d'intégration (image `main`) et les instances déjà installées ont appliqué l'ancienne au démarrage, et Adonis ne rejoue pas une migration déjà exécutée.
 - Volume à persister : `DRIVE_ROOT`.
 - **HTTPS obligatoire** : en production, les cookies de session sont `Secure` et HSTS est actif ; servie en HTTP, l'application ne garde pas la session. Déploiement prévu derrière un reverse proxy (Traefik, Nginx, Caddy…) qui termine le HTTPS, avec `TRUSTED_PROXIES` renseigné.
 - **Sauvegardes** : il n'y a ni corbeille ni soft delete. La [doc de déploiement](deployment.md#sauvegarde) explique comment sauvegarder ensemble la base (`pg_dump`) et le dossier `DRIVE_ROOT`, et comment restaurer.
@@ -138,28 +139,40 @@ Guide d'installation, de mise à jour, de sauvegarde et de restauration : [deplo
 
 ## CI (GitHub Actions)
 
-- Sur chaque PR et sur `main` :
+- Sur chaque PR (`.github/workflows/ci.yml`) et sur chaque push sur `main` (`ci.yml` rejoué par `main.yml`, voir ci-dessous) :
   - `lint` ;
   - `typecheck`, après avoir vérifié que les fichiers générés de `.adonisjs/` sont à jour ;
   - `test` sur PostgreSQL 16 (version minimale, [ADR 0002](adr/0002-postgresql-uuidv7.md)) et 18, puis vérification que `database/schema.ts` correspond aux migrations ;
   - `build` de l'image, puis démarrage contre PostgreSQL (migrations, seeder, `/health/live` et `/`).
-- Sur un tag `v2.*` (`.github/workflows/release.yml`), une publication à la fois (concurrence globale au workflow, sans annulation) :
+- **Publication de l'image** : `.github/workflows/publish.yml`, workflow réutilisable (`workflow_call`) appelé par `release.yml` et `main.yml` une fois leur CI passée. Il reçoit les tags à poser et la version du label OCI :
+  1. `publish` : construction pour `linux/amd64` et `linux/arm64` et envoi sur **GHCR seul** (`ghcr.io/aquatracking/app`) **par digest, sans aucun tag**. Labels et annotations OCI (titre, description, source, version, révision) posés par `docker/metadata-action`, attestations de provenance (`mode=max`) et SBOM jointes à l'image. Construite sans cache, pour qu'aucun job précédent ne puisse influencer l'image publiée ;
+  2. `smoke-test` : démarrage de ce digest sur chaque architecture (runner natif) contre PostgreSQL : migrations, seeder, `/health/live`, `/` ;
+  3. `tag` : seulement si le démarrage a réussi, pose des tags demandés sur le digest testé (`docker buildx imagetools create`). Une image qui échoue au démarrage reste sans tag : personne ne la reçoit.
+
+  Les deux workflows appelants ne publient que depuis `aquatracking/app` (`if: github.repository == 'aquatracking/app'`) : sur un fork, la CI tourne mais rien n'est publié.
+- Sur un tag `v2.*` (`.github/workflows/release.yml`), une publication à la fois (groupe de concurrence `release`, sans annulation) :
   1. `version` : vérification que le tag correspond à la version de `package.json` et pointe sur un commit de `main` ; calcul des tags de l'image (voir ci-dessous) ;
   2. `ci` : les vérifications ci-dessus, rejouées sur le commit tagué (`ci.yml` est appelé comme workflow réutilisable) ;
-  3. `publish` : construction pour `linux/amd64` et `linux/arm64` et envoi sur **GHCR seul** (`ghcr.io/aquatracking/app`) **par digest, sans aucun tag**. Labels OCI (source, version, révision) posés par `docker/metadata-action`, attestations de provenance (`mode=max`) et SBOM jointes à l'image. Construite sans cache, pour qu'aucun job précédent ne puisse influencer l'image publiée ;
-  4. `smoke-test` : démarrage de ce digest sur chaque architecture (runner natif) contre PostgreSQL : migrations, seeder, `/health/live`, `/` ;
-  5. `tag` : seulement si le démarrage a réussi, pose du tag `X.Y.Z` et des tags flottants sur le digest testé (`docker buildx imagetools create`, [ADR 0007](adr/0007-versionnement-v2.md)). Une image qui échoue au démarrage reste sans tag : personne ne la reçoit ;
-  6. `github-release` : création de la GitHub Release avec des notes générées (marquée pré-version si le tag en est une).
+  3. `publish` : `publish.yml` avec le tag `X.Y.Z` et les tags flottants ([ADR 0007](adr/0007-versionnement-v2.md)), label de version `X.Y.Z` ;
+  4. `github-release` : création de la GitHub Release avec des notes générées (marquée pré-version si le tag en est une), seulement après la pose des tags.
+- Sur chaque push sur `main` (`.github/workflows/main.yml`), l'image du serveur d'intégration :
+  1. `version` : calcul du SHA court (7 caractères) et de la version du label OCI, `<version de package.json>-main.<SHA court>` (par exemple `2.0.0-main.afd1564`), pour qu'une image de `main` ne soit jamais prise pour une version publiée ;
+  2. `ci` : `ci.yml`, seule exécution de la CI pour ce push (`ci.yml` n'a pas de déclencheur `push`) ;
+  3. `publish` : `publish.yml` avec le tag fixe `sha-<SHA court>` et le tag flottant `main`. Jamais `latest` ni un tag de version.
+- **Image `main`** : instable par nature, elle sert au serveur d'intégration et aux essais, jamais à la production ([déploiement](deployment.md#limage)). Le tag `main` ne recule jamais vers un commit plus ancien :
+  - une exécution de `main.yml` à la fois, dans l'ordre des push (groupe de concurrence `main-image`, distinct de `release` puisque les tags écrits sont différents, sans annulation) ;
+  - juste avant de poser les tags, le job `tag` lit la tête de `main` (API GitHub, `git/ref/heads/main`). Si `main` a avancé depuis, il pose `sha-<SHA court>` mais pas `main` : l'exécution du commit plus récent s'en charge. Cela couvre aussi la relance d'une ancienne exécution ;
+  - GitHub ne garde qu'une exécution en attente par groupe : si plusieurs PR sont fusionnées pendant une publication, les commits intermédiaires n'ont pas de tag `sha-…` (une relance de leur exécution le pose, sans toucher `main`).
 - **Tags flottants** : ils ne reculent jamais. `X.Y` n'est posé que si la version est la plus haute version stable de la ligne `X.Y`, `X` que si elle est la plus haute de la ligne `X`, `latest` que si elle est la plus haute de toutes. Seuls comptent les tags git `vX.Y.Z` atteignables depuis `main` (`git tag --merged origin/main`), triés en semver. Un correctif `v2.0.5` poussé après `v2.1.0` reçoit `2.0.5` et `2.0`, sans toucher `2` ni `latest`. Une pré-version (`2.1.0-rc.1`) n'a que son propre tag.
 - **Publier une version, en pratique** :
   - pousser les tags **un par un**, en attendant la fin de chaque exécution : GitHub ne garde qu'une exécution en attente par groupe de concurrence, et un troisième tag poussé pendant que deux attendent annule celle du deuxième ;
-  - après un échec, relancer avec **« Re-run all jobs »**. « Re-run failed jobs » réutilise les sorties des jobs réussis, dont les tags calculés par `version` : faux si un autre tag a été publié entre-temps ;
+  - après un échec, relancer `release.yml` avec **« Re-run all jobs »**. « Re-run failed jobs » réutilise les sorties des jobs réussis, dont les tags calculés par `version` : faux si un autre tag a été publié entre-temps ;
   - un tag invalide (mauvaise version, commit hors de `main`) fait échouer `version` avant toute publication. Le supprimer (`git push --delete origin vX.Y.Z` puis `git tag -d vX.Y.Z`), corriger, puis le poser à nouveau. Un tag supprimé n'est plus compté dans le calcul des tags flottants ; un digest déjà envoyé sans tag reste dans GHCR, sans effet (à supprimer à la main si besoin).
-- Les workflows n'utilisent que `GITHUB_TOKEN`, avec les permissions minimales de chaque job : `contents: read` pour lire le dépôt, `packages: write` pour l'envoi par digest et la pose des tags, `packages: read` pour le démarrage du digest, `contents: write` pour la Release. Toutes les actions de `ci.yml` et `release.yml` sont épinglées par SHA de commit, version en commentaire. Les checkouts ne gardent pas le jeton (`persist-credentials: false`).
+- Les workflows n'utilisent que `GITHUB_TOKEN`, avec les permissions minimales de chaque job : `contents: read` pour lire le dépôt et la tête de `main`, `packages: write` pour l'envoi par digest et la pose des tags, `packages: read` pour le démarrage du digest, `contents: write` pour la Release. Un job qui appelle un workflow réutilisable lui accorde les permissions dont ses jobs ont besoin (`contents: read` et `packages: write` pour `publish.yml`). Toutes les actions des workflows sont épinglées par SHA de commit, version en commentaire. Les checkouts ne gardent pas le jeton (`persist-credentials: false`).
 - **Dependabot** (`.github/dependabot.yml`) passe chaque semaine :
   - actions GitHub : SHA et commentaire de version, dans une seule PR groupée ;
   - dépendances npm (`pnpm-lock.yaml`) : les mises à jour mineures et correctives sont groupées (paquets Adonis, VineJS, Japa et Tuyau ensemble ; Vue, Inertia, Vite, Tailwind et bibliothèques d'interface ensemble ; puis le reste des dépendances de dev, puis le reste des dépendances de production). Chaque version majeure a sa propre PR. Cinq PR npm ouvertes au plus. `@types/node` ne change pas de majeure (elle suit `.node-version`) et `decode-uri-component` est exclu (voir « Audit des dépendances »).
   - les « Dependabot security updates » (réglage du dépôt) complètent ce passage pour les failles signalées entre deux semaines.
-- Docker Hub n'est pas utilisé pour l'instant : il pourra être ajouté plus tard (secret d'accès, second nom d'image dans le job `tag`).
+- Docker Hub n'est pas utilisé pour l'instant : il pourra être ajouté plus tard (secret d'accès, second nom d'image dans le job `tag` de `publish.yml`).
 
 **Audit des dépendances.** `pnpm audit --prod` ignore deux avis sur `decode-uri-component` 0.2.2 (`GHSA-qr28-fpjm-wq7f`, `GHSA-vcc3-ghjq-m6fr`, déclarés dans `pnpm.auditConfig.ignoreGhsas` de `package.json`). Le paquet n'est atteint que par `vite > stylus > css > source-map-resolve`, qui ne sert qu'à compiler du Stylus, absent du projet : ce code n'est jamais exécuté, ni au build ni en production. Les versions corrigées (≥ 0.5.0) ne sont publiées qu'en ESM, alors que `source-map-resolve` les charge avec `require()` : forcer la mise à jour casserait ce chemin au lieu de le corriger. Les alertes Dependabot correspondantes sont à rejeter dans GitHub (« Dismiss », motif « Vulnerable code is not actually used ») avec la même justification. À retirer quand `vite` ou `stylus` ne dépendront plus de `css`.
