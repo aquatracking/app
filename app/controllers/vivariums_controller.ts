@@ -19,7 +19,10 @@ import { createVivariumValidator, updateVivariumValidator } from '#validators/vi
  */
 @inject()
 export default class VivariumsController {
-  constructor(protected readingService: ReadingService) {}
+  constructor(
+    protected readingService: ReadingService,
+    protected vivariumService: VivariumService
+  ) {}
 
   /**
    * Home page: the vivariums in service, by name.
@@ -53,17 +56,13 @@ export default class VivariumsController {
     })
   }
 
-  @inject()
-  async store(
-    { auth, request, response, session, i18n }: HttpContext,
-    vivariumService: VivariumService
-  ) {
+  async store({ auth, request, response, session, i18n }: HttpContext) {
     const user = auth.getUserOrFail()
     const data = await request.validateUsing(createVivariumValidator, {
       meta: { timezone: user.timezone },
     })
 
-    const vivarium = await vivariumService.create(user, data)
+    const vivarium = await this.vivariumService.create(user, data)
 
     session.notify('success', i18n.t('vivariums.created', { name: vivarium.name }))
     return response.redirect().toRoute('vivariums.show', { id: vivarium.id })
@@ -110,8 +109,7 @@ export default class VivariumsController {
     const vivarium = await Vivarium.findOrFail(params.id)
     await bouncer.with(VivariumPolicy).authorize('update', vivarium)
     const { timezone } = auth.getUserOrFail()
-    const firstMeasuredAt = await this.readingService.firstMeasuredAt(vivarium)
-    const firstReading = firstMeasuredAt && firstMeasuredAt.setZone(timezone)
+    const firstReading = await this.vivariumService.firstReadingIn(vivarium, timezone)
     const data = await request.validateUsing(updateVivariumValidator, {
       meta: {
         timezone,
@@ -135,8 +133,7 @@ export default class VivariumsController {
     const vivarium = await Vivarium.findOrFail(params.id)
     await bouncer.with(VivariumPolicy).authorize('update', vivarium)
 
-    vivarium.archivedAt = DateTime.now()
-    await vivarium.save()
+    await this.vivariumService.archive(vivarium)
 
     session.notify('success', i18n.t('vivariums.archived_notice', { name: vivarium.name }))
     return response.redirect().toRoute('vivariums.show', { id: vivarium.id })
@@ -146,8 +143,7 @@ export default class VivariumsController {
     const vivarium = await Vivarium.findOrFail(params.id)
     await bouncer.with(VivariumPolicy).authorize('unarchive', vivarium)
 
-    vivarium.archivedAt = null
-    await vivarium.save()
+    await this.vivariumService.unarchive(vivarium)
 
     session.notify('success', i18n.t('vivariums.unarchived_notice', { name: vivarium.name }))
     return response.redirect().toRoute('vivariums.show', { id: vivarium.id })
