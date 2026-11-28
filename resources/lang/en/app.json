@@ -5,5 +5,9 @@
   "locales": {
     "en": "English",
     "fr": "Français"
+  },
+  "timezones": {
+    "search": "Search for a time zone",
+    "empty": "No time zone found"
   }
 }

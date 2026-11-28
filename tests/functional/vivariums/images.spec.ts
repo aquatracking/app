@@ -1,4 +1,9 @@
 import sharp from 'sharp'
+import { join } from 'node:path'
+import { mkdir, rm } from 'node:fs/promises'
+import app from '@adonisjs/core/services/app'
+import InvalidImageException from '#exceptions/invalid_image_exception'
+import { VivariumImageService } from '#services/vivarium_image_service'
 import { test } from '@japa/runner'
 import { DateTime } from 'luxon'
 import type User from '#models/user'
@@ -134,6 +139,64 @@ test.group('Vivarium images', (group) => {
         .then((list) => [...list.objects]),
       []
     )
+  })
+
+  test('VIV-7 an image in another format than JPEG, PNG or WebP is refused, whatever its name', async ({
+    client,
+    assert,
+  }) => {
+    const user = await UserFactory.create()
+    const vivarium = await VivariumFactory.merge({ userId: user.id }).create()
+
+    /**
+     * An SVG has no binary signature: beyond the first 4100 bytes read to
+     * find one, the type falls back on the file name. sharp decodes it.
+     */
+    const svg = Buffer.from(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">` +
+        `<!-- ${'padding '.repeat(600)} -->` +
+        `<rect width="200" height="200" fill="#2a9df4"/></svg>`
+    )
+    assert.isAbove(svg.length, 4100)
+    const { format } = await sharp(svg).metadata()
+    assert.equal(format, 'svg')
+
+    const response = await uploadImage(client, user, vivarium, svg, 'photo.png')
+
+    const errors = response.flashMessages().inputErrorsBag as Record<string, string[]>
+    assert.deepEqual(errors.image, ['Choose a JPEG, PNG or WebP image'])
+    await vivarium.refresh()
+    assert.isNull(vivarium.imagePath)
+    assert.deepEqual(
+      await drive
+        .use('vivariums')
+        .listAll(vivarium.id)
+        .then((list) => [...list.objects]),
+      []
+    )
+  })
+
+  test('VIV-7 the image service refuses a format other than JPEG, PNG or WebP', async ({
+    assert,
+  }) => {
+    const user = await UserFactory.create()
+    const vivarium = await VivariumFactory.merge({ userId: user.id }).create()
+    const path = join(app.tmpPath(), `${vivarium.id}.png`)
+    await mkdir(app.tmpPath(), { recursive: true })
+    await sharp({ create: { width: 10, height: 10, channels: 3, background: '#000' } })
+      .gif()
+      .toFile(path)
+
+    try {
+      await assert.rejects(
+        () => new VivariumImageService().replace(vivarium, path),
+        InvalidImageException
+      )
+    } finally {
+      await rm(path)
+    }
+    await vivarium.refresh()
+    assert.isNull(vivarium.imagePath)
   })
 
   test('VIV-7 an image of more than 15 MB is refused', async ({ client, assert }) => {

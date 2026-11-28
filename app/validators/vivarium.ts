@@ -1,6 +1,7 @@
 import vine from '@vinejs/vine'
 import { DateTime } from 'luxon'
 import type { FieldContext } from '@vinejs/vine/types'
+import { MultipartFile } from '@adonisjs/core/bodyparser'
 import {
   CLIMATES,
   VIVARIUM_KINDS,
@@ -9,6 +10,7 @@ import {
   hasWaterType,
   type VivariumKind,
 } from '#models/vivarium'
+import { IMAGE_FORMATS, imageFormatOf } from '#services/vivarium_image_service'
 
 /**
  * Metadata of the vivarium validators: the time zone of the user, whose
@@ -128,8 +130,28 @@ export const updateVivariumValidator = vine
   .create(fields)
 
 /**
+ * Refuses a file whose content, as read by sharp, is not in an accepted
+ * format. The type checked by "extnames" comes from the first bytes of
+ * the file, or from its name when they are not recognized: a large SVG
+ * named "photo.png" passes it. A file that sharp cannot read is left to
+ * the image service, which refuses it as an image that cannot be read.
+ */
+const imageFormat = vine.createRule(
+  async (value, _, field) => {
+    if (!(value instanceof MultipartFile) || !value.tmpPath) {
+      return
+    }
+    const format = await imageFormatOf(value.tmpPath)
+    if (format && !IMAGE_FORMATS.includes(format)) {
+      field.report('The {{ field }} field must be a JPEG, PNG or WebP image', 'imageFormat', field)
+    }
+  },
+  { isAsync: true }
+)
+
+/**
  * JPEG, PNG or WebP image of 15 MB at most (docs/features/04-vivariums.md).
  */
 export const updateVivariumImageValidator = vine.create({
-  image: vine.file({ size: '15mb', extnames: ['jpg', 'jpeg', 'png', 'webp'] }),
+  image: vine.file({ size: '15mb', extnames: ['jpg', 'jpeg', 'png', 'webp'] }).use(imageFormat()),
 })

@@ -86,17 +86,35 @@ test.group('Setup', (group) => {
     response.assertSession('auth_web', admin.id)
   })
 
-  test('INS-3 the last name is optional', async ({ client, assert }) => {
+  test('INS-3 the last name is optional')
+    .with(['', '   '])
+    .run(async ({ client, assert }, lastName) => {
+      const response = await client
+        .post('/setup')
+        .withInertia()
+        .form(setupForm({ lastName }))
+        .withCsrfToken()
+        .redirects(0)
+
+      response.assertHeader('location', '/')
+      const admin = await User.findByOrFail('email', 'ada@example.com')
+      assert.isNull(admin.lastName)
+    })
+
+  test('an email of more than 254 characters is refused on the field', async ({
+    client,
+    assert,
+  }) => {
     const response = await client
       .post('/setup')
       .withInertia()
-      .form(setupForm({ lastName: '' }))
+      .header('accept-language', 'en')
+      .form(setupForm({ email: `${'a'.repeat(10)}@${`${'b'.repeat(60)}.`.repeat(4)}com` }))
       .withCsrfToken()
       .redirects(0)
 
-    response.assertHeader('location', '/')
-    const admin = await User.findByOrFail('email', 'ada@example.com')
-    assert.isNull(admin.lastName)
+    assert.deepEqual(fieldErrors(response, 'email'), ['Enter at most 254 characters'])
+    assert.lengthOf(await User.all(), 0)
   })
 
   test('INS-4 once installed, the setup routes answer 404', async ({ client }) => {
@@ -224,12 +242,12 @@ test.group('Setup', (group) => {
     await client
       .post('/setup')
       .withInertia()
-      .form(setupForm({ timezone: 'America/Montreal' }))
+      .form(setupForm({ timezone: 'America/Toronto' }))
       .withCsrfToken()
       .redirects(0)
 
     const admin = await User.findByOrFail('email', 'ada@example.com')
-    assert.equal(admin.timezone, 'America/Montreal')
+    assert.equal(admin.timezone, 'America/Toronto')
   })
 
   test('INS-7 the case of the time zone is corrected', async ({ client, assert }) => {
@@ -244,8 +262,16 @@ test.group('Setup', (group) => {
     assert.equal(admin.timezone, 'Europe/Paris')
   })
 
-  test('INS-7 an invalid time zone name is refused on the field')
-    .with(['Mars/Olympus_Mons', '+01:00', 'UTC+1'])
+  test('INS-7 the form lists the time zones it accepts', async ({ client, assert }) => {
+    const response = await client.get('/setup').withInertia()
+
+    const timezones = response.inertiaProps.timezones as string[]
+    assert.includeMembers(timezones, ['UTC', 'Europe/Paris', 'America/Toronto'])
+    assert.notIncludeMembers(timezones, ['Etc/GMT+5', 'EST'])
+  })
+
+  test('INS-7 a name that is not in the list of time zones is refused on the field')
+    .with(['Mars/Olympus_Mons', '+01:00', 'UTC+1', 'Etc/GMT+5', 'EST'])
     .run(async ({ client, assert }, timezone) => {
       const response = await client
         .post('/setup')
@@ -255,9 +281,7 @@ test.group('Setup', (group) => {
         .withCsrfToken()
         .redirects(0)
 
-      assert.deepEqual(fieldErrors(response, 'timezone'), [
-        'Enter a valid time zone name, for example Europe/Paris',
-      ])
+      assert.deepEqual(fieldErrors(response, 'timezone'), ['Choose a time zone from the list'])
       assert.lengthOf(await User.all(), 0)
     })
 

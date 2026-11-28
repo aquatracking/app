@@ -1,17 +1,20 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import AppLayout from '~/layouts/app.vue'
 import { Form } from '@adonisjs/inertia/vue'
 import { Head, usePage } from '@inertiajs/vue3'
 import { Input } from '~/components/ui/input'
 import { Button } from '~/components/ui/button'
 import { useI18n } from '~/composables/use_i18n'
-import TimezoneInput from '~/components/timezone_input.vue'
+import TimezoneSelect from '~/components/timezone_select.vue'
+import { browserTimezone, listedTimezone } from '~/timezones'
 import { NativeSelect, NativeSelectOption } from '~/components/ui/native-select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field'
 
 defineOptions({ layout: AppLayout })
+
+const props = defineProps<{ timezones: string[] }>()
 
 const { t } = useI18n()
 const page = usePage()
@@ -26,12 +29,21 @@ const timezone = ref(page.props.timezone)
 /**
  * The browser's time zone, known once mounted. When it differs from the
  * saved one (after a move, for example), the page offers to use it;
- * nothing changes until the user saves.
+ * nothing changes until the user saves. The comparison is with the saved
+ * zone, not with the field being edited.
  */
-const browserTimezone = ref<string | null>(null)
+const browserZone = ref<string | null>(null)
+const suggestedTimezone = computed(() =>
+  browserZone.value && browserZone.value !== page.props.timezone ? browserZone.value : null
+)
 
 onMounted(() => {
-  browserTimezone.value = Intl.DateTimeFormat().resolvedOptions().timeZone || null
+  browserZone.value = browserTimezone(props.timezones)
+  /**
+   * A zone saved under a name that is no longer in the list (renamed by
+   * an update of the runtime) is shown under its name in the list.
+   */
+  timezone.value = listedTimezone(timezone.value, props.timezones) ?? timezone.value
 })
 </script>
 
@@ -101,25 +113,23 @@ onMounted(() => {
 
             <Field :data-invalid="!!errors.timezone">
               <FieldLabel for="timezone">{{ t('auth.timezone') }}</FieldLabel>
-              <TimezoneInput
+              <TimezoneSelect
                 id="timezone"
                 v-model="timezone"
                 name="timezone"
+                :timezones="props.timezones"
                 :invalid="!!errors.timezone"
               />
               <FieldDescription>{{ t('auth.timezone_hint') }}</FieldDescription>
-              <div
-                v-if="browserTimezone && browserTimezone !== timezone"
-                class="flex flex-wrap items-center gap-2 text-sm"
-              >
-                <span>{{ t('profile.timezone_suggestion', { timezone: browserTimezone }) }}</span>
+              <div v-if="suggestedTimezone" class="flex flex-wrap items-center gap-2 text-sm">
+                <span>{{ t('profile.timezone_suggestion', { timezone: suggestedTimezone }) }}</span>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  @click="timezone = browserTimezone"
+                  @click="timezone = suggestedTimezone"
                 >
-                  {{ t('profile.use_timezone', { timezone: browserTimezone }) }}
+                  {{ t('profile.use_timezone', { timezone: suggestedTimezone }) }}
                 </Button>
               </div>
               <FieldError :errors="[errors.timezone]" />

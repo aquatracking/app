@@ -194,15 +194,25 @@ test.group('Registration by invitation', (group) => {
     await client
       .post(`/invitations/${token}`)
       .withInertia()
-      .form(registrationForm({ timezone: 'America/Montreal' }))
+      .form(registrationForm({ timezone: 'America/Toronto' }))
       .withCsrfToken()
 
     const user = await User.findByOrFail('email', 'grace@example.com')
-    assert.equal(user.timezone, 'America/Montreal')
+    assert.equal(user.timezone, 'America/Toronto')
   })
 
-  test('AUTH-14 an invalid time zone name is refused on the field')
-    .with(['Mars/Olympus', '+01:00'])
+  test('AUTH-14 the form lists the time zones it accepts', async ({ client, assert }) => {
+    const { token } = await invite('grace@example.com')
+
+    const response = await client.get(`/invitations/${token}`).withInertia()
+
+    const timezones = response.inertiaProps.timezones as string[]
+    assert.includeMembers(timezones, ['UTC', 'Europe/Paris', 'America/Toronto'])
+    assert.notIncludeMembers(timezones, ['Etc/GMT+5', 'EST'])
+  })
+
+  test('AUTH-14 a name that is not in the list of time zones is refused on the field')
+    .with(['Mars/Olympus', '+01:00', 'Etc/GMT+5', 'EST'])
     .run(async ({ client, assert }, timezone) => {
       const { invitation, token } = await invite('grace@example.com')
 
@@ -214,11 +224,26 @@ test.group('Registration by invitation', (group) => {
         .withCsrfToken()
         .redirects(0)
 
-      assert.deepEqual(fieldErrors(response, 'timezone'), [
-        'Enter a valid time zone name, for example Europe/Paris',
-      ])
+      assert.deepEqual(fieldErrors(response, 'timezone'), ['Choose a time zone from the list'])
       assert.isNull(await User.findBy('email', 'grace@example.com'))
       assert.isNotNull(await Invitation.find(invitation.id))
+    })
+
+  test('AUTH-5 a blank last name is saved as none')
+    .with(['', '   '])
+    .run(async ({ client, assert }, lastName) => {
+      const { token } = await invite('grace@example.com')
+
+      const response = await client
+        .post(`/invitations/${token}`)
+        .withInertia()
+        .form(registrationForm({ lastName }))
+        .withCsrfToken()
+        .redirects(0)
+
+      response.assertHeader('location', '/')
+      const user = await User.findByOrFail('email', 'grace@example.com')
+      assert.isNull(user.lastName)
     })
 
   test('a signed-in user opening an invitation link is sent home with a message', async ({

@@ -1,34 +1,27 @@
 import vine from '@vinejs/vine'
+import { TIMEZONES } from '#models/user'
 
 /**
- * Accepts an IANA time zone name ("Europe/Paris", "UTC"), as known by the
- * runtime. Fixed offsets ("+01:00"), which the runtime also understands,
- * are refused: they would ignore daylight saving time (docs/CONTEXT.md).
- *
- * The runtime fixes the case ("europe/paris" becomes "Europe/Paris"),
- * which is kept. It also renames some zones ("America/Montreal" becomes
- * "America/Toronto"), which the user did not choose: then the name is
- * kept as submitted.
+ * Names of the list of time zones, by their lowercase form.
+ */
+const timezonesByLowerCase = new Map(TIMEZONES.map((name) => [name.toLowerCase(), name]))
+
+/**
+ * Accepts a name of the list of time zones (docs/CONTEXT.md), whatever its
+ * case: "europe/paris" is saved as "Europe/Paris". Any other name is
+ * refused, even one the runtime understands: fixed offsets ("+01:00",
+ * "Etc/GMT+5") and abbreviations ("EST") would ignore daylight saving time.
  */
 export const timezone = vine.createRule((value, _, field) => {
   if (typeof value !== 'string') {
     return
   }
 
-  let resolvedName: string
-  try {
-    resolvedName = new Intl.DateTimeFormat('en', { timeZone: value }).resolvedOptions().timeZone
-  } catch {
+  const name = timezonesByLowerCase.get(value.toLowerCase())
+  if (!name) {
     field.report('The {{ field }} field must be a valid time zone', 'timezone', field)
     return
   }
 
-  if (resolvedName.startsWith('+') || resolvedName.startsWith('-')) {
-    field.report('The {{ field }} field must be a valid time zone', 'timezone', field)
-    return
-  }
-
-  if (resolvedName.toLowerCase() === value.toLowerCase()) {
-    field.mutate(resolvedName, field)
-  }
+  field.mutate(name, field)
 })

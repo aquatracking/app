@@ -1,4 +1,5 @@
 import { inject } from '@adonisjs/core'
+import { TIMEZONES } from '#models/user'
 import { setupValidator } from '#validators/setup'
 import type { HttpContext } from '@adonisjs/core/http'
 import { SetupService } from '#services/setup_service'
@@ -9,7 +10,7 @@ import { SetupService } from '#services/setup_service'
  */
 export default class SetupController {
   async show({ inertia }: HttpContext) {
-    return inertia.render('setup/show', {})
+    return inertia.render('setup/show', { timezones: TIMEZONES })
   }
 
   @inject()

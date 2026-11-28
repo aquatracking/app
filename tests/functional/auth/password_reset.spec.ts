@@ -134,6 +134,23 @@ test.group('Password reset', (group) => {
     mails.assertNoneSent()
   })
 
+  test('AUTH-7 an email of more than 254 characters is refused on the field', async ({
+    client,
+    assert,
+  }) => {
+    const { mails } = mail.fake()
+
+    const response = await requestLink(
+      client,
+      `${'a'.repeat(10)}@${`${'b'.repeat(60)}.`.repeat(4)}com`
+    )
+
+    const errors = response.flashMessages().inputErrorsBag as Record<string, string[]>
+    assert.deepEqual(errors.email, ['Enter at most 254 characters'])
+    mails.assertNoneQueued()
+    mails.assertNoneSent()
+  })
+
   test('AUTH-7 requests are limited to 3 per hour and per IP', async ({ client }) => {
     mail.fake()
 

@@ -10,6 +10,26 @@ import InvalidImageException from '#exceptions/invalid_image_exception'
 const MAX_IMAGE_SIZE = 1600
 
 /**
+ * Formats accepted for an image, as read by sharp from the content of the
+ * file (docs/features/04-vivariums.md). sharp decodes others too (SVG,
+ * GIF, TIFF…), which are refused.
+ */
+export const IMAGE_FORMATS = ['jpeg', 'png', 'webp']
+
+/**
+ * Format of an image read from its content, or undefined when sharp does
+ * not recognize it.
+ */
+export async function imageFormatOf(path: string): Promise<string | undefined> {
+  try {
+    const { format } = await sharp(path).metadata()
+    return format
+  } catch {
+    return undefined
+  }
+}
+
+/**
  * Images of the vivariums, on the "vivariums" Drive disk under
  * "<vivarium_id>/<uuid>.webp" (docs/features/04-vivariums.md). The file
  * name changes with each image, so browsers may cache it for good.
@@ -24,9 +44,14 @@ export class VivariumImageService {
    * metadata (sharp drops EXIF unless asked to keep it; the orientation
    * is applied before), then deletes the previous image.
    *
-   * @throws InvalidImageException when the file cannot be decoded
+   * @throws InvalidImageException when the file is not in an accepted
+   * format or cannot be decoded
    */
   async replace(vivarium: Vivarium, sourcePath: string) {
+    if (!IMAGE_FORMATS.includes((await imageFormatOf(sourcePath)) ?? '')) {
+      throw new InvalidImageException()
+    }
+
     let contents: Buffer
     try {
       contents = await sharp(sourcePath)
