@@ -225,6 +225,64 @@ test.group('Registration by invitation', (group) => {
       assert.isNotNull(await Invitation.find(invitation.id))
     })
 
+  test(
+    'AUTH-25 the registration refuses a missing first name, or a name of more than 100 characters'
+  )
+    .with([
+      { field: 'firstName', value: '', error: 'This field is required' },
+      { field: 'firstName', value: '   ', error: 'This field is required' },
+      { field: 'firstName', value: 'a'.repeat(101), error: 'Enter at most 100 characters' },
+      { field: 'lastName', value: 'a'.repeat(101), error: 'Enter at most 100 characters' },
+    ])
+    .run(async ({ client, assert }, { field, value, error }) => {
+      const { invitation, token } = await invite('grace@example.com')
+
+      const response = await client
+        .post(`/invitations/${token}`)
+        .withInertia()
+        .header('accept-language', 'en')
+        .form(registrationForm({ [field]: value }))
+        .withCsrfToken()
+        .redirects(0)
+
+      assert.deepEqual(fieldErrors(response, field), [error])
+      assert.isNull(await User.findBy('email', 'grace@example.com'))
+      assert.isNotNull(await Invitation.find(invitation.id))
+    })
+
+  test('AUTH-25 the registration accepts names of 100 characters', async ({ client, assert }) => {
+    const { token } = await invite('grace@example.com')
+
+    await client
+      .post(`/invitations/${token}`)
+      .withInertia()
+      .form(registrationForm({ firstName: 'a'.repeat(100), lastName: 'b'.repeat(100) }))
+      .withCsrfToken()
+      .redirects(0)
+
+    const user = await User.findByOrFail('email', 'grace@example.com')
+    assert.equal(user.firstName, 'a'.repeat(100))
+    assert.equal(user.lastName, 'b'.repeat(100))
+  })
+
+  test('AUTH-26 the registration saves a last name made of spaces as absent', async ({
+    client,
+    assert,
+  }) => {
+    const { token } = await invite('grace@example.com')
+
+    await client
+      .post(`/invitations/${token}`)
+      .withInertia()
+      .form(registrationForm({ firstName: '  Grace ', lastName: '   ' }))
+      .withCsrfToken()
+      .redirects(0)
+
+    const user = await User.findByOrFail('email', 'grace@example.com')
+    assert.equal(user.firstName, 'Grace')
+    assert.isNull(user.lastName)
+  })
+
   test('AUTH-21 a signed-in user opening an invitation link is sent home with a message, the invitation kept', async ({
     client,
     assert,

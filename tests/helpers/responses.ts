@@ -16,3 +16,23 @@ export function fieldErrors(response: ApiResponse, field: string): string[] {
 export function generatedLink(response: ApiResponse): GeneratedLink {
   return response.flashMessages().generatedLink as GeneratedLink
 }
+
+/**
+ * HTML of the page as rendered by the server (SSR), without the props
+ * sent along (written before it).
+ */
+export function renderedPage(response: ApiResponse): string {
+  const page = response.text().split('id="app"')[1].split('</body>')[0]
+  return page.slice(page.indexOf('>') + 1)
+}
+
+/**
+ * Text of a piece of HTML as read on screen: tags replaced by spaces,
+ * spaces collapsed.
+ */
+export function textOf(html: string): string {
+  return html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}

@@ -118,6 +118,7 @@ tests/helpers/
 ## Rendu et formulaires
 
 - Formulaires avec le composant `<Form>` d'Inertia et routes typées ; les erreurs de validation reviennent par session.
+- Le bodyparser retire les espaces autour des valeurs envoyées, puis change une chaîne vide en `null` (`trimWhitespaces` et `convertEmptyStringsToNull`, écrits dans `config/bodyparser.ts` pour les formulaires, le JSON et le multipart) : un champ fait d'espaces arrive comme absent.
 - Les messages de succès ou d'erreur métier passent par un flash `notification` partagé par le middleware Inertia, posé avec `session.notify(type, message)` (macro de `start/session.ts`). Un lien à usage unique généré par un administrateur (invitation, réinitialisation) passe par un flash `generatedLink`, seul moment où il est connu, posé avec `session.showLink(link)` (macro du même fichier).
 - Données partagées à toutes les pages (`InertiaMiddleware`) : utilisateur courant (transformé), langue, fuseau de l'utilisateur, notification, `mailEnabled` et `now`, l'instant de la réponse. Les durées relatives (« il y a 3 h ») et la date du jour (âge d'un vivarium) se calculent à partir de `now` pendant le rendu SSR et l'hydratation, qui donnent ainsi le même texte ; une fois la page montée, elles suivent l'horloge du navigateur, rafraîchie chaque minute, y compris sur une page restaurée par un retour arrière sans requête (`useNow`, `inertia/composables/use_now.ts`).
 - Les listes de valeurs que le serveur accepte (langues, fuseaux, kinds, types d'eau, climats) arrivent aux pages qui en ont besoin dans leurs props, depuis les constantes du serveur (`LOCALES`, `TIMEZONES`, `VIVARIUM_KINDS`…) : elles ne sont pas recopiées côté client.
@@ -158,6 +159,7 @@ Guide d'installation, de mise à jour, de sauvegarde et de restauration : [deplo
 - Chaque critère d'acceptation d'une spec correspond à au moins un test fonctionnel Japa dans `tests/functional/<feature>/`.
 - La base de test est réinitialisée par transaction globale par test. Exception : un test qui a besoin de plusieurs connexions simultanées (concurrence, verrous) vide la base par troncature, car la transaction globale réunirait ses requêtes sur une seule connexion. Pour que les requêtes se chevauchent, le test tient un verrou dans sa propre transaction et ne le relâche que lorsqu'elles l'attendent toutes (`waitForLockWaiters`, `tests/helpers/locks.ts`).
 - Les emails sont capturés avec `mail.fake()`.
+- Un critère qui porte sur ce que la page **affiche** est vérifié sur le HTML rendu par le serveur (SSR), demandé sans en-tête Inertia (`renderedPage` et `textOf`, `tests/helpers/responses.ts`), et pas seulement sur les props.
 - Une seule suite, `functional` : pas de suite `unit`. Ce qui serait testé unitairement l'est par les tests fonctionnels de sa feature, avec la base. Le calcul des séries (`MeasureSeriesService`) se fait en SQL : ses tests appellent directement le service (`tests/functional/charts/measure_series.spec.ts`) ; le catalogue est testé par les critères TRK et le seeder. Une suite `unit` ne sera déclarée dans `adonisrc.ts` qu'avec son premier test.
 
 ## CI (GitHub Actions)

@@ -6,7 +6,7 @@ import testUtils from '@adonisjs/core/services/test_utils'
 import db from '@adonisjs/lucid/services/db'
 import limiter from '@adonisjs/limiter/services/main'
 import { waitForLockWaiters } from '#tests/helpers/locks'
-import { fieldErrors } from '#tests/helpers/responses'
+import { fieldErrors, renderedPage, textOf } from '#tests/helpers/responses'
 
 /**
  * A valid submission of the setup form.
@@ -106,6 +106,97 @@ test.group('Setup', (group) => {
 
     assert.deepEqual(fieldErrors(response, 'email'), ['Enter at most 254 characters'])
     assert.lengthOf(await User.all(), 0)
+  })
+
+  test('INS-10 a missing first name, or one made of spaces, is refused on the field')
+    .with(['', '   '])
+    .run(async ({ client, assert }, firstName) => {
+      const response = await client
+        .post('/setup')
+        .withInertia()
+        .header('accept-language', 'en')
+        .form(setupForm({ firstName }))
+        .withCsrfToken()
+        .redirects(0)
+
+      assert.deepEqual(fieldErrors(response, 'firstName'), ['This field is required'])
+      assert.lengthOf(await User.all(), 0)
+    })
+
+  test('INS-10 a first name or a last name of more than 100 characters is refused on the field')
+    .with(['firstName', 'lastName'])
+    .run(async ({ client, assert }, field) => {
+      const response = await client
+        .post('/setup')
+        .withInertia()
+        .header('accept-language', 'en')
+        .form(setupForm({ [field]: 'a'.repeat(101) }))
+        .withCsrfToken()
+        .redirects(0)
+
+      assert.deepEqual(fieldErrors(response, field), ['Enter at most 100 characters'])
+      assert.lengthOf(await User.all(), 0)
+    })
+
+  test('INS-10 a first name and a last name of 100 characters are accepted', async ({
+    client,
+    assert,
+  }) => {
+    const response = await client
+      .post('/setup')
+      .withInertia()
+      .form(setupForm({ firstName: 'a'.repeat(100), lastName: 'b'.repeat(100) }))
+      .withCsrfToken()
+      .redirects(0)
+
+    response.assertHeader('location', '/')
+    const admin = await User.findByOrFail('email', 'ada@example.com')
+    assert.equal(admin.firstName, 'a'.repeat(100))
+    assert.equal(admin.lastName, 'b'.repeat(100))
+  })
+
+  test('INS-11 a last name made of spaces is saved as absent, the names are trimmed', async ({
+    client,
+    assert,
+  }) => {
+    const response = await client
+      .post('/setup')
+      .withInertia()
+      .form(setupForm({ firstName: '  Ada  ', lastName: '   ' }))
+      .withCsrfToken()
+      .redirects(0)
+
+    response.assertHeader('location', '/')
+    const admin = await User.findByOrFail('email', 'ada@example.com')
+    assert.equal(admin.firstName, 'Ada')
+    assert.isNull(admin.lastName)
+  })
+
+  test('INS-12 the form follows the language of the browser, English otherwise', async ({
+    client,
+    assert,
+  }) => {
+    /**
+     * The texts of the page as rendered by the server (SSR), and the
+     * language that prefills the language field of the form.
+     */
+    const page = async (acceptLanguage: string) => {
+      const rendered = await client.get('/setup').header('accept-language', acceptLanguage)
+      rendered.assertStatus(200)
+      const props = await client
+        .get('/setup')
+        .header('accept-language', acceptLanguage)
+        .withInertia()
+      return { text: textOf(renderedPage(rendered)), locale: props.inertiaProps.locale }
+    }
+
+    const french = await page('fr-FR,fr;q=0.9,en;q=0.8')
+    assert.include(french.text, 'Créer le compte administrateur')
+    assert.equal(french.locale, 'fr')
+
+    const german = await page('de-DE,de;q=0.9')
+    assert.include(german.text, 'Create the administrator account')
+    assert.equal(german.locale, 'en')
   })
 
   test('INS-4 once installed, the setup routes answer 404', async ({ client }) => {

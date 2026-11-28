@@ -5,6 +5,7 @@ import db from '@adonisjs/lucid/services/db'
 import testUtils from '@adonisjs/core/services/test_utils'
 import { storeMeasures, vivariumTracking } from '#tests/helpers/measures'
 import { UserFactory } from '#database/factories/user_factory'
+import { renderedPage, textOf } from '#tests/helpers/responses'
 
 type HistoryProps = {
   readings: {
@@ -169,11 +170,12 @@ test.group('History', (group) => {
     assert.equal(measure.measuredAt.toUTC().toISO(), '2026-01-15T17:00:00.000Z')
   })
 
-  test('MEA-16 values are sent as numbers, without forced trailing zeros', async ({
+  test('MEA-16 values are shown as entered, without forced trailing zeros', async ({
     client,
     assert,
   }) => {
-    const { user, vivarium } = await vivariumTracking(['no3', 'ph'])
+    const owner = await UserFactory.merge({ locale: 'fr' }).create()
+    const { user, vivarium } = await vivariumTracking(['no3', 'ph'], owner)
     await storeMeasures(vivarium, '2026-01-15T17:00:00Z', { no3: 10, ph: 7.25 })
 
     const response = await client
@@ -193,6 +195,16 @@ test.group('History', (group) => {
         ['no3', 10, 1],
       ]
     )
+
+    /**
+     * The values of the reading as rendered by the server (SSR), in the
+     * language of the user: "10" and not "10,0".
+     */
+    const page = renderedPage(await client.get(`/vivariums/${vivarium.id}/measures`).loginAs(user))
+    const values = [...page.matchAll(/<dt[^>]*>(.*?)<\/dt>\s*<dd[^>]*>(.*?)<\/dd>/g)].map(
+      ([, label, value]) => `${textOf(label)}: ${textOf(value)}`
+    )
+    assert.deepEqual(values, ['pH: 7,25', 'Nitrates (NO₃): 10 mg/L'])
   })
 
   test('MEA-28 the history filtered by type offers no deletion of a reading, only its edit', async ({
@@ -211,7 +223,7 @@ test.group('History', (group) => {
     const buttons = async (url: string) => {
       const response = await client.get(url).loginAs(user)
       response.assertStatus(200)
-      const page = response.text().split('id="app"')[1]
+      const page = renderedPage(response)
       return {
         edit: page.split('>Edit</a>').length - 1,
         delete: page.split('Delete the reading').length - 1,

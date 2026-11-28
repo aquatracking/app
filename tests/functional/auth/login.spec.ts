@@ -49,6 +49,21 @@ async function endBlock(email: string) {
   }
 }
 
+/**
+ * Seconds before the history of the blocks of the IP + email key is
+ * forgotten, read in the limiter under the key the login service gives it.
+ */
+async function blocksHistoryExpiresIn(email: string) {
+  const history = limiter.use({ requests: 1, duration: '24 hours' })
+  for (const ip of CLIENT_IPS) {
+    const blocks = await history.get(`${loginLimiterKeys(ip, email).ipAndEmail}:blocks`)
+    if (blocks) {
+      return blocks.availableIn
+    }
+  }
+  return null
+}
+
 function blockedMessage(duration: string) {
   return {
     type: 'error',
@@ -173,6 +188,41 @@ test.group('Login', (group) => {
     assert.lengthOf(await db.from('remember_me_tokens').where('tokenable_id', user.id), 0)
   })
 
+  test('AUTH-29 without "remember me", the session cookie ends with the browser', async ({
+    client,
+    assert,
+  }) => {
+    const user = await UserFactory.create()
+
+    /**
+     * Cookies set by a response, as "name attributes" in lowercase.
+     */
+    const setCookies = (response: { headers(): Record<string, string | string[]> }) =>
+      ([] as string[]).concat(response.headers()['set-cookie'] ?? []).map((cookie) => {
+        const [name, ...attributes] = cookie.split(';').map((part) => part.trim())
+        return {
+          name: name.split('=')[0],
+          attributes: attributes.map((attribute) => attribute.toLowerCase()),
+        }
+      })
+    const lifetime = (attributes: string[]) =>
+      attributes.filter((attribute) => /^(max-age|expires)=/.test(attribute))
+
+    const session = await login(client, user.email, 'secret-password')
+    session.assertSession('auth_web', user.id)
+    const sessionCookie = setCookies(session).find(({ name }) => name === 'adonis-session')
+    assert.exists(sessionCookie)
+    assert.deepEqual(lifetime(sessionCookie!.attributes), [])
+
+    /**
+     * With "remember me", the remember me cookie has a lifetime: the
+     * check above would see one on the session cookie.
+     */
+    const remembered = await login(client, user.email, 'secret-password', { rememberMe: true })
+    const rememberCookie = setCookies(remembered).find(({ name }) => name === 'remember_web')
+    assert.isNotEmpty(lifetime(rememberCookie!.attributes))
+  })
+
   test('AUTH-13 a protected page requested without being signed in redirects to the login', async ({
     client,
   }) => {
@@ -279,6 +329,46 @@ test.group('Login', (group) => {
     await failLogins(client, user.email, 5)
     const ninth = await login(client, user.email, 'secret-password')
     ninth.assertFlashMessage('notification', blockedMessage('24 hours'))
+  })
+
+  test('AUTH-27 the history of the blocks of a key is forgotten 24 hours after the end of its last block', async ({
+    client,
+    assert,
+  }) => {
+    const user = await UserFactory.create()
+    const day = 24 * 60 * 60
+
+    await failLogins(client, user.email, 5)
+    assert.closeTo((await blocksHistoryExpiresIn(user.email))!, 15 * 60 + day, 5)
+
+    await endBlock(user.email)
+    await failLogins(client, user.email, 5)
+    assert.closeTo((await blocksHistoryExpiresIn(user.email))!, 30 * 60 + day, 5)
+  })
+
+  test('AUTH-27 once the history is forgotten, a new block lasts 15 minutes again', async ({
+    client,
+    assert,
+  }) => {
+    const user = await UserFactory.create()
+    await failLogins(client, user.email, 5)
+    await endBlock(user.email)
+    await failLogins(client, user.email, 5)
+    await endBlock(user.email)
+
+    /**
+     * Simulates the passing of the 24 hours of the history.
+     */
+    for (const ip of CLIENT_IPS) {
+      await limiter
+        .use({ requests: 1, duration: '24 hours' })
+        .delete(`${loginLimiterKeys(ip, user.email).ipAndEmail}:blocks`)
+    }
+    assert.isNull(await blocksHistoryExpiresIn(user.email))
+
+    await failLogins(client, user.email, 5)
+    const response = await login(client, user.email, 'secret-password')
+    response.assertFlashMessage('notification', blockedMessage('15 minutes'))
   })
 
   test('AUTH-19 a successful login resets the IP + email counter', async ({ client }) => {

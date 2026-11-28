@@ -56,7 +56,7 @@ Justification des décimales notables : pH au 0,01 (pH-mètres, suivi récifal) 
 - Retirer un type ne supprime aucune mesure. Le réajouter fait réapparaître sa dernière valeur et son historique.
 - Un vivarium peut ne suivre aucun type. La page des mesures suivies l'indique ; le tableau de bord ([07](07-charts.md)) et le relevé ([06](06-measures.md)) invitent alors à en ajouter.
 - Sur un vivarium **archivé**, les mesures suivies sont figées : ajout, retrait et réordonnancement sont refusés (le bac est en lecture seule, comme pour les relevés). Il faut le désarchiver d'abord. Une modification envoyée au moment de l'archivage est refusée de même : sa transaction verrouille le bac en lecture et revérifie qu'il n'est pas archivé ([04](04-vivariums.md)).
-- Changer le type d'eau ou le climat d'un vivarium ne touche pas aux mesures suivies.
+- Changer le type d'eau ou le climat d'un vivarium ne touche pas aux mesures suivies (TRK-15).
 
 ## Données
 `measure_types` (lecture), `tracked_measures`, `vivariums` (relu sous verrou partagé dans la transaction d'une modification des mesures suivies, pour revérifier `archived_at`).
@@ -84,3 +84,4 @@ Justification des décimales notables : pH au 0,01 (pH-mètres, suivi récifal) 
 - **TRK-12** ([VIV-13](04-vivariums.md)) Supprimer un utilisateur depuis l'administration supprime les mesures suivies de ses vivariums.
 - **TRK-13** La page des mesures suivies les liste dans leur ordre et propose à l'ajout les autres types du catalogue ; ajouter un type le fait suivre en dernière position.
 - **TRK-14** Ajouter, retirer ou réordonner des mesures suivies pendant l'archivage du bac, en attendant la fin de l'archivage, est refusé avec la notification « bac archivé », et rien n'est modifié.
+- **TRK-15** Changer le type d'eau ou le climat d'un vivarium qui suit des mesures garde les mêmes mesures suivies, dans le même ordre.

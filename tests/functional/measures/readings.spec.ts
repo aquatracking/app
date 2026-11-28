@@ -169,6 +169,90 @@ test.group('Readings', (group) => {
     assert.deepEqual(await measuresOf(vivarium), ['2025-01-01T05:30:00Z ph=7'])
   })
 
+  test('MEA-31 an edited reading cannot move more than 5 minutes into the future nor before the set-up', async ({
+    client,
+    assert,
+  }) => {
+    const { user, vivarium } = await vivariumTracking(['ph'])
+    const local = (instant: DateTime) => instant.toUTC().toFormat("yyyy-MM-dd'T'HH:mm")
+    await storeMeasures(vivarium, '2026-01-15T17:00:00Z', { ph: 7 })
+
+    const future = await putReading(client, user, vivarium, '2026-01-15T17:00:00Z', {
+      measuredAt: local(DateTime.now().plus({ minutes: 7 })),
+      values: { ph: '7.1' },
+    })
+    assert.deepEqual(fieldErrors(future, 'measuredAt'), ['The date cannot be in the future'])
+
+    const beforeSetUp = await putReading(client, user, vivarium, '2026-01-15T17:00:00Z', {
+      measuredAt: '2024-12-31T23:59',
+      values: { ph: '7.1' },
+    })
+    assert.deepEqual(fieldErrors(beforeSetUp, 'measuredAt'), [
+      'The date cannot be before the set-up date of the tank',
+    ])
+    assert.deepEqual(await measuresOf(vivarium), ['2026-01-15T17:00:00Z ph=7'])
+
+    /**
+     * On the set-up date itself, then within the tolerance: accepted.
+     */
+    await putReading(client, user, vivarium, '2026-01-15T17:00:00Z', {
+      measuredAt: '2025-01-01T00:00',
+      values: { ph: '7.1' },
+    })
+    assert.deepEqual(await measuresOf(vivarium), ['2025-01-01T00:00:00Z ph=7.1'])
+    const soon = DateTime.now().plus({ minutes: 3 })
+    const moved = await putReading(client, user, vivarium, '2025-01-01T00:00:00Z', {
+      measuredAt: local(soon),
+      values: { ph: '7.1' },
+    })
+    moved.assertStatus(303)
+    assert.deepEqual(await measuresOf(vivarium), [
+      `${soon.toUTC().startOf('minute').toISO({ suppressMilliseconds: true })} ph=7.1`,
+    ])
+  })
+
+  test('MEA-31 an edited reading compares the set-up date with its local date', async ({
+    client,
+    assert,
+  }) => {
+    const user = await UserFactory.merge({ timezone: 'America/Montreal' }).create()
+    const { vivarium } = await vivariumTracking(['ph'], user)
+    await storeMeasures(vivarium, '2026-01-15T17:00:00Z', { ph: 7 })
+
+    /**
+     * 2024-12-31 at 19:30 in Montreal is already 2025-01-01 in UTC:
+     * refused all the same, its local date being before the set-up.
+     */
+    const refused = await putReading(client, user, vivarium, '2026-01-15T17:00:00Z', {
+      measuredAt: '2024-12-31T19:30',
+      values: { ph: '7' },
+    })
+    assert.deepEqual(fieldErrors(refused, 'measuredAt'), [
+      'The date cannot be before the set-up date of the tank',
+    ])
+    assert.deepEqual(await measuresOf(vivarium), ['2026-01-15T17:00:00Z ph=7'])
+  })
+
+  test('MEA-31 an edited reading cannot move to a time skipped in the time zone', async ({
+    client,
+    assert,
+  }) => {
+    Settings.now = () => Date.parse('2028-01-01T00:00:00Z')
+    const user = await UserFactory.merge({ timezone: 'Europe/Paris' }).create()
+    const { vivarium } = await vivariumTracking(['ph'], user)
+    await storeMeasures(vivarium, '2027-03-27T12:00:00Z', { ph: 7 })
+
+    const skipped = await putReading(client, user, vivarium, '2027-03-27T12:00:00Z', {
+      measuredAt: '2027-03-28T02:30',
+      values: { ph: '7' },
+    })
+
+    assert.deepEqual(fieldErrors(skipped, 'measuredAt'), [
+      'This time does not exist in your time zone (change to summer time)',
+    ])
+    assert.deepEqual(await measuresOf(vivarium), ['2027-03-27T12:00:00Z ph=7'])
+  })
+
   test('MEA-7 a new reading only accepts the types tracked by the vivarium', async ({
     client,
     assert,

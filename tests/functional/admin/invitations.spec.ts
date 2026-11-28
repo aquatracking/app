@@ -122,6 +122,22 @@ test.group('Administration of invitations', (group) => {
     assert.lengthOf(await Invitation.all(), 0)
   })
 
+  test('ADM-16 an email of more than 254 characters is refused on the field', async ({
+    client,
+    assert,
+  }) => {
+    const admin = await UserFactory.merge({ isAdmin: true }).create()
+    const longEmail = `${'a'.repeat(10)}@${`${'b'.repeat(60)}.`.repeat(4)}com`
+    assert.lengthOf(longEmail, 258)
+
+    const response = await invite(client, admin, longEmail)
+
+    response.assertHeader('location', '/admin/invitations')
+    assert.deepEqual(fieldErrors(response, 'email'), ['Enter at most 254 characters'])
+    assert.isUndefined(response.flashMessages().generatedLink)
+    assert.lengthOf(await Invitation.all(), 0)
+  })
+
   test('ADM-4 inviting an email already invited renews the invitation: the old link no longer works', async ({
     client,
     assert,
