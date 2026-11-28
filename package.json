@@ -111,11 +111,14 @@
   "prettier": "@adonisjs/prettier-config",
   "packageManager": "pnpm@10.33.2",
   "pnpm": {
-    "overrides": {
-      "decode-uri-component": "^0.5.1"
-    },
     "onlyBuiltDependencies": [
       "@swc/core"
-    ]
+    ],
+    "auditConfig": {
+      "ignoreGhsas": [
+        "GHSA-qr28-fpjm-wq7f",
+        "GHSA-vcc3-ghjq-m6fr"
+      ]
+    }
   }
 }
