@@ -5,7 +5,8 @@ import app from '@adonisjs/core/services/app'
 import testUtils from '@adonisjs/core/services/test_utils'
 import { MEASURE_TYPES } from '#catalog/measure_types'
 import { TrackedMeasureService } from '#services/tracked_measure_service'
-import { storeMeasures, vivariumTracking } from '#tests/functional/measures/helpers'
+import { storeMeasures, vivariumTracking } from '#tests/helpers/measures'
+import { daysAgo } from '#tests/helpers/dates'
 
 type Tile = {
   measureType: { code: string; unit: string; decimals: number }
@@ -21,9 +22,6 @@ const summary = (tiles: Tile[]) =>
   tiles.map(
     (tile) => `${tile.measureType.code} ${tile.last?.value ?? '-'} ${tile.variation ?? '-'}`
   )
-
-const daysAgo = (days: number) =>
-  DateTime.utc().minus({ days }).startOf('minute').toISO({ suppressMilliseconds: true })!
 
 test.group('Dashboard tiles', (group) => {
   group.each.setup(() => testUtils.db().withGlobalTransaction())

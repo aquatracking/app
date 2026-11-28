@@ -326,7 +326,9 @@ test.group('Login', (group) => {
     assert.lengthOf(await db.from('remember_me_tokens').where('tokenable_id', user.id), 0)
   })
 
-  test('a signed-in user opening a page for visitors is sent home', async ({ client }) => {
+  test('AUTH-21 a signed-in user opening a page for visitors is sent home with a message', async ({
+    client,
+  }) => {
     const user = await UserFactory.create()
 
     for (const url of ['/login', '/forgot-password', '/reset-password/any-token']) {

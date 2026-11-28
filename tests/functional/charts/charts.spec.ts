@@ -2,7 +2,8 @@ import { test } from '@japa/runner'
 import { DateTime } from 'luxon'
 import testUtils from '@adonisjs/core/services/test_utils'
 import { UserFactory } from '#database/factories/user_factory'
-import { storeMeasures, vivariumTracking } from '#tests/functional/measures/helpers'
+import { storeMeasures, vivariumTracking } from '#tests/helpers/measures'
+import { daysAgo } from '#tests/helpers/dates'
 
 type ChartProps = {
   measureType: { code: string; unit: string; decimals: number }
@@ -14,9 +15,6 @@ type ChartProps = {
     stats: { count: number } | null
   }
 }
-
-const daysAgo = (days: number) =>
-  DateTime.utc().minus({ days }).startOf('minute').toISO({ suppressMilliseconds: true })!
 
 test.group('Charts', (group) => {
   group.each.setup(() => testUtils.db().withGlobalTransaction())

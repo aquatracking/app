@@ -69,4 +69,64 @@ test.group('Administration on several connections', (group) => {
       [303, 403]
     )
   })
+
+  test(
+    "ADM-7 two administrators removing each other's rights at the same time leave one administrator, the other refused with the translated message"
+  )
+    .with([
+      { locale: 'fr' as const, message: 'Il doit rester au moins un administrateur.' },
+      { locale: 'en' as const, message: 'There must remain at least one administrator.' },
+    ])
+    .run(async ({ client, assert }, { locale, message }) => {
+      /**
+       * Seen recently: recording their activity does not write to their
+       * row, which the test locks.
+       */
+      const [ada, grace] = await UserFactory.merge({
+        isAdmin: true,
+        locale,
+        lastSeenAt: DateTime.now(),
+      }).createMany(2)
+
+      /**
+       * The lock on the administrators holds both requests until both
+       * wait on it: both actors are still administrators when they are
+       * authorized, and only the lock of the service refuses the second.
+       */
+      const blocker = await db.transaction()
+      let responses: ApiResponse[]
+      try {
+        await blocker.rawQuery('select id from users where is_admin for update')
+        const removals = Promise.all(
+          [
+            [ada, grace],
+            [grace, ada],
+          ].map(([actor, target]) =>
+            client
+              .put(`/admin/users/${target.id}/admin`)
+              .withInertia()
+              .header('referer', '/admin/users')
+              .form({ isAdmin: 'false' })
+              .withCsrfToken()
+              .loginAs(actor)
+              .redirects(0)
+          )
+        )
+        await waitForLockWaiters(2)
+        await blocker.commit()
+        responses = await removals
+      } finally {
+        if (!blocker.isCompleted) {
+          await blocker.rollback()
+        }
+      }
+
+      assert.lengthOf(await User.query().where('is_admin', true), 1)
+      const notifications = responses.map(
+        (response) => (response.flashMessages().notification as { type: string }).type
+      )
+      assert.sameMembers(notifications, ['success', 'error'])
+      const refused = responses[notifications.indexOf('error')]
+      refused.assertFlashMessage('notification', { type: 'error', message })
+    })
 })

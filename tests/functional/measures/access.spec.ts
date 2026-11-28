@@ -6,12 +6,7 @@ import router from '@adonisjs/core/services/router'
 import testUtils from '@adonisjs/core/services/test_utils'
 import type { ApiClient } from '@japa/api-client'
 import { UserFactory } from '#database/factories/user_factory'
-import {
-  measuresOf,
-  readingUrl,
-  storeMeasures,
-  vivariumTracking,
-} from '#tests/functional/measures/helpers'
+import { measuresOf, readingUrl, storeMeasures, vivariumTracking } from '#tests/helpers/measures'
 
 const READING = '2026-01-15T18:00:00Z'
 const FORM = { measuredAt: '2026-01-15T18:00', values: { ph: '7.5' } }

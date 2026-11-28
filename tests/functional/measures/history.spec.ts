@@ -3,7 +3,8 @@ import { DateTime } from 'luxon'
 import Measure from '#models/measure'
 import db from '@adonisjs/lucid/services/db'
 import testUtils from '@adonisjs/core/services/test_utils'
-import { storeMeasures, vivariumTracking } from '#tests/functional/measures/helpers'
+import { storeMeasures, vivariumTracking } from '#tests/helpers/measures'
+import { UserFactory } from '#database/factories/user_factory'
 
 type HistoryProps = {
   readings: {
@@ -192,5 +193,33 @@ test.group('History', (group) => {
         ['no3', 10, 1],
       ]
     )
+  })
+
+  test('MEA-28 the history filtered by type offers no deletion of a reading, only its edit', async ({
+    client,
+    assert,
+  }) => {
+    const owner = await UserFactory.merge({ locale: 'en' }).create()
+    const { user, vivarium } = await vivariumTracking(['temperature', 'ph'], owner)
+    await storeMeasures(vivarium, '2026-01-15T17:00:00Z', { temperature: 25, ph: 7 })
+    await storeMeasures(vivarium, '2026-01-16T17:00:00Z', { temperature: 25.5, ph: 7.1 })
+
+    /**
+     * The buttons of the page as rendered by the server (SSR), without
+     * the props sent along.
+     */
+    const buttons = async (url: string) => {
+      const response = await client.get(url).loginAs(user)
+      response.assertStatus(200)
+      const page = response.text().split('id="app"')[1]
+      return {
+        edit: page.split('>Edit</a>').length - 1,
+        delete: page.split('Delete the reading').length - 1,
+      }
+    }
+
+    const history = `/vivariums/${vivarium.id}/measures`
+    assert.deepEqual(await buttons(history), { edit: 2, delete: 2 })
+    assert.deepEqual(await buttons(`${history}?type=ph`), { edit: 2, delete: 0 })
   })
 })

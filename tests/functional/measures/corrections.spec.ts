@@ -10,13 +10,13 @@ import { MEASURE_TYPES, MeasureTypeCatalog } from '#catalog/measure_types'
 import {
   deleteReading,
   failWritesOf,
-  fieldErrors,
   measuresOf,
   putReading,
   readingUrl,
   storeMeasures,
   vivariumTracking,
-} from '#tests/functional/measures/helpers'
+} from '#tests/helpers/measures'
+import { fieldErrors } from '#tests/helpers/responses'
 
 test.group('Reading corrections', (group) => {
   group.each.setup(() => testUtils.db().withGlobalTransaction())
@@ -173,11 +173,15 @@ test.group('Reading corrections', (group) => {
     assert.deepEqual(await measuresOf(vivarium), ['2026-01-15T18:00:00Z ph=7'])
   })
 
-  test('MEA-10 the history keeps its filter and page after an edit', async ({ client }) => {
+  test('MEA-26 the history keeps its filter and page after an edit or a deletion', async ({
+    client,
+    assert,
+  }) => {
     const { user, vivarium } = await vivariumTracking(['ph'])
     await storeMeasures(vivarium, '2026-01-15T18:00:00Z', { ph: 7 })
+    await storeMeasures(vivarium, '2026-01-16T18:00:00Z', { ph: 7.2 })
 
-    const response = await client
+    const edited = await client
       .put(`${readingUrl(vivarium, '2026-01-15T18:00:00Z')}?type=ph&page=2`)
       .withInertia()
       .header('referer', `/vivariums/${vivarium.id}/measures`)
@@ -185,11 +189,20 @@ test.group('Reading corrections', (group) => {
       .withCsrfToken()
       .loginAs(user)
       .redirects(0)
+    const deleted = await client
+      .delete(`${readingUrl(vivarium, '2026-01-16T18:00:00Z')}?page=2`)
+      .withInertia()
+      .header('referer', `/vivariums/${vivarium.id}/measures`)
+      .withCsrfToken()
+      .loginAs(user)
+      .redirects(0)
 
-    response.assertHeader('location', `/vivariums/${vivarium.id}/measures?type=ph&page=2`)
+    edited.assertHeader('location', `/vivariums/${vivarium.id}/measures?type=ph&page=2`)
+    deleted.assertHeader('location', `/vivariums/${vivarium.id}/measures?page=2`)
+    assert.deepEqual(await measuresOf(vivarium), ['2026-01-15T18:00:00Z ph=7.1'])
   })
 
-  test('MEA-10 the routes of a reading accept the instant with encoded colons, as built by the client', async ({
+  test('MEA-27 the routes of a reading accept the instant with encoded colons, as built by the client', async ({
     client,
     assert,
   }) => {

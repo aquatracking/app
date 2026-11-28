@@ -1,12 +1,12 @@
 import { test } from '@japa/runner'
 import { TIMEZONES } from '#catalog/timezones'
-import type { ApiResponse } from '@japa/api-client'
 import User from '#models/user'
 import { SetupService } from '#services/setup_service'
 import testUtils from '@adonisjs/core/services/test_utils'
 import db from '@adonisjs/lucid/services/db'
 import limiter from '@adonisjs/limiter/services/main'
 import { waitForLockWaiters } from '#tests/helpers/locks'
+import { fieldErrors } from '#tests/helpers/responses'
 
 /**
  * A valid submission of the setup form.
@@ -22,14 +22,6 @@ function setupForm(overrides: Record<string, string> = {}) {
     timezone: 'Europe/Paris',
     ...overrides,
   }
-}
-
-/**
- * Validation errors of a field, as flashed for the next page.
- */
-function fieldErrors(response: ApiResponse, field: string): string[] {
-  const errors = response.flashMessages().inputErrorsBag as Record<string, string[]> | undefined
-  return errors?.[field] ?? []
 }
 
 /**
@@ -282,7 +274,10 @@ test.group('Setup', (group) => {
       assert.lengthOf(await User.all(), 0)
     })
 
-  test('INS-8 submissions are limited to 10 per minute and per IP', async ({ client }) => {
+  test('INS-8 a submission other than Inertia over the limit gets a 429, without being processed', async ({
+    client,
+    assert,
+  }) => {
     const invalidForm = setupForm({ password: 'short' })
 
     for (let attempt = 1; attempt <= 10; attempt++) {
@@ -290,11 +285,15 @@ test.group('Setup', (group) => {
       response.assertStatus(302)
     }
 
-    const response = await client.post('/setup').form(invalidForm).withCsrfToken().redirects(0)
+    const response = await client.post('/setup').form(setupForm()).withCsrfToken().redirects(0)
     response.assertStatus(429)
+    assert.lengthOf(await User.all(), 0)
   })
 
-  test('INS-8 an Inertia submission over the limit gets a notification', async ({ client }) => {
+  test('INS-8 an Inertia submission over the limit goes back to the form with a notification, without being processed', async ({
+    client,
+    assert,
+  }) => {
     const invalidForm = setupForm({ password: 'short' })
 
     for (let attempt = 1; attempt <= 10; attempt++) {
@@ -306,7 +305,7 @@ test.group('Setup', (group) => {
       .header('accept-language', 'en')
       .header('referer', '/setup')
       .withInertia()
-      .form(invalidForm)
+      .form(setupForm())
       .withCsrfToken()
       .redirects(0)
 
@@ -316,5 +315,6 @@ test.group('Setup', (group) => {
       type: 'error',
       message: 'Too many attempts. Please try again in a moment.',
     })
+    assert.lengthOf(await User.all(), 0)
   })
 })

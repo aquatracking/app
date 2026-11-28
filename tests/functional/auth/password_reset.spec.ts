@@ -11,6 +11,8 @@ import PasswordResetToken from '#models/password_reset_token'
 import { UserFactory } from '#database/factories/user_factory'
 import { PasswordResetService } from '#services/password_reset_service'
 import PasswordResetNotification from '#mails/password_reset_notification'
+import { useMail } from '#tests/helpers/mail'
+import { fieldErrors } from '#tests/helpers/responses'
 
 const SENT_MESSAGE = {
   type: 'success',
@@ -43,14 +45,6 @@ function resetPassword(client: ApiClient, token: string, password = 'new-secret-
 async function assertPassword(assert: any, email: string, password: string) {
   const user = await User.verifyCredentials(email, password)
   assert.equal(user.email, email)
-}
-
-/**
- * The instance sends emails or not depending on SMTP_HOST: each test
- * chooses, and the configured value is restored after it.
- */
-function useMail(enabled: boolean) {
-  app.config.set('app.mail.enabled', enabled)
 }
 
 test.group('Password reset', (group) => {
@@ -145,8 +139,7 @@ test.group('Password reset', (group) => {
       `${'a'.repeat(10)}@${`${'b'.repeat(60)}.`.repeat(4)}com`
     )
 
-    const errors = response.flashMessages().inputErrorsBag as Record<string, string[]>
-    assert.deepEqual(errors.email, ['Enter at most 254 characters'])
+    assert.deepEqual(fieldErrors(response, 'email'), ['Enter at most 254 characters'])
     mails.assertNoneQueued()
     mails.assertNoneSent()
   })
@@ -170,16 +163,25 @@ test.group('Password reset', (group) => {
     client,
   }) => {
     useMail(false)
-    const { mails } = mail.fake()
-    await UserFactory.merge({ email: 'ada@example.com' }).create()
 
     const show = await client.get('/forgot-password').withInertia()
     show.assertInertiaComponent('auth/forgot_password')
     show.assertInertiaPropsContains({ mailEnabled: false })
+  })
+
+  test('AUTH-22 without SMTP, a submission of the form answers 404 and sends nothing', async ({
+    client,
+    assert,
+  }) => {
+    useMail(false)
+    const { mails } = mail.fake()
+    const user = await UserFactory.merge({ email: 'ada@example.com' }).create()
 
     const response = await requestLink(client, 'ada@example.com')
+
     response.assertStatus(404)
     mails.assertNoneQueued()
+    assert.lengthOf(await PasswordResetToken.query().where('userId', user.id), 0)
   })
 
   test('AUTH-9 an expired, used, replaced or unknown link is refused as soon as it is shown', async ({
@@ -251,8 +253,7 @@ test.group('Password reset', (group) => {
 
     const response = await resetPassword(client, token, 'short')
 
-    const errors = response.flashMessages().inputErrorsBag as Record<string, string[]>
-    assert.deepEqual(errors.password, ['Enter at least 8 characters'])
+    assert.deepEqual(fieldErrors(response, 'password'), ['Enter at least 8 characters'])
     await assertPassword(assert, 'ada@example.com', 'secret-password')
     assert.lengthOf(await PasswordResetToken.query().where('userId', user.id), 1)
   })

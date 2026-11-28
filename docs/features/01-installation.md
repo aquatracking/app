@@ -43,5 +43,5 @@ Prénom (requis, 100 caractères maximum), nom (facultatif, 100 caractères maxi
 - **INS-5** Deux `POST /setup` simultanés valides ne créent qu'un seul utilisateur.
 - **INS-6** Un mot de passe de moins de 8 caractères ou une confirmation différente est refusé avec un message sur le champ.
 - **INS-7** Le fuseau soumis (ex. `Europe/Paris`) est enregistré sur l'administrateur ; un nom hors de la liste des fuseaux (`Mars/Olympus_Mons`, `+01:00`, `Etc/GMT+5`, `EST`) est refusé avec un message sur le champ.
-- **INS-8** Au-delà de 10 soumissions par minute depuis une même IP, la soumission est refusée (429, ou notification « trop de tentatives » pour le formulaire).
+- **INS-8** Au-delà de 10 soumissions par minute depuis une même IP, la soumission suivante est refusée sans être traitée, même valide : une soumission du formulaire de la page (requête Inertia) revient sur la page avec la notification « trop de tentatives » ; toute autre requête reçoit une réponse 429.
 - **INS-9** Un email de plus de 254 caractères est refusé avec un message sur le champ.

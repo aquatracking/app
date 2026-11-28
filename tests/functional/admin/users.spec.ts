@@ -5,22 +5,19 @@ import Invitation from '#models/invitation'
 import db from '@adonisjs/lucid/services/db'
 import app from '@adonisjs/core/services/app'
 import mail from '@adonisjs/mail/services/main'
-import type { ApiClient, ApiResponse } from '@japa/api-client'
+import type { ApiClient } from '@japa/api-client'
 import testUtils from '@adonisjs/core/services/test_utils'
 import PasswordResetToken from '#models/password_reset_token'
 import { UserFactory } from '#database/factories/user_factory'
 import { VivariumFactory } from '#database/factories/vivarium_factory'
-import type { GeneratedLink } from '#middleware/inertia_middleware'
 import { PasswordResetService } from '#services/password_reset_service'
 import { InvitationFactory } from '#database/factories/invitation_factory'
 import PasswordResetNotification from '#mails/password_reset_notification'
 import { UserAdministrationService } from '#services/user_administration_service'
 import LastAdminException from '#exceptions/last_admin_exception'
 import { errors as bouncerErrors } from '@adonisjs/bouncer'
-
-function useMail(enabled: boolean) {
-  app.config.set('app.mail.enabled', enabled)
-}
+import { fieldErrors, generatedLink } from '#tests/helpers/responses'
+import { useMail } from '#tests/helpers/mail'
 
 function setAdmin(client: ApiClient, actor: User, target: User, isAdmin: boolean) {
   return client
@@ -51,10 +48,6 @@ function createPasswordReset(client: ApiClient, actor: User, target: User) {
     .withCsrfToken()
     .loginAs(actor)
     .redirects(0)
-}
-
-function generatedLink(response: ApiResponse): GeneratedLink {
-  return response.flashMessages().generatedLink as GeneratedLink
 }
 
 async function listUsers(client: ApiClient, admin: User) {
@@ -126,7 +119,10 @@ test.group('Administration of users', (group) => {
     assert.isTrue(lastAdmin.isAdmin)
   })
 
-  test('ADM-7 the last administrator message is translated', async ({ client, assert }) => {
+  test("ADM-7 the message refusing to remove one's own rights is translated", async ({
+    client,
+    assert,
+  }) => {
     const admin = await UserFactory.merge({ isAdmin: true, locale: 'fr' }).create()
 
     const response = await setAdmin(client, admin, admin, false)
@@ -170,8 +166,7 @@ test.group('Administration of users', (group) => {
     for (const email of ['', admin.email, 'grace@example.org']) {
       const response = await deleteUser(client, admin, user, email)
       response.assertHeader('location', '/admin/users')
-      const errors = response.flashMessages().inputErrorsBag as Record<string, string[]>
-      assert.isNotEmpty(errors.email)
+      assert.isNotEmpty(fieldErrors(response, 'email'))
     }
     assert.isNotNull(await User.find(user.id))
   })

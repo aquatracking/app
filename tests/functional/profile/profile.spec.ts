@@ -2,9 +2,11 @@ import { test } from '@japa/runner'
 import { TIMEZONES } from '#catalog/timezones'
 import User from '#models/user'
 import db from '@adonisjs/lucid/services/db'
-import type { ApiResponse } from '@japa/api-client'
 import testUtils from '@adonisjs/core/services/test_utils'
 import { UserFactory } from '#database/factories/user_factory'
+import Measure from '#models/measure'
+import { fieldErrors } from '#tests/helpers/responses'
+import { storeMeasures, vivariumTracking } from '#tests/helpers/measures'
 
 function profileForm(overrides: Record<string, string> = {}) {
   return {
@@ -14,11 +16,6 @@ function profileForm(overrides: Record<string, string> = {}) {
     timezone: 'UTC',
     ...overrides,
   }
-}
-
-function fieldErrors(response: ApiResponse, field: string): string[] {
-  const errors = response.flashMessages().inputErrorsBag as Record<string, string[]> | undefined
-  return errors?.[field] ?? []
 }
 
 test.group('Profile', (group) => {
@@ -63,7 +60,10 @@ test.group('Profile', (group) => {
     assert.equal(user.timezone, 'America/Toronto')
   })
 
-  test('a profile saved without last name keeps the saved one', async ({ client, assert }) => {
+  test('AUTH-23 a profile saved without last name keeps the saved one', async ({
+    client,
+    assert,
+  }) => {
     const user = await UserFactory.merge({ lastName: 'Byron' }).create()
     const { lastName, ...form } = profileForm({ firstName: 'Augusta' })
     assert.notEqual(lastName, 'Byron')
@@ -176,24 +176,37 @@ test.group('Profile', (group) => {
     response.assertInertiaPropsContains({ locale: 'fr' })
   })
 
-  test('AUTH-15 changing the time zone changes the displayed zone, not the stored instants', async ({
+  test('AUTH-15 changing the time zone changes the displayed time of the measures, not the stored instants', async ({
     client,
     assert,
   }) => {
     const user = await UserFactory.merge({ timezone: 'Europe/Paris' }).create()
-    const instantsBefore = await db.from('users').where('id', user.id).select('created_at').first()
+    const { vivarium } = await vivariumTracking(['ph'], user)
+    await storeMeasures(vivarium, '2026-01-15T17:00:00Z', { ph: 7 })
+    const editUrl = `/vivariums/${vivarium.id}/readings/2026-01-15T17:00:00Z/edit`
+    const localTime = async () => {
+      const response = await client.get(editUrl).withInertia().loginAs(user)
+      const props = response.inertiaProps as {
+        editedReading: { measuredAt: string; localMeasuredAt: string }
+      }
+      assert.equal(props.editedReading.measuredAt, '2026-01-15T17:00:00Z')
+      return props.editedReading.localMeasuredAt
+    }
+    assert.equal(await localTime(), '2026-01-15T18:00')
 
-    await client
+    const response = await client
       .put('/profile')
       .withInertia()
       .loginAs(user)
       .form(profileForm({ timezone: 'America/Toronto' }))
       .withCsrfToken()
+      .redirects(0)
 
-    const response = await client.get('/profile').withInertia().loginAs(user)
-    response.assertInertiaPropsContains({ timezone: 'America/Toronto' })
-    const instantsAfter = await db.from('users').where('id', user.id).select('created_at').first()
-    assert.equal(instantsAfter.created_at.getTime(), instantsBefore.created_at.getTime())
+    response.assertHeader('location', '/profile')
+    await user.refresh()
+    assert.equal(await localTime(), '2026-01-15T12:00')
+    const measure = await Measure.findByOrFail('vivarium_id', vivarium.id)
+    assert.equal(measure.measuredAt.toUTC().toISO(), '2026-01-15T17:00:00.000Z')
   })
 
   test('AUTH-16 the profile page lists the time zones it accepts', async ({ client, assert }) => {
