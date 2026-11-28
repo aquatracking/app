@@ -22,7 +22,7 @@ L'image est publiée sur GHCR pour `linux/amd64` et `linux/arm64` :
 
 Ces tags ne reculent jamais : un correctif d'une ancienne ligne (`2.0.5` publié après `2.1.0`) met à jour `2.0`, mais ni `2` ni `latest`. Les pré-versions (`2.1.0-rc.1`) n'ont que leur propre tag. Conseil : `2` pour suivre les mises à jour, une version exacte pour décider soi-même de chaque mise à jour. Évitez `latest`, qui passera à la v3 sans prévenir.
 
-Les tags `main` (dernier commit de la branche `main`) et `sha-<SHA court du commit>` existent aussi, mais **seulement pour les essais et l'intégration** : ce sont des images de développement, instables, dont les migrations peuvent précéder toute version publiée. Ne les utilisez pas en production : une base migrée par une image `main` ne peut plus revenir à la dernière version publiée. En production, utilisez `2`, `2.0`, `2.0.0` ou `latest`.
+Les tags `main` (dernière image publiée de la branche `main`, après sa CI) et `sha-<SHA court du commit>` existent aussi, mais **seulement pour les essais et l'intégration** : ce sont des images de développement, instables, dont les migrations peuvent précéder toute version publiée. Ne les utilisez pas en production : une base migrée par une image `main` ne peut plus revenir à la dernière version publiée. En production, utilisez `2`, `2.0`, `2.0.0` ou `latest`.
 
 Ce que fait l'image :
 
