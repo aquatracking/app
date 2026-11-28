@@ -52,6 +52,23 @@ export default class HttpExceptionHandler extends ExceptionHandler {
     }
 
     /**
+     * A guest is sent to the login page, which brings them back to the
+     * page they asked for, query string included, once signed in
+     * (docs/features/02-auth-profile.md). The auth package would also
+     * forward that query string to the login page: it is left out.
+     */
+    if (
+      error instanceof authErrors.E_UNAUTHORIZED_ACCESS &&
+      error.guardDriverName === 'session' &&
+      [null, 'html'].includes(ctx.request.accepts(['html', 'application/vnd.api+json', 'json']))
+    ) {
+      return ctx.response
+        .redirect()
+        .withIntendedUrl()
+        .toPath(error.redirectTo || '/')
+    }
+
+    /**
      * Refused access answers 403 with its page, form submissions included
      * (Bouncer would redirect them back): the administration is not shown
      * to non-administrators (docs/features/03-admin.md). A policy that

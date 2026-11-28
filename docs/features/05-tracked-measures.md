@@ -55,7 +55,7 @@ Justification des décimales notables : pH au 0,01 (pH-mètres, suivi récifal) 
 - L'utilisateur peut **ajouter** n'importe quel type du catalogue non encore suivi et non retiré (ajouté en dernière position), **retirer** un type suivi et **réordonner** les types suivis (glisser-déposer, y compris au toucher, et flèches haut/bas). Chaque déplacement est enregistré aussitôt.
 - Retirer un type ne supprime aucune mesure. Le réajouter fait réapparaître sa dernière valeur et son historique.
 - Un vivarium peut ne suivre aucun type. La page des mesures suivies l'indique ; le tableau de bord ([07](07-charts.md)) et le relevé ([06](06-measures.md)) invitent alors à en ajouter.
-- Sur un vivarium **archivé**, les mesures suivies sont figées : ajout, retrait et réordonnancement sont refusés (le bac est en lecture seule, comme pour les relevés). Il faut le désarchiver d'abord.
+- Sur un vivarium **archivé**, les mesures suivies sont figées : ajout, retrait et réordonnancement sont refusés (le bac est en lecture seule, comme pour les relevés). Il faut le désarchiver d'abord. Une modification envoyée au moment de l'archivage est refusée de même : sa transaction verrouille le bac en lecture et revérifie qu'il n'est pas archivé ([04](04-vivariums.md)).
 - Changer le type d'eau ou le climat d'un vivarium ne touche pas aux mesures suivies.
 
 ## Données
@@ -83,3 +83,4 @@ Justification des décimales notables : pH au 0,01 (pH-mètres, suivi récifal) 
 - **TRK-11** Le type densité existe dans le catalogue mais n'est suivi par défaut par aucun profil.
 - **TRK-12** ([VIV-13](04-vivariums.md)) Supprimer un utilisateur depuis l'administration supprime les mesures suivies de ses vivariums.
 - **TRK-13** La page des mesures suivies les liste dans leur ordre et propose à l'ajout les autres types du catalogue ; ajouter un type le fait suivre en dernière position.
+- **TRK-14** Ajouter, retirer ou réordonner des mesures suivies pendant l'archivage du bac, en attendant la fin de l'archivage, est refusé avec la notification « bac archivé », et rien n'est modifié.

@@ -42,7 +42,7 @@ Permettre à chaque utilisateur de décrire ses bacs (aquariums, terrariums, pal
 
 ### Archivage
 - Archiver : `archived_at = maintenant`. Le vivarium disparaît de l'accueil et apparaît dans « Archivés ».
-- Un vivarium archivé reste consultable (tableau de bord, historique, graphes) mais en **lecture seule** : pas de modification du vivarium (formulaire, image), pas de relevé (création, modification, suppression), pas de modification des mesures suivies. Les boutons correspondants sont masqués et les routes refusent la requête : rien n'est modifié et le refus revient en notification sur la page précédente. Un bandeau l'indique, avec le bouton « Désarchiver », seule action possible.
+- Un vivarium archivé reste consultable (tableau de bord, historique, graphes) mais en **lecture seule** : pas de modification du vivarium (formulaire, image), pas de relevé (création, modification, suppression), pas de modification des mesures suivies. Les boutons correspondants sont masqués et les routes refusent la requête : rien n'est modifié et le refus revient en notification sur la page précédente. Un relevé ou une modification des mesures suivies envoyé au moment de l'archivage est refusé de même : sa transaction verrouille le bac en lecture et revérifie qu'il n'est pas archivé, et l'archivage, qui écrit sur le bac, attend la fin des transactions en cours ([06](06-measures.md), MEA-30 ; [05](05-tracked-measures.md), TRK-14). Un bandeau l'indique, avec le bouton « Désarchiver », seule action possible.
 
 ### Pas de suppression
 - Un utilisateur ne peut pas supprimer un vivarium : l'archivage est le seul moyen de le retirer de l'accueil, y compris pour un bac créé par erreur.

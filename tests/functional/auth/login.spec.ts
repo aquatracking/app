@@ -2,6 +2,7 @@ import { test } from '@japa/runner'
 import User from '#models/user'
 import db from '@adonisjs/lucid/services/db'
 import { UserFactory } from '#database/factories/user_factory'
+import { VivariumFactory } from '#database/factories/vivarium_factory'
 import limiter from '@adonisjs/limiter/services/main'
 import testUtils from '@adonisjs/core/services/test_utils'
 import { loginLimiterKeys } from '#services/login_service'
@@ -182,6 +183,29 @@ test.group('Login', (group) => {
       response.assertStatus(302)
       response.assertHeader('location', '/login')
     }
+  })
+
+  test('AUTH-24 the login does not receive the parameters of the page asked for, which the user gets back after login', async ({
+    client,
+  }) => {
+    const user = await UserFactory.create()
+    const vivarium = await VivariumFactory.merge({ userId: user.id }).create()
+    const history = `/vivariums/${vivarium.id}/measures?type=ph&page=2`
+
+    const protectedPage = await client.get(history).redirects(0)
+    protectedPage.assertStatus(302)
+    protectedPage.assertHeader('location', '/login')
+
+    const response = await client
+      .post('/login')
+      .withSession(protectedPage.session())
+      .withInertia()
+      .form({ email: user.email, password: 'secret-password' })
+      .withCsrfToken()
+      .redirects(0)
+
+    response.assertHeader('location', history)
+    response.assertSession('auth_web', user.id)
   })
 
   test('AUTH-17 after 20 failures from an IP on different emails, the IP is refused', async ({

@@ -13,7 +13,9 @@ import InvalidTrackedMeasureOrderException from '#exceptions/invalid_tracked_mea
  * Operations on the tracked measures of a vivarium, callable outside HTTP
  * (docs/features/05-tracked-measures.md). The caller authorizes with
  * VivariumPolicy and validates the codes against the offered catalog
- * entries. Removing a tracked measure never deletes measures.
+ * entries. Removing a tracked measure never deletes measures. Each change
+ * checks again under lock that the vivarium is not archived, against a
+ * concurrent archiving.
  */
 @inject()
 export class TrackedMeasureService {
@@ -74,6 +76,7 @@ export class TrackedMeasureService {
   async add(vivarium: Vivarium, code: string) {
     const type = await MeasureType.findByOrFail('code', code)
     return db.transaction(async (trx) => {
+      await vivarium.lockUnarchived(trx)
       const existing = await TrackedMeasure.query({ client: trx })
         .where('vivarium_id', vivarium.id)
         .where('measure_type_id', type.id)
@@ -100,8 +103,11 @@ export class TrackedMeasureService {
     })
   }
 
-  async remove(trackedMeasure: TrackedMeasure) {
-    await trackedMeasure.delete()
+  async remove(vivarium: Vivarium, trackedMeasure: TrackedMeasure) {
+    await db.transaction(async (trx) => {
+      await vivarium.lockUnarchived(trx)
+      await trackedMeasure.useTransaction(trx).delete()
+    })
   }
 
   /**
@@ -110,6 +116,7 @@ export class TrackedMeasureService {
    */
   async reorder(vivarium: Vivarium, ids: string[]) {
     await db.transaction(async (trx) => {
+      await vivarium.lockUnarchived(trx)
       const tracked = await TrackedMeasure.query({ client: trx })
         .where('vivarium_id', vivarium.id)
         .select('id')

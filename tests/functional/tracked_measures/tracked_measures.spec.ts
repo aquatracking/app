@@ -11,7 +11,7 @@ import { VivariumFactory } from '#database/factories/vivarium_factory'
 import { TrackedMeasureService } from '#services/tracked_measure_service'
 import { MEASURE_TYPES, MeasureTypeCatalog } from '#catalog/measure_types'
 import { fieldErrors } from '#tests/helpers/responses'
-import { createVivarium } from '#tests/helpers/vivariums'
+import { createVivarium, sendDuringArchiving } from '#tests/helpers/vivariums'
 
 /**
  * Codes tracked by a vivarium, in their order.
@@ -340,11 +340,9 @@ test.group('Tracked measures', (group) => {
     assert,
   }) => {
     const user = await UserFactory.create()
-    const vivarium = await VivariumFactory.merge({
-      userId: user.id,
-      archivedAt: DateTime.now(),
-    }).create()
+    const vivarium = await VivariumFactory.merge({ userId: user.id }).create()
     const [temperature, ph] = await track(vivarium, ['temperature', 'ph'])
+    await vivarium.merge({ archivedAt: DateTime.now() }).save()
     const refusal = { type: 'error', message: 'This tank is archived: unarchive it to change it.' }
 
     const responses = [
@@ -365,11 +363,9 @@ test.group('Tracked measures', (group) => {
     assert,
   }) => {
     const user = await UserFactory.create()
-    const vivarium = await VivariumFactory.merge({
-      userId: user.id,
-      archivedAt: DateTime.now(),
-    }).create()
+    const vivarium = await VivariumFactory.merge({ userId: user.id }).create()
     await track(vivarium, ['temperature'])
+    await vivarium.merge({ archivedAt: DateTime.now() }).save()
 
     const response = await client.get(page(vivarium)).withInertia().loginAs(user)
 
@@ -441,4 +437,45 @@ test.group('Tracked measures', (group) => {
     assert.lengthOf(await TrackedMeasure.query().where('vivarium_id', vivarium.id), 0)
     assert.lengthOf(await TrackedMeasure.query().where('vivarium_id', kept.id), 1)
   })
+})
+
+/**
+ * Changes of tracked measures that overlap an archiving, on several
+ * connections. The database is emptied by truncation rather than rolled
+ * back, as a global transaction would merge the connections into one
+ * (docs/architecture.md). The truncation also empties the measure type
+ * catalog, seeded before each test and again for the other groups.
+ */
+test.group('Tracked measures on several connections', (group) => {
+  group.each.setup(() => testUtils.db().truncate())
+  group.each.setup(() => testUtils.db().seed())
+  group.teardown(() => testUtils.db().seed())
+
+  test(
+    'TRK-14 {$self} tracked measures while the vivarium is archived is refused once the archiving is done'
+  )
+    .with(['adding', 'reordering', 'removing'] as const)
+    .run(async ({ client, assert }, action) => {
+      const user = await UserFactory.create()
+      const vivarium = await VivariumFactory.merge({ userId: user.id }).create()
+      const [temperature, ph] = await track(vivarium, ['temperature', 'ph'])
+
+      const response = await sendDuringArchiving(vivarium, () => {
+        switch (action) {
+          case 'adding':
+            return add(client, user, vivarium, 'kh')
+          case 'reordering':
+            return reorder(client, user, vivarium, [ph.id, temperature.id])
+          case 'removing':
+            return remove(client, user, vivarium, temperature.id)
+        }
+      })
+
+      response.assertHeader('location', page(vivarium))
+      response.assertFlashMessage('notification', {
+        type: 'error',
+        message: 'This tank is archived: unarchive it to change it.',
+      })
+      assert.deepEqual(await trackedCodes(vivarium), ['temperature', 'ph'])
+    })
 })

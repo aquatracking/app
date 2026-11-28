@@ -87,7 +87,6 @@ export default class MeasuresController {
     session.notify('success', i18n.t('measures.reading.updated'))
     return response
       .redirect()
-      .withQs(false)
       .toRoute('measures.index', { id: vivarium.id }, { qs: this.historyQs(request.qs()) })
   }
 
@@ -101,7 +100,6 @@ export default class MeasuresController {
     session.notify('success', i18n.t('measures.reading.deleted', { count }))
     return response
       .redirect()
-      .withQs(false)
       .toRoute('measures.index', { id: vivarium.id }, { qs: this.historyQs(request.qs()) })
   }
 
@@ -122,6 +120,7 @@ export default class MeasuresController {
     return {
       timezone,
       startedOn: vivarium.startedOn.toISODate()!,
+      editedMeasuredAt: reading?.measuredAt ?? null,
       measureTypes: await this.readingService.fieldTypes(vivarium, reading),
     }
   }
@@ -129,8 +128,7 @@ export default class MeasuresController {
   /**
    * Filter and page of the history in the query string. A missing or
    * invalid page is the first one. The redirections to the history carry
-   * only these, not the raw query string ("withQs(false)"), which
-   * "forwardQueryString" (config/app.ts) would forward as is.
+   * only these, not the raw query string.
    */
   private historyQs(qs: Record<string, unknown>) {
     const page = Number.parseInt(String(qs.page ?? ''), 10)

@@ -168,7 +168,7 @@ test.group('Dashboard tiles', (group) => {
     const trackedMeasures = await service.list(vivarium)
     const ph = trackedMeasures.find(({ measureType }) => measureType.code === 'ph')!
 
-    await service.remove(ph)
+    await service.remove(vivarium, ph)
     const untracked = await client.get(`/vivariums/${vivarium.id}`).withInertia().loginAs(user)
     await service.add(vivarium, 'ph')
     const tracked = await client.get(`/vivariums/${vivarium.id}`).withInertia().loginAs(user)

@@ -44,6 +44,10 @@ export class VivariumService {
 
   /**
    * Archives the vivarium: it leaves the home page and becomes read-only.
+   * Updating its row locks it for writing: the archiving waits for the
+   * changes of readings and tracked measures under way, which hold it in
+   * shared mode, and those that come after find it archived
+   * (Vivarium.lockUnarchived).
    */
   async archive(vivarium: Vivarium) {
     vivarium.archivedAt = DateTime.now()

@@ -78,7 +78,7 @@ export default class TrackedMeasuresController {
       .preload('measureType')
       .firstOrFail()
 
-    await this.trackedMeasureService.remove(trackedMeasure)
+    await this.trackedMeasureService.remove(vivarium, trackedMeasure)
 
     session.notify(
       'success',

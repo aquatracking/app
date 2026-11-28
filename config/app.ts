@@ -60,11 +60,12 @@ export const http = defineConfig({
    */
   redirect: {
     /**
-     * When enabled, all redirects automatically carry over the current
-     * request's query string parameters to the redirect destination.
-     * Use withQs(false) to opt out for a specific redirect.
+     * Redirects do not carry over the query string of the current
+     * request: no redirection needs it as is. Those that keep some of it
+     * pass it explicitly (history filter and page after editing a
+     * reading).
      */
-    forwardQueryString: true,
+    forwardQueryString: false,
   },
 
   /**

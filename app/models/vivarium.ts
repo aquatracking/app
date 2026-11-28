@@ -5,6 +5,8 @@ import TrackedMeasure from '#models/tracked_measure'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 import { VivariumSchema } from '#database/schema'
 import { withUuidV7 } from '#models/mixins/with_uuid_v7'
+import ArchivedVivariumException from '#exceptions/archived_vivarium_exception'
+import type { TransactionClientContract } from '@adonisjs/lucid/types/database'
 
 /**
  * Kinds of vivarium, water types and climates (docs/CONTEXT.md), mirrored
@@ -61,5 +63,25 @@ export default class Vivarium extends compose(VivariumSchema, withUuidV7) {
    */
   get isArchived() {
     return this.archivedAt !== null
+  }
+
+  /**
+   * Locks the row of the vivarium in shared mode until the end of the
+   * transaction of a change of its content (readings, tracked measures),
+   * then checks again that it is not archived. Archiving, which writes
+   * the row, waits for these transactions; a change that waited for an
+   * archiving is refused (docs/features/04-vivariums.md).
+   *
+   * @throws ArchivedVivariumException when it was archived meanwhile
+   */
+  async lockUnarchived(trx: TransactionClientContract) {
+    const locked = await Vivarium.query({ client: trx })
+      .where('id', this.id)
+      .select('archived_at')
+      .forShare()
+      .firstOrFail()
+    if (locked.isArchived) {
+      throw new ArchivedVivariumException()
+    }
   }
 }

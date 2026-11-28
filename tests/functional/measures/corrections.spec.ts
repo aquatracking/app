@@ -342,7 +342,10 @@ test.group('Reading corrections', (group) => {
      */
     const service = await app.container.make(TrackedMeasureService)
     const tracked = await service.list(vivarium)
-    await service.remove(tracked.find(({ measureType }) => measureType.code === 'fe')!)
+    await service.remove(
+      vivarium,
+      tracked.find(({ measureType }) => measureType.code === 'fe')!
+    )
 
     const tooHigh = await putReading(client, user, vivarium, '2026-01-15T18:00:00Z', {
       measuredAt: '2026-01-15T18:00',

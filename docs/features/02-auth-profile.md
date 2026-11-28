@@ -25,7 +25,7 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 - **Blocage progressif** : quand un compteur est dépassé, la clé est bloquée 15 minutes, puis la durée double à chaque nouveau blocage de la même clé (30 min, 1 h, 2 h…), plafonnée à 24 h. L'historique des blocages d'une clé est oublié 24 h après la fin de son dernier blocage.
 - Pendant un blocage, le message indique quand réessayer, sans dire quel compteur a été dépassé.
 - Les IP sont celles du client réel : derrière un reverse proxy, il doit être déclaré de confiance ([architecture](../architecture.md)), sinon tous les utilisateurs partageraient l'IP du proxy et se bloqueraient mutuellement.
-- Pages accessibles sans connexion : connexion, inscription par invitation, mot de passe oublié, réinitialisation. Toutes les autres redirigent vers la connexion, puis vers la page demandée après connexion.
+- Pages accessibles sans connexion : connexion, inscription par invitation, mot de passe oublié, réinitialisation. Toutes les autres redirigent vers la connexion, puis vers la page demandée après connexion. La redirection vers la connexion n'emporte pas les paramètres de la page demandée (`?type=ph`) ; ils sont rendus avec elle après connexion.
 - Ces quatre pages sont réservées aux visiteurs : un utilisateur déjà connecté qui en ouvre une est redirigé vers l'accueil avec un message.
 
 ### Champs communs
@@ -103,3 +103,4 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 - **AUTH-21** Un utilisateur connecté qui ouvre la connexion, un lien d'invitation, « mot de passe oublié » ou la réinitialisation est redirigé vers l'accueil avec le message « vous êtes déjà connecté » ; l'invitation reste valable.
 - **AUTH-22** Sans SMTP, une soumission du formulaire « mot de passe oublié » répond 404, sans envoi ni lien créé.
 - **AUTH-23** Un profil enregistré sans le champ nom garde le nom enregistré.
+- **AUTH-24** Une page protégée demandée sans connexion avec des paramètres (`?type=ph&page=2`) redirige vers `/login` sans ces paramètres ; après connexion, l'utilisateur revient à la page demandée avec ses paramètres.

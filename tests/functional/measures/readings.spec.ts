@@ -8,6 +8,8 @@ import {
   failWritesOf,
   measuresOf,
   postReading,
+  putReading,
+  readingUrl,
   storeMeasures,
   vivariumTracking,
 } from '#tests/helpers/measures'
@@ -239,6 +241,34 @@ test.group('Readings', (group) => {
       values: { ph: '7' },
     })
     assert.deepEqual(await measuresOf(vivarium), ['2027-10-31T00:30:00Z ph=7'])
+  })
+
+  test('MEA-29 a reading in the second occurrence of a repeated time keeps its instant when saved with its date and time unchanged', async ({
+    client,
+    assert,
+  }) => {
+    Settings.now = () => Date.parse('2028-01-01T00:00:00Z')
+    const user = await UserFactory.merge({ timezone: 'Europe/Paris' }).create()
+    const { vivarium } = await vivariumTracking(['ph'], user)
+    await storeMeasures(vivarium, '2027-10-31T01:30:00Z', { ph: 7 })
+
+    const edit = await client
+      .get(`${readingUrl(vivarium, '2027-10-31T01:30:00Z')}/edit`)
+      .withInertia()
+      .loginAs(user)
+    const { localMeasuredAt } = (
+      edit.inertiaProps as { editedReading: { localMeasuredAt: string } }
+    ).editedReading
+    assert.equal(localMeasuredAt, '2027-10-31T02:30')
+
+    const response = await putReading(client, user, vivarium, '2027-10-31T01:30:00Z', {
+      measuredAt: localMeasuredAt,
+      values: { ph: '7.2' },
+    })
+
+    response.assertStatus(303)
+    response.assertHeader('location', `/vivariums/${vivarium.id}/measures`)
+    assert.deepEqual(await measuresOf(vivarium), ['2027-10-31T01:30:00Z ph=7.2'])
   })
 
   test('MEA-16 a value with more decimals than its type allows is refused', async ({
