@@ -12,6 +12,7 @@ import { UserFactory } from '#database/factories/user_factory'
 import { PasswordResetService } from '#services/password_reset_service'
 import PasswordResetNotification from '#mails/password_reset_notification'
 import { useMail } from '#tests/helpers/mail'
+import { fieldErrors } from '#tests/helpers/responses'
 
 const SENT_MESSAGE = {
   type: 'success',
@@ -138,8 +139,7 @@ test.group('Password reset', (group) => {
       `${'a'.repeat(10)}@${`${'b'.repeat(60)}.`.repeat(4)}com`
     )
 
-    const errors = response.flashMessages().inputErrorsBag as Record<string, string[]>
-    assert.deepEqual(errors.email, ['Enter at most 254 characters'])
+    assert.deepEqual(fieldErrors(response, 'email'), ['Enter at most 254 characters'])
     mails.assertNoneQueued()
     mails.assertNoneSent()
   })
@@ -253,8 +253,7 @@ test.group('Password reset', (group) => {
 
     const response = await resetPassword(client, token, 'short')
 
-    const errors = response.flashMessages().inputErrorsBag as Record<string, string[]>
-    assert.deepEqual(errors.password, ['Enter at least 8 characters'])
+    assert.deepEqual(fieldErrors(response, 'password'), ['Enter at least 8 characters'])
     await assertPassword(assert, 'ada@example.com', 'secret-password')
     assert.lengthOf(await PasswordResetToken.query().where('userId', user.id), 1)
   })

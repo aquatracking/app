@@ -11,8 +11,9 @@ import { VivariumFactory } from '#database/factories/vivarium_factory'
 import { TrackedMeasureService } from '#services/tracked_measure_service'
 
 /**
- * Helpers of the tests of feature 06 (docs/features/06-measures.md),
- * also used by the tests of the charts (07).
+ * Vivariums with tracked measures, measures and readings, for the tests
+ * of the measures (docs/features/06-measures.md), of the charts (07) and
+ * of the profile (02, time zone).
  */
 
 /**

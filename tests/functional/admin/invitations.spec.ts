@@ -10,7 +10,7 @@ import { UserFactory } from '#database/factories/user_factory'
 import type { GeneratedLink } from '#middleware/inertia_middleware'
 import InvitationNotification from '#mails/invitation_notification'
 import { InvitationFactory } from '#database/factories/invitation_factory'
-import { generatedLink } from '#tests/helpers/responses'
+import { fieldErrors, generatedLink } from '#tests/helpers/responses'
 import { useMail } from '#tests/helpers/mail'
 
 function invite(client: ApiClient, admin: User, email: string) {
@@ -117,8 +117,7 @@ test.group('Administration of invitations', (group) => {
     const response = await invite(client, admin, 'GRACE@example.com')
 
     response.assertHeader('location', '/admin/invitations')
-    const errors = response.flashMessages().inputErrorsBag as Record<string, string[]>
-    assert.deepEqual(errors.email, ['An account already uses this email'])
+    assert.deepEqual(fieldErrors(response, 'email'), ['An account already uses this email'])
     assert.isUndefined(response.flashMessages().generatedLink)
     assert.lengthOf(await Invitation.all(), 0)
   })

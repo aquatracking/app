@@ -16,7 +16,7 @@ import PasswordResetNotification from '#mails/password_reset_notification'
 import { UserAdministrationService } from '#services/user_administration_service'
 import LastAdminException from '#exceptions/last_admin_exception'
 import { errors as bouncerErrors } from '@adonisjs/bouncer'
-import { generatedLink } from '#tests/helpers/responses'
+import { fieldErrors, generatedLink } from '#tests/helpers/responses'
 import { useMail } from '#tests/helpers/mail'
 
 function setAdmin(client: ApiClient, actor: User, target: User, isAdmin: boolean) {
@@ -166,8 +166,7 @@ test.group('Administration of users', (group) => {
     for (const email of ['', admin.email, 'grace@example.org']) {
       const response = await deleteUser(client, admin, user, email)
       response.assertHeader('location', '/admin/users')
-      const errors = response.flashMessages().inputErrorsBag as Record<string, string[]>
-      assert.isNotEmpty(errors.email)
+      assert.isNotEmpty(fieldErrors(response, 'email'))
     }
     assert.isNotNull(await User.find(user.id))
   })

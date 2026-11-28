@@ -13,6 +13,7 @@ import type { ApiClient } from '@japa/api-client'
 import testUtils from '@adonisjs/core/services/test_utils'
 import { UserFactory } from '#database/factories/user_factory'
 import { VivariumFactory } from '#database/factories/vivarium_factory'
+import { fieldErrors } from '#tests/helpers/responses'
 
 /**
  * A JPEG photo of 3000 × 2000 px, with EXIF data and an orientation
@@ -131,8 +132,7 @@ test.group('Vivarium images', (group) => {
     const disguised = await uploadImage(client, user, vivarium, Buffer.from('text'), 'photo.jpg')
 
     for (const response of [text, disguised]) {
-      const errors = response.flashMessages().inputErrorsBag as Record<string, string[]>
-      assert.deepEqual(errors.image, ['Choose a JPEG, PNG or WebP image'])
+      assert.deepEqual(fieldErrors(response, 'image'), ['Choose a JPEG, PNG or WebP image'])
     }
     await vivarium.refresh()
     assert.isNull(vivarium.imagePath)
@@ -180,16 +180,16 @@ test.group('Vivarium images', (group) => {
     const vivarium = await VivariumFactory.merge({ userId: user.id }).create()
     await uploadImage(client, user, vivarium, await photo())
     await vivarium.refresh()
-    const filename = vivarium.imagePath!.split('/')[1]
+    const imageUrl = `/vivariums/${vivarium.id}/image/${vivarium.imagePath!.split('/')[1]}`
+    const before = await client.get(imageUrl).loginAs(user)
+    before.assertStatus(200)
     await drive.use('vivariums').delete(vivarium.imagePath!)
 
     const show = await client.get(`/vivariums/${vivarium.id}`).withInertia().loginAs(user)
-    const served = await client.get(`/vivariums/${vivarium.id}/image/${filename}`).loginAs(user)
+    const served = await client.get(imageUrl).loginAs(user)
 
     show.assertStatus(200)
-    show.assertInertiaPropsContains({
-      vivarium: { imageUrl: `/vivariums/${vivarium.id}/image/${filename}` },
-    })
+    show.assertInertiaPropsContains({ vivarium: { imageUrl } })
     served.assertStatus(404)
   })
 
@@ -209,8 +209,7 @@ test.group('Vivarium images', (group) => {
 
     const response = await uploadImage(client, user, vivarium, svg, 'photo.png')
 
-    const errors = response.flashMessages().inputErrorsBag as Record<string, string[]>
-    assert.deepEqual(errors.image, ['Choose a JPEG, PNG or WebP image'])
+    assert.deepEqual(fieldErrors(response, 'image'), ['Choose a JPEG, PNG or WebP image'])
     await vivarium.refresh()
     assert.isNull(vivarium.imagePath)
     assert.deepEqual(
@@ -261,8 +260,7 @@ test.group('Vivarium images', (group) => {
 
     const response = await uploadImage(client, user, vivarium, tooLarge)
 
-    const errors = response.flashMessages().inputErrorsBag as Record<string, string[]>
-    assert.deepEqual(errors.image, ['The file must not exceed 15mb'])
+    assert.deepEqual(fieldErrors(response, 'image'), ['The file must not exceed 15mb'])
     await vivarium.refresh()
     assert.isNull(vivarium.imagePath)
   })
