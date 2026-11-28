@@ -10,7 +10,7 @@ Les versions précédentes utilisaient MariaDB puis MySQL. Le cœur de l'applica
 - Identifiants **UUIDv7** pour toutes les tables de l'application, générés côté application (hook `beforeCreate` commun) pour ne pas dépendre de `uuidv7()` de PostgreSQL 18.
 - Exceptions : les tables dont le format est imposé par une bibliothèque, qui les écrit elle-même ([data-model](../data-model.md)) :
   - `remember_me_tokens` (table standard d'`@adonisjs/auth`) : clé `id` entière auto-incrémentée, car le fournisseur de tokens insère les lignes sans identifiant ; sa colonne `tokenable_id` reste un UUID vers `users` ;
-  - `rate_limits` (store database d'`@adonisjs/limiter`) : clé primaire `key` (texte), au format de `rate-limiter-flexible`.
+  - `rate_limits` (store database d'`@adonisjs/limiter`) : clé primaire `key` (`varchar(255)`), au format de `rate-limiter-flexible`.
 
 ## Conséquences
 - `DISTINCT ON`, `date_bin`/`date_trunc`, `timestamptz` et contraintes `CHECK` disponibles sans contournement.

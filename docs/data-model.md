@@ -37,7 +37,7 @@ users 1───* vivariums 1───* tracked_measures *───1 measure_typ
 | `password` | text | hash (scrypt) |
 | `is_admin` | boolean | défaut `false` |
 | `locale` | text | requis, `CHECK in ('fr','en')`, défaut `en` |
-| `timezone` | text | requis, nom de la liste des fuseaux (`app/catalog/timezones.ts` : `UTC` ou une zone géographique sous le nom que lui donne `zone.tab` de l'IANA, reconnu par PostgreSQL ; validé côté application), défaut `UTC` |
+| `timezone` | text | requis, nom de la liste des fuseaux (`app/catalog/timezones.ts` : `UTC` ou une zone géographique sous le nom que lui donne `zone.tab` de l'IANA à une exception près (`America/Coral_Harbour`, voir [spec 02](features/02-auth-profile.md#profil)), reconnu par PostgreSQL ; validé côté application), défaut `UTC` |
 | `invited_by_id` | uuid | nullable, FK `users`, `on delete set null`. Qui a envoyé l'invitation utilisée ; vide pour le premier administrateur ou si l'invitant a été supprimé. Avec `created_at` (date d'inscription), c'est l'historique « qui a invité qui, et quand » |
 | `last_seen_at` | timestamptz | nullable. Dernière activité : mise à jour par un middleware sur les requêtes authentifiées, au plus une fois par heure par utilisateur |
 
@@ -47,7 +47,7 @@ Règle d'intégrité applicative : il reste toujours au moins un utilisateur ave
 Table standard d'`@adonisjs/auth` (`tokenable_id` uuid → `users.id` en cascade, `hash` unique, `expires_at`). Exception à la convention des identifiants : sa clé `id` est un entier auto-incrémenté, car le fournisseur de tokens d'Adonis insère les lignes sans identifiant. Gérée par le fournisseur de tokens d'Adonis ; l'application n'y fait qu'une requête directe, la suppression des tokens d'un utilisateur (réinitialisation et changement de mot de passe). Exclue de la génération de `database/schema.ts`.
 
 ### `rate_limits`
-Table gérée par `@adonisjs/limiter` (store database), créée par sa migration standard : une ligne par clé limitée (`key`, `points`, `expire`). Exception à la convention des identifiants : sa clé primaire est `key` (texte), au format imposé par `rate-limiter-flexible`, sans `id` ni `created_at`/`updated_at`. Contient aussi les clés qui comptent les blocages successifs pour le blocage progressif. Jamais lue ni écrite en dehors du limiter. Nettoyage des lignes expirées : assuré par la bibliothèque sous-jacente (`rate-limiter-flexible`, option `clearExpiredByTimeout` activée dans `config/limiter.ts`) : toutes les 5 minutes, suppression des lignes expirées depuis plus d'une heure. Exclue de la génération de `database/schema.ts` (aucun modèle).
+Table gérée par `@adonisjs/limiter` (store database), créée par sa migration standard : une ligne par clé limitée (`key`, `points`, `expire`). Exception à la convention des identifiants : sa clé primaire est `key` (`varchar(255)`), au format imposé par `rate-limiter-flexible`, sans `id` ni `created_at`/`updated_at`. Contient aussi les clés qui comptent les blocages successifs pour le blocage progressif. Jamais lue ni écrite en dehors du limiter. Nettoyage des lignes expirées : assuré par la bibliothèque sous-jacente (`rate-limiter-flexible`, option `clearExpiredByTimeout` activée dans `config/limiter.ts`) : toutes les 5 minutes, suppression des lignes expirées depuis plus d'une heure. Exclue de la génération de `database/schema.ts` (aucun modèle).
 
 ### `invitations`
 | Colonne | Type | Règles |
