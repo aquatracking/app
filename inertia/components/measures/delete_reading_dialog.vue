@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import type { Data } from '@generated/data'
 import { Trash2 } from '@lucide/vue'
 import { Form } from '@adonisjs/inertia/vue'
 import { Button } from '~/components/ui/button'
@@ -19,8 +20,8 @@ import {
  * Deletion of a whole reading, confirmed with its number of measures.
  */
 const props = defineProps<{
-  vivarium: { id: string }
-  reading: { measuredAt: string; measures: unknown[] }
+  vivarium: Pick<Data.Vivarium, 'id'>
+  reading: Pick<Data.Reading, 'measuredAt' | 'measures'>
   qs?: Record<string, string | number>
 }>()
 

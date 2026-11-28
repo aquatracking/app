@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Form } from '@adonisjs/inertia/vue'
+import type { Data } from '@generated/data'
 import { Button } from '~/components/ui/button'
 import { useI18n } from '~/composables/use_i18n'
 
@@ -7,7 +8,7 @@ import { useI18n } from '~/composables/use_i18n'
  * Actions on an invitation: renew it or revoke it. Shared by the table
  * and the cards of the administration.
  */
-const props = defineProps<{ invitation: { id: string } }>()
+const props = defineProps<{ invitation: Pick<Data.Invitation.Variants['forAdmin'], 'id'> }>()
 
 const { t } = useI18n()
 </script>

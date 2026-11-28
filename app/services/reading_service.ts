@@ -3,6 +3,7 @@ import { inject } from '@adonisjs/core'
 import Measure from '#models/measure'
 import type Vivarium from '#models/vivarium'
 import db from '@adonisjs/lucid/services/db'
+import { isUniqueViolation } from '#database/errors'
 import { errors as lucidErrors } from '@adonisjs/lucid'
 import MeasureType from '#models/measure_type'
 import type { Infer } from '@vinejs/vine/types'
@@ -30,12 +31,6 @@ export type ReadingData = Infer<typeof readingValidator>
  * Readings per page of the history.
  */
 const READINGS_PER_PAGE = 20
-
-/**
- * Unique violation of PostgreSQL: here, two measures of a type at the
- * same instant on a vivarium, inserted concurrently.
- */
-const UNIQUE_VIOLATION = '23505'
 
 /**
  * Operations on the readings of a vivarium, callable outside HTTP
@@ -306,7 +301,7 @@ export class ReadingService {
     try {
       return await db.transaction(callback)
     } catch (error) {
-      if ((error as { code?: string }).code === UNIQUE_VIOLATION) {
+      if (isUniqueViolation(error)) {
         throw new ReadingConflictException(codes)
       }
       throw error

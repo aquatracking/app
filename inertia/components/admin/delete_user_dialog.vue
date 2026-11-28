@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import type { Data } from '@generated/data'
 import { Form } from '@adonisjs/inertia/vue'
 import { Input } from '~/components/ui/input'
 import { Button } from '~/components/ui/button'
@@ -18,7 +19,9 @@ import {
 /**
  * Deletion of an account, confirmed by typing its email.
  */
-const props = defineProps<{ user: { id: string; email: string; displayName: string } }>()
+const props = defineProps<{
+  user: Pick<Data.User.Variants['forAdmin'], 'id' | 'email' | 'displayName'>
+}>()
 
 const { t } = useI18n()
 const open = ref(false)

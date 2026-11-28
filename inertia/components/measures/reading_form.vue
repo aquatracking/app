@@ -16,7 +16,7 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '~/c
  * Bounds and decimals are checked again by the server.
  */
 const props = defineProps<{
-  vivarium: { id: string }
+  vivarium: Pick<Data.Vivarium, 'id'>
   fields: Data.MeasureTypeDefinition[]
   reading?: Data.Reading.Variants['forEdit']
   /**

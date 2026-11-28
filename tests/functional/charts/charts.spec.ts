@@ -24,8 +24,9 @@ test.group('Charts', (group) => {
     assert,
   }) => {
     const { user, vivarium } = await vivariumTracking(['temperature', 'ph'])
+    const threeDaysAgo = daysAgo(3)
     await storeMeasures(vivarium, daysAgo(20), { ph: 7 })
-    await storeMeasures(vivarium, daysAgo(3), { ph: 7.2, temperature: 25 })
+    await storeMeasures(vivarium, threeDaysAgo, { ph: 7.2, temperature: 25 })
 
     const response = await client
       .get(`/vivariums/${vivarium.id}/charts/ph?range=7d`)
@@ -36,7 +37,7 @@ test.group('Charts', (group) => {
     response.assertInertiaComponent('charts/show')
     const props = response.inertiaProps as ChartProps
     assert.equal(props.series.range, '7d')
-    assert.deepEqual(props.series.points, [{ measuredAt: daysAgo(3), value: 7.2 }])
+    assert.deepEqual(props.series.points, [{ measuredAt: threeDaysAgo, value: 7.2 }])
     assert.deepEqual(props.measureType, { code: 'ph', unit: '', decimals: 2 })
     assert.deepEqual(
       props.trackedTypes.map(({ code }) => code),
@@ -49,7 +50,8 @@ test.group('Charts', (group) => {
     assert,
   }) => {
     const { user, vivarium } = await vivariumTracking(['ph'])
-    await storeMeasures(vivarium, daysAgo(20), { ph: 7 })
+    const twentyDaysAgo = daysAgo(20)
+    await storeMeasures(vivarium, twentyDaysAgo, { ph: 7 })
     await storeMeasures(vivarium, daysAgo(40), { ph: 7.5 })
 
     for (const qs of ['', '?range=2w', '?range=', '?range[]=7d']) {
@@ -59,7 +61,7 @@ test.group('Charts', (group) => {
         .loginAs(user)
       const props = response.inertiaProps as ChartProps
       assert.equal(props.series.range, '30d', qs)
-      assert.deepEqual(props.series.points, [{ measuredAt: daysAgo(20), value: 7 }], qs)
+      assert.deepEqual(props.series.points, [{ measuredAt: twentyDaysAgo, value: 7 }], qs)
     }
   })
 

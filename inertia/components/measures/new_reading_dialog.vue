@@ -21,7 +21,10 @@ import {
  * screen on mobile. Without tracked measures, the window invites to add
  * some instead (docs/features/06-measures.md).
  */
-const props = defineProps<{ vivarium: { id: string }; fields: Data.MeasureTypeDefinition[] }>()
+const props = defineProps<{
+  vivarium: Pick<Data.Vivarium, 'id'>
+  fields: Data.MeasureTypeDefinition[]
+}>()
 
 const { t } = useI18n()
 const open = ref(false)

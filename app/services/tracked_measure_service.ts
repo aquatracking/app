@@ -1,5 +1,6 @@
 import { inject } from '@adonisjs/core'
 import db from '@adonisjs/lucid/services/db'
+import { isUniqueViolation } from '#database/errors'
 import type Vivarium from '#models/vivarium'
 import MeasureType from '#models/measure_type'
 import TrackedMeasure from '#models/tracked_measure'
@@ -91,7 +92,7 @@ export class TrackedMeasureService {
           { client: trx }
         )
       } catch (error) {
-        if ((error as { code?: string }).code === '23505') {
+        if (isUniqueViolation(error)) {
           throw new TrackedMeasureAlreadyExistsException()
         }
         throw error

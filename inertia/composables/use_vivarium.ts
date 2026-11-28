@@ -1,7 +1,9 @@
 import { usePage } from '@inertiajs/vue3'
+import type { Data } from '@generated/data'
+import { useNow } from '~/composables/use_now'
 import { useI18n } from '~/composables/use_i18n'
 
-export type VivariumKind = 'aquarium' | 'terrarium' | 'paludarium'
+export type VivariumKind = Data.Vivarium['kind']
 
 /**
  * Whether a kind of vivarium has a water type and a climate, as checked
@@ -16,10 +18,10 @@ export function hasClimate(kind: VivariumKind) {
 }
 
 /**
- * Today's date ("YYYY-MM-DD") in the time zone of the user.
+ * Date ("YYYY-MM-DD") of an instant in the time zone of the user.
  */
-function todayIn(timezone: string) {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: timezone }).format(new Date())
+function dateIn(instant: number, timezone: string) {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: timezone }).format(instant)
 }
 
 /**
@@ -29,12 +31,9 @@ function todayIn(timezone: string) {
 export function useVivarium() {
   const { t } = useI18n()
   const page = usePage()
+  const now = useNow()
 
-  function profileLabel(vivarium: {
-    kind: VivariumKind
-    waterType: string | null
-    climate: string | null
-  }) {
+  function profileLabel(vivarium: Pick<Data.Vivarium, 'kind' | 'waterType' | 'climate'>) {
     return [
       t(`vivariums.kinds.${vivarium.kind}`),
       vivarium.waterType && t(`vivariums.water_types.${vivarium.waterType}`),
@@ -46,11 +45,13 @@ export function useVivarium() {
 
   /**
    * Age from the set-up date, in the largest whole unit: years, months
-   * or days, counted on calendar dates.
+   * or days, counted on calendar dates. Today is the date of now
+   * (useNow): the server rendering and the hydration agree, then it
+   * follows the clock of the browser.
    */
   function ageLabel(startedOn: string) {
     const [fromYear, fromMonth, fromDay] = startedOn.split('-').map(Number)
-    const [toYear, toMonth, toDay] = todayIn(page.props.timezone).split('-').map(Number)
+    const [toYear, toMonth, toDay] = dateIn(now.value, page.props.timezone).split('-').map(Number)
 
     let months = (toYear - fromYear) * 12 + (toMonth - fromMonth)
     if (toDay < fromDay) months -= 1

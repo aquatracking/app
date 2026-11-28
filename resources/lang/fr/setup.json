@@ -1,15 +1,5 @@
 {
   "title": "Installation",
   "description": "Créez le compte administrateur de cette instance. Vous pourrez inviter d'autres personnes une fois le compte créé.",
-  "first_name": "Prénom",
-  "last_name": "Nom",
-  "optional": "facultatif",
-  "email": "Email",
-  "password": "Mot de passe",
-  "password_hint": "Au moins 8 caractères.",
-  "password_confirmation": "Confirmation du mot de passe",
-  "locale": "Langue",
-  "timezone": "Fuseau horaire",
-  "timezone_hint": "Les dates et heures sont affichées dans ce fuseau, par exemple Europe/Paris.",
   "submit": "Créer le compte administrateur"
 }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { usePage } from '@inertiajs/vue3'
+import type { Data } from '@generated/data'
 import { Form } from '@adonisjs/inertia/vue'
 import { Button } from '~/components/ui/button'
 import { useI18n } from '~/composables/use_i18n'
@@ -10,7 +11,7 @@ import DeleteUserDialog from '~/components/admin/delete_user_dialog.vue'
  * administrator rights and deletion. Shared by the table and the cards.
  */
 const props = defineProps<{
-  user: { id: string; email: string; displayName: string; isAdmin: boolean }
+  user: Pick<Data.User.Variants['forAdmin'], 'id' | 'email' | 'displayName' | 'isAdmin'>
 }>()
 
 const { t } = useI18n()

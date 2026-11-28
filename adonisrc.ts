@@ -80,6 +80,7 @@ export default defineConfig({
     () => import('#start/kernel'),
     () => import('#start/validator'),
     () => import('#start/image_decoders'),
+    () => import('#start/session'),
   ],
 
   /*

@@ -4,7 +4,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import InvitationPolicy from '#policies/invitation_policy'
 import { createInvitationValidator } from '#validators/admin'
 import InvitationTransformer from '#transformers/invitation_transformer'
-import type { GeneratedLink, Notification } from '#middleware/inertia_middleware'
+import type { GeneratedLink } from '#middleware/inertia_middleware'
 import { type InvitationLink, InvitationService } from '#services/invitation_service'
 
 /**
@@ -50,11 +50,7 @@ export default class InvitationsController {
 
     await invitationService.revoke(invitation)
 
-    const notification: Notification = {
-      type: 'success',
-      message: i18n.t('admin.invitations.revoked', { email: invitation.email }),
-    }
-    session.flash('notification', notification)
+    session.notify('success', i18n.t('admin.invitations.revoked', { email: invitation.email }))
     return response.redirect().toRoute('admin.invitations.index')
   }
 

@@ -1,30 +1,29 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { Form } from '@adonisjs/inertia/vue'
-import { Head, usePage } from '@inertiajs/vue3'
+import { Head } from '@inertiajs/vue3'
 import AppLayout from '~/layouts/app.vue'
 import { Input } from '~/components/ui/input'
 import { Button } from '~/components/ui/button'
 import { useI18n } from '~/composables/use_i18n'
 import { browserTimezone } from '~/timezones'
-import TimezoneSelect from '~/components/timezone_select.vue'
-import { NativeSelect, NativeSelectOption } from '~/components/ui/native-select'
+import NameFields from '~/components/users/name_fields.vue'
+import PasswordFields from '~/components/users/password_fields.vue'
+import PreferenceFields from '~/components/users/preference_fields.vue'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field'
+import { Field, FieldError, FieldGroup, FieldLabel } from '~/components/ui/field'
 
 defineOptions({ layout: AppLayout })
 
-const props = defineProps<{ timezones: string[] }>()
+const props = defineProps<{ locales: string[]; timezones: string[] }>()
 
 const { t } = useI18n()
-const page = usePage()
 
 /**
  * The language follows the browser (detected by the server from
  * "Accept-Language"). The time zone is only known by the browser: the
  * server renders "UTC", replaced by the browser's own zone once mounted.
  */
-const locales = ['en', 'fr'] as const
 const timezone = ref('UTC')
 
 onMounted(() => {
@@ -44,34 +43,10 @@ onMounted(() => {
     <CardContent>
       <Form v-slot="{ errors, processing }" route="setup.store">
         <FieldGroup>
-          <Field :data-invalid="!!errors.firstName">
-            <FieldLabel for="firstName">{{ t('setup.first_name') }}</FieldLabel>
-            <Input
-              id="firstName"
-              name="firstName"
-              autocomplete="given-name"
-              required
-              :aria-invalid="!!errors.firstName"
-            />
-            <FieldError :errors="[errors.firstName]" />
-          </Field>
-
-          <Field :data-invalid="!!errors.lastName">
-            <FieldLabel for="lastName">
-              {{ t('setup.last_name') }}
-              <span class="text-muted-foreground font-normal">({{ t('setup.optional') }})</span>
-            </FieldLabel>
-            <Input
-              id="lastName"
-              name="lastName"
-              autocomplete="family-name"
-              :aria-invalid="!!errors.lastName"
-            />
-            <FieldError :errors="[errors.lastName]" />
-          </Field>
+          <NameFields :errors="errors" />
 
           <Field :data-invalid="!!errors.email">
-            <FieldLabel for="email">{{ t('setup.email') }}</FieldLabel>
+            <FieldLabel for="email">{{ t('auth.email') }}</FieldLabel>
             <Input
               id="email"
               name="email"
@@ -83,64 +58,14 @@ onMounted(() => {
             <FieldError :errors="[errors.email]" />
           </Field>
 
-          <Field :data-invalid="!!errors.password">
-            <FieldLabel for="password">{{ t('setup.password') }}</FieldLabel>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              autocomplete="new-password"
-              required
-              :aria-invalid="!!errors.password"
-            />
-            <FieldDescription>{{ t('setup.password_hint') }}</FieldDescription>
-            <FieldError :errors="[errors.password]" />
-          </Field>
+          <PasswordFields :errors="errors" :label="t('auth.password')" />
 
-          <Field :data-invalid="!!errors.passwordConfirmation">
-            <FieldLabel for="passwordConfirmation">
-              {{ t('setup.password_confirmation') }}
-            </FieldLabel>
-            <Input
-              id="passwordConfirmation"
-              name="passwordConfirmation"
-              type="password"
-              autocomplete="new-password"
-              required
-              :aria-invalid="!!errors.passwordConfirmation"
-            />
-            <FieldError :errors="[errors.passwordConfirmation]" />
-          </Field>
-
-          <Field :data-invalid="!!errors.locale">
-            <FieldLabel for="locale">{{ t('setup.locale') }}</FieldLabel>
-            <NativeSelect
-              id="locale"
-              name="locale"
-              class="w-full"
-              :model-value="page.props.locale"
-              :aria-invalid="!!errors.locale"
-            >
-              <NativeSelectOption v-for="locale in locales" :key="locale" :value="locale">
-                {{ t(`app.locales.${locale}`) }}
-              </NativeSelectOption>
-            </NativeSelect>
-            <FieldError :errors="[errors.locale]" />
-          </Field>
-
-          <Field :data-invalid="!!errors.timezone">
-            <FieldLabel for="timezone">{{ t('setup.timezone') }}</FieldLabel>
-            <TimezoneSelect
-              id="timezone"
-              v-model="timezone"
-              name="timezone"
-              :label="t('setup.timezone')"
-              :timezones="props.timezones"
-              :invalid="!!errors.timezone"
-            />
-            <FieldDescription>{{ t('setup.timezone_hint') }}</FieldDescription>
-            <FieldError :errors="[errors.timezone]" />
-          </Field>
+          <PreferenceFields
+            v-model:timezone="timezone"
+            :errors="errors"
+            :locales="props.locales"
+            :timezones="props.timezones"
+          />
 
           <Button type="submit" :disabled="processing">{{ t('setup.submit') }}</Button>
         </FieldGroup>

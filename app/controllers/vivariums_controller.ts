@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon'
-import Vivarium from '#models/vivarium'
+import Vivarium, { CLIMATES, VIVARIUM_KINDS, WATER_TYPES } from '#models/vivarium'
 import { inject } from '@adonisjs/core'
 import type { HttpContext } from '@adonisjs/core/http'
 import VivariumPolicy from '#policies/vivarium_policy'
@@ -7,7 +7,6 @@ import { VivariumService } from '#services/vivarium_service'
 import { ReadingService } from '#services/reading_service'
 import TileTransformer from '#transformers/tile_transformer'
 import { MeasureSeriesService } from '#services/measure_series_service'
-import type { Notification } from '#middleware/inertia_middleware'
 import VivariumTransformer from '#transformers/vivarium_transformer'
 import type { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
 import MeasureTypeDefinitionTransformer from '#transformers/measure_type_definition_transformer'
@@ -20,7 +19,10 @@ import { createVivariumValidator, updateVivariumValidator } from '#validators/vi
  */
 @inject()
 export default class VivariumsController {
-  constructor(protected readingService: ReadingService) {}
+  constructor(
+    protected readingService: ReadingService,
+    protected vivariumService: VivariumService
+  ) {}
 
   /**
    * Home page: the vivariums in service, by name.
@@ -51,26 +53,21 @@ export default class VivariumsController {
   async create({ auth, inertia }: HttpContext) {
     return inertia.render('vivariums/create', {
       today: DateTime.now().setZone(auth.getUserOrFail().timezone).toISODate()!,
+      kinds: [...VIVARIUM_KINDS],
+      waterTypes: [...WATER_TYPES],
+      climates: [...CLIMATES],
     })
   }
 
-  @inject()
-  async store(
-    { auth, request, response, session, i18n }: HttpContext,
-    vivariumService: VivariumService
-  ) {
+  async store({ auth, request, response, session, i18n }: HttpContext) {
     const user = auth.getUserOrFail()
     const data = await request.validateUsing(createVivariumValidator, {
       meta: { timezone: user.timezone },
     })
 
-    const vivarium = await vivariumService.create(user, data)
+    const vivarium = await this.vivariumService.create(user, data)
 
-    const notification: Notification = {
-      type: 'success',
-      message: i18n.t('vivariums.created', { name: vivarium.name }),
-    }
-    session.flash('notification', notification)
+    session.notify('success', i18n.t('vivariums.created', { name: vivarium.name }))
     return response.redirect().toRoute('vivariums.show', { id: vivarium.id })
   }
 
@@ -105,6 +102,8 @@ export default class VivariumsController {
     return inertia.render('vivariums/edit', {
       vivarium: VivariumTransformer.transform(vivarium),
       today: DateTime.now().setZone(auth.getUserOrFail().timezone).toISODate()!,
+      waterTypes: [...WATER_TYPES],
+      climates: [...CLIMATES],
     })
   }
 
@@ -115,8 +114,7 @@ export default class VivariumsController {
     const vivarium = await Vivarium.findOrFail(params.id)
     await bouncer.with(VivariumPolicy).authorize('update', vivarium)
     const { timezone } = auth.getUserOrFail()
-    const firstMeasuredAt = await this.readingService.firstMeasuredAt(vivarium)
-    const firstReading = firstMeasuredAt && firstMeasuredAt.setZone(timezone)
+    const firstReading = await this.vivariumService.firstReadingIn(vivarium, timezone)
     const data = await request.validateUsing(updateVivariumValidator, {
       meta: {
         timezone,
@@ -132,11 +130,7 @@ export default class VivariumsController {
     vivarium.merge(data)
     await vivarium.save()
 
-    const notification: Notification = {
-      type: 'success',
-      message: i18n.t('vivariums.saved', { name: vivarium.name }),
-    }
-    session.flash('notification', notification)
+    session.notify('success', i18n.t('vivariums.saved', { name: vivarium.name }))
     return response.redirect().toRoute('vivariums.show', { id: vivarium.id })
   }
 
@@ -144,14 +138,9 @@ export default class VivariumsController {
     const vivarium = await Vivarium.findOrFail(params.id)
     await bouncer.with(VivariumPolicy).authorize('update', vivarium)
 
-    vivarium.archivedAt = DateTime.now()
-    await vivarium.save()
+    await this.vivariumService.archive(vivarium)
 
-    const notification: Notification = {
-      type: 'success',
-      message: i18n.t('vivariums.archived_notice', { name: vivarium.name }),
-    }
-    session.flash('notification', notification)
+    session.notify('success', i18n.t('vivariums.archived_notice', { name: vivarium.name }))
     return response.redirect().toRoute('vivariums.show', { id: vivarium.id })
   }
 
@@ -159,14 +148,9 @@ export default class VivariumsController {
     const vivarium = await Vivarium.findOrFail(params.id)
     await bouncer.with(VivariumPolicy).authorize('unarchive', vivarium)
 
-    vivarium.archivedAt = null
-    await vivarium.save()
+    await this.vivariumService.unarchive(vivarium)
 
-    const notification: Notification = {
-      type: 'success',
-      message: i18n.t('vivariums.unarchived_notice', { name: vivarium.name }),
-    }
-    session.flash('notification', notification)
+    session.notify('success', i18n.t('vivariums.unarchived_notice', { name: vivarium.name }))
     return response.redirect().toRoute('vivariums.show', { id: vivarium.id })
   }
 

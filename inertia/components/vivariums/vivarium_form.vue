@@ -20,15 +20,19 @@ import {
 
 /**
  * Creation (no vivarium) or update form of a vivarium. Only the fields of
- * the chosen kind are shown; the kind is chosen on creation only.
+ * the chosen kind are shown; the kind is chosen on creation only. The
+ * kinds, water types and climates are those of the server
+ * (app/models/vivarium.ts).
  */
-const props = defineProps<{ vivarium?: Data.Vivarium; today: string }>()
+const props = defineProps<{
+  vivarium?: Data.Vivarium
+  today: string
+  kinds?: readonly VivariumKind[]
+  waterTypes: readonly NonNullable<Data.Vivarium['waterType']>[]
+  climates: readonly NonNullable<Data.Vivarium['climate']>[]
+}>()
 
 const { t } = useI18n()
-
-const kinds = ['aquarium', 'terrarium', 'paludarium'] as const
-const waterTypes = ['fresh', 'brackish', 'salt'] as const
-const climates = ['tropical', 'desert', 'temperate'] as const
 
 const kind = ref<VivariumKind>(props.vivarium?.kind ?? 'aquarium')
 
@@ -82,7 +86,7 @@ const suggestedVolume = computed(() => {
           class="w-full"
           :aria-invalid="!!errors.kind"
         >
-          <NativeSelectOption v-for="value in kinds" :key="value" :value="value">
+          <NativeSelectOption v-for="value in props.kinds" :key="value" :value="value">
             {{ t(`vivariums.kinds.${value}`) }}
           </NativeSelectOption>
         </NativeSelect>
@@ -116,7 +120,7 @@ const suggestedVolume = computed(() => {
           <NativeSelectOption value="" disabled>{{
             t('vivariums.form.choose')
           }}</NativeSelectOption>
-          <NativeSelectOption v-for="value in waterTypes" :key="value" :value="value">
+          <NativeSelectOption v-for="value in props.waterTypes" :key="value" :value="value">
             {{ optionLabel(`vivariums.water_types.${value}`) }}
           </NativeSelectOption>
         </NativeSelect>
@@ -136,7 +140,7 @@ const suggestedVolume = computed(() => {
           <NativeSelectOption value="" disabled>{{
             t('vivariums.form.choose')
           }}</NativeSelectOption>
-          <NativeSelectOption v-for="value in climates" :key="value" :value="value">
+          <NativeSelectOption v-for="value in props.climates" :key="value" :value="value">
             {{ optionLabel(`vivariums.climates.${value}`) }}
           </NativeSelectOption>
         </NativeSelect>

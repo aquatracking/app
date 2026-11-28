@@ -5,7 +5,6 @@ import { errors as lucidErrors } from '@adonisjs/lucid'
 import { readingValidator } from '#validators/reading'
 import type { HttpContext } from '@adonisjs/core/http'
 import VivariumPolicy from '#policies/vivarium_policy'
-import type { Notification } from '#middleware/inertia_middleware'
 import ReadingTransformer from '#transformers/reading_transformer'
 import VivariumTransformer from '#transformers/vivarium_transformer'
 import MeasureTypeTransformer from '#transformers/measure_type_transformer'
@@ -34,11 +33,7 @@ export default class MeasuresController {
 
     const measures = await this.readingService.create(vivarium, data)
 
-    const notification: Notification = {
-      type: 'success',
-      message: i18n.t('measures.reading.created', { count: measures.length }),
-    }
-    session.flash('notification', notification)
+    session.notify('success', i18n.t('measures.reading.created', { count: measures.length }))
     return response.redirect().toRoute('vivariums.show', { id: vivarium.id })
   }
 
@@ -89,13 +84,10 @@ export default class MeasuresController {
 
     await this.readingService.update(vivarium, reading, data)
 
-    const notification: Notification = {
-      type: 'success',
-      message: i18n.t('measures.reading.updated'),
-    }
-    session.flash('notification', notification)
+    session.notify('success', i18n.t('measures.reading.updated'))
     return response
       .redirect()
+      .withQs(false)
       .toRoute('measures.index', { id: vivarium.id }, { qs: this.historyQs(request.qs()) })
   }
 
@@ -106,13 +98,10 @@ export default class MeasuresController {
 
     const count = await this.readingService.destroy(vivarium, reading)
 
-    const notification: Notification = {
-      type: 'success',
-      message: i18n.t('measures.reading.deleted', { count }),
-    }
-    session.flash('notification', notification)
+    session.notify('success', i18n.t('measures.reading.deleted', { count }))
     return response
       .redirect()
+      .withQs(false)
       .toRoute('measures.index', { id: vivarium.id }, { qs: this.historyQs(request.qs()) })
   }
 
@@ -139,7 +128,9 @@ export default class MeasuresController {
 
   /**
    * Filter and page of the history in the query string. A missing or
-   * invalid page is the first one.
+   * invalid page is the first one. The redirections to the history carry
+   * only these, not the raw query string ("withQs(false)"), which
+   * "forwardQueryString" (config/app.ts) would forward as is.
    */
   private historyQs(qs: Record<string, unknown>) {
     const page = Number.parseInt(String(qs.page ?? ''), 10)
