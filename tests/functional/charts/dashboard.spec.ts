@@ -77,13 +77,21 @@ test.group('Dashboard tiles', (group) => {
     const response = await client.get(`/vivariums/${vivarium.id}`).withInertia().loginAs(user)
 
     const [, ph] = response.inertiaProps.tiles as Tile[]
-    assert.deepEqual(ph.measureType, { code: 'ph', unit: '', decimals: 2 })
-    assert.isNull(ph.last)
-    assert.isNull(ph.variation)
-    assert.deepEqual(ph.sparkline.points, [])
+    const { start, end, ...sparkline } = ph.sparkline
+    assert.deepEqual(
+      { ...ph, sparkline },
+      {
+        measureType: { code: 'ph', unit: '', decimals: 2 },
+        last: null,
+        variation: null,
+        sparkline: { points: [] },
+      }
+    )
+    assert.isTrue(DateTime.fromISO(start).isValid)
+    assert.isTrue(DateTime.fromISO(end).isValid)
   })
 
-  test('CHT-13 the time axis of the sparkline is the 30d range, whatever the measures', async ({
+  test('CHT-13 each tile receives the bounds of the 30d range in local days, whatever the measures', async ({
     client,
     assert,
   }) => {

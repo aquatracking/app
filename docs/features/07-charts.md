@@ -67,4 +67,4 @@ Voir d'un coup d'œil l'état actuel d'un bac et l'évolution de chaque paramèt
 - **CHT-10** Pour un utilisateur en `Europe/Paris`, des mesures du 31 octobre 2027 entre 00:00 et 23:59 heure locale (25 heures réelles) tombent dans un même intervalle journalier, et aucune mesure du 30 ou du 1er novembre n'y est comptée.
 - **CHT-11** ([TRK-7](05-tracked-measures.md)) Retirer un type suivi conserve ses mesures ; le réajouter fait réapparaître sa tuile avec sa dernière valeur.
 - **CHT-12** ([05](05-tracked-measures.md)) Un vivarium qui ne suit aucun type affiche l'invitation à en ajouter à la place des tuiles.
-- **CHT-13** L'axe temporel de la mini-courbe d'une tuile va du début de la plage `30d` (minuit local, 29 jours avant aujourd'hui) à maintenant, quelles que soient les dates des mesures.
+- **CHT-13** Chaque tuile reçoit les bornes de la plage `30d` en jours locaux du fuseau de l'utilisateur : début à minuit local, 29 jours avant aujourd'hui, et fin à l'instant de la requête, quelles que soient les dates des mesures. La mini-courbe les prend pour axe temporel.
