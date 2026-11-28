@@ -16,14 +16,12 @@ const sessionConfig = defineConfig({
   /**
    * The session ends when the browser is closed. "Remember me" keeps the
    * user signed in longer, with its own cookie (config/auth.ts).
+   *
+   * No "age": with clearWithBrowser and the cookie store, it sets no
+   * expiry. The session lives in the browser and cannot be revoked by the
+   * server (docs/architecture.md, "Limite des sessions").
    */
   clearWithBrowser: true,
-
-  /**
-   * Define how long to keep the session data alive without
-   * any activity.
-   */
-  age: '2h',
 
   /**
    * Configuration for session cookie and the
