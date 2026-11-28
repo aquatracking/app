@@ -1,7 +1,8 @@
 import sharp from 'sharp'
 import { open } from 'node:fs/promises'
 import { v7 as uuidv7 } from 'uuid'
-import type Vivarium from '#models/vivarium'
+import Vivarium from '#models/vivarium'
+import db from '@adonisjs/lucid/services/db'
 import drive from '@adonisjs/drive/services/main'
 import InvalidImageException from '#exceptions/invalid_image_exception'
 
@@ -48,8 +49,15 @@ export class VivariumImageService {
    * metadata (sharp drops EXIF unless asked to keep it; the orientation
    * is applied before), then deletes the previous image.
    *
+   * The previous image is read with the vivarium locked, so that of two
+   * simultaneous replacements, the second one deletes the image of the
+   * first. A new file whose save fails is deleted. The caller keeps the
+   * source file: the temporary file of an upload is deleted by
+   * delete_uploaded_files_middleware.
+   *
    * @throws InvalidImageException when the file cannot be decoded, which
    * includes any format other than JPEG, PNG or WebP
+   * @throws E_ROW_NOT_FOUND when the vivarium was deleted meanwhile
    */
   async replace(vivarium: Vivarium, sourcePath: string) {
     let contents: Buffer
@@ -63,27 +71,49 @@ export class VivariumImageService {
       throw new InvalidImageException()
     }
 
-    const previousPath = vivarium.imagePath
     const imagePath = `${vivarium.id}/${uuidv7()}.webp`
     await this.disk().put(imagePath, contents)
 
-    vivarium.imagePath = imagePath
-    await vivarium.save()
-
+    let previousPath: string | null
+    try {
+      previousPath = await this.setImagePath(vivarium, imagePath)
+    } catch (error) {
+      await this.disk().delete(imagePath)
+      throw error
+    }
     if (previousPath) {
       await this.disk().delete(previousPath)
     }
   }
 
+  /**
+   * @throws E_ROW_NOT_FOUND when the vivarium was deleted meanwhile
+   */
   async remove(vivarium: Vivarium) {
-    const previousPath = vivarium.imagePath
-    if (!previousPath) {
-      return
+    const previousPath = await this.setImagePath(vivarium, null)
+    if (previousPath) {
+      await this.disk().delete(previousPath)
     }
+  }
 
-    vivarium.imagePath = null
-    await vivarium.save()
-    await this.disk().delete(previousPath)
+  /**
+   * Saves the path of the image with the vivarium locked, and returns the
+   * previous one, read under the lock rather than from the given instance,
+   * which another request may have made stale.
+   */
+  private async setImagePath(vivarium: Vivarium, imagePath: string | null) {
+    const previousPath = await db.transaction(async (trx) => {
+      const locked = await Vivarium.query({ client: trx })
+        .where('id', vivarium.id)
+        .forUpdate()
+        .firstOrFail()
+      const previous = locked.imagePath
+      locked.imagePath = imagePath
+      await locked.save()
+      return previous
+    })
+    vivarium.imagePath = imagePath
+    return previousPath
   }
 
   /**

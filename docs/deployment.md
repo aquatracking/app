@@ -206,7 +206,7 @@ Avec SMTP, ces liens sont aussi envoyés par email, et « mot de passe oublié �
 
 En production, le cookie de session est marqué `Secure` et l'en-tête HSTS est envoyé : **servie en HTTP, l'application ne garde pas la session** et la connexion ne fonctionne pas. Elle doit donc être servie en HTTPS, derrière un reverse proxy qui termine le TLS et transmet les requêtes au port `3333` du conteneur.
 
-Les images de vivarium peuvent peser jusqu'à 15 Mo (la limite du serveur pour un envoi est de 20 Mo). Caddy et Traefik n'imposent pas de limite par défaut ; avec Nginx, ajoutez `client_max_body_size 20m;`.
+Les images de vivarium peuvent peser jusqu'à 15 Mo (la limite du serveur pour un envoi est de 16 Mo). Caddy et Traefik n'imposent pas de limite par défaut ; avec Nginx, ajoutez `client_max_body_size 16m;`.
 
 Avec Traefik plutôt que Caddy, retirez le service `caddy` et ajoutez à `app` (en supposant un Traefik déjà configuré avec un point d'entrée `websecure` et un résolveur de certificats `letsencrypt`, dans le même réseau Docker) :
 

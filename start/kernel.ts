@@ -29,7 +29,12 @@ server.use([
   () => import('#middleware/inertia_middleware'),
 ])
 
+/**
+ * Uploaded files are deleted once the request is handled: their middleware
+ * comes before the bodyparser, which writes them.
+ */
 router.use([
+  () => import('#middleware/delete_uploaded_files_middleware'),
   () => import('@adonisjs/core/bodyparser_middleware'),
   () => import('@adonisjs/shield/shield_middleware'),
   () => import('#middleware/setup_middleware'),
