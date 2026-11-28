@@ -31,9 +31,10 @@ test.group('Dashboard tiles', (group) => {
     assert,
   }) => {
     const { user, vivarium } = await vivariumTracking(['kh', 'temperature', 'ph'])
+    const twoDaysAgo = daysAgo(2)
     await storeMeasures(vivarium, daysAgo(10), { temperature: 25.4, ph: 7.2, kh: 6 })
     await storeMeasures(vivarium, daysAgo(5), { temperature: 25.1, ph: 7.5 })
-    await storeMeasures(vivarium, daysAgo(2), { temperature: 25.4 })
+    await storeMeasures(vivarium, twoDaysAgo, { temperature: 25.4 })
     await storeMeasures(vivarium, daysAgo(1), { no3: 10 })
 
     const response = await client.get(`/vivariums/${vivarium.id}`).withInertia().loginAs(user)
@@ -41,7 +42,7 @@ test.group('Dashboard tiles', (group) => {
     response.assertStatus(200)
     const tiles = response.inertiaProps.tiles as Tile[]
     assert.deepEqual(summary(tiles), ['kh 6 -', 'temperature 25.4 0.3', 'ph 7.5 0.3'])
-    assert.equal(tiles[1].last!.measuredAt, daysAgo(2))
+    assert.equal(tiles[1].last!.measuredAt, twoDaysAgo)
     assert.deepEqual(tiles[1].measureType, { code: 'temperature', unit: '°C', decimals: 1 })
   })
 
@@ -50,16 +51,18 @@ test.group('Dashboard tiles', (group) => {
     assert,
   }) => {
     const { user, vivarium } = await vivariumTracking(['temperature', 'ph'])
+    const twentyDaysAgo = daysAgo(20)
+    const tenDaysAgo = daysAgo(10)
     await storeMeasures(vivarium, daysAgo(40), { temperature: 24, ph: 7 })
-    await storeMeasures(vivarium, daysAgo(20), { temperature: 25 })
-    await storeMeasures(vivarium, daysAgo(10), { temperature: 26, ph: 7.1 })
+    await storeMeasures(vivarium, twentyDaysAgo, { temperature: 25 })
+    await storeMeasures(vivarium, tenDaysAgo, { temperature: 26, ph: 7.1 })
 
     const response = await client.get(`/vivariums/${vivarium.id}`).withInertia().loginAs(user)
 
     const [temperature, ph] = response.inertiaProps.tiles as Tile[]
     assert.deepEqual(temperature.sparkline.points, [
-      { measuredAt: daysAgo(20), value: 25 },
-      { measuredAt: daysAgo(10), value: 26 },
+      { measuredAt: twentyDaysAgo, value: 25 },
+      { measuredAt: tenDaysAgo, value: 26 },
     ])
     assert.deepEqual(ph.sparkline.points, [])
     assert.equal(ph.variation, 0.1)
