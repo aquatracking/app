@@ -10,13 +10,13 @@ import { MEASURE_TYPES, MeasureTypeCatalog } from '#catalog/measure_types'
 import {
   deleteReading,
   failWritesOf,
-  fieldErrors,
   measuresOf,
   putReading,
   readingUrl,
   storeMeasures,
   vivariumTracking,
-} from '#tests/functional/measures/helpers'
+} from '#tests/helpers/measures'
+import { fieldErrors } from '#tests/helpers/responses'
 
 test.group('Reading corrections', (group) => {
   group.each.setup(() => testUtils.db().withGlobalTransaction())

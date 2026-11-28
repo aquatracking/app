@@ -5,7 +5,7 @@ import type Vivarium from '#models/vivarium'
 import app from '@adonisjs/core/services/app'
 import MeasureType from '#models/measure_type'
 import testUtils from '@adonisjs/core/services/test_utils'
-import { storeMeasures, vivariumTracking } from '#tests/functional/measures/helpers'
+import { storeMeasures, vivariumTracking } from '#tests/helpers/measures'
 import {
   MAX_CHART_POINTS,
   MeasureSeriesService,

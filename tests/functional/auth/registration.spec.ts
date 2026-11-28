@@ -1,11 +1,11 @@
 import { test } from '@japa/runner'
 import { TIMEZONES } from '#catalog/timezones'
 import User from '#models/user'
-import type { ApiResponse } from '@japa/api-client'
 import Invitation from '#models/invitation'
 import testUtils from '@adonisjs/core/services/test_utils'
 import { UserFactory } from '#database/factories/user_factory'
 import { InvitationFactory } from '#database/factories/invitation_factory'
+import { fieldErrors } from '#tests/helpers/responses'
 
 /**
  * A pending invitation from an administrator, and the token of its link.
@@ -33,11 +33,6 @@ function registrationForm(overrides: Record<string, string> = {}) {
     timezone: 'Europe/Paris',
     ...overrides,
   }
-}
-
-function fieldErrors(response: ApiResponse, field: string): string[] {
-  const errors = response.flashMessages().inputErrorsBag as Record<string, string[]> | undefined
-  return errors?.[field] ?? []
 }
 
 test.group('Registration by invitation', (group) => {

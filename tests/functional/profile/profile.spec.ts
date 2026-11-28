@@ -2,9 +2,9 @@ import { test } from '@japa/runner'
 import { TIMEZONES } from '#catalog/timezones'
 import User from '#models/user'
 import db from '@adonisjs/lucid/services/db'
-import type { ApiResponse } from '@japa/api-client'
 import testUtils from '@adonisjs/core/services/test_utils'
 import { UserFactory } from '#database/factories/user_factory'
+import { fieldErrors } from '#tests/helpers/responses'
 
 function profileForm(overrides: Record<string, string> = {}) {
   return {
@@ -14,11 +14,6 @@ function profileForm(overrides: Record<string, string> = {}) {
     timezone: 'UTC',
     ...overrides,
   }
-}
-
-function fieldErrors(response: ApiResponse, field: string): string[] {
-  const errors = response.flashMessages().inputErrorsBag as Record<string, string[]> | undefined
-  return errors?.[field] ?? []
 }
 
 test.group('Profile', (group) => {

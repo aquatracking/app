@@ -5,13 +5,14 @@ import type Vivarium from '#models/vivarium'
 import app from '@adonisjs/core/services/app'
 import db from '@adonisjs/lucid/services/db'
 import MeasureType from '#models/measure_type'
-import type { ApiClient, ApiResponse } from '@japa/api-client'
+import type { ApiClient } from '@japa/api-client'
 import { UserFactory } from '#database/factories/user_factory'
 import { VivariumFactory } from '#database/factories/vivarium_factory'
 import { TrackedMeasureService } from '#services/tracked_measure_service'
 
 /**
- * Helpers of the tests of feature 06 (docs/features/06-measures.md).
+ * Helpers of the tests of feature 06 (docs/features/06-measures.md),
+ * also used by the tests of the charts (07).
  */
 
 /**
@@ -137,9 +138,4 @@ export function deleteReading(
     .withCsrfToken()
     .loginAs(user)
     .redirects(0)
-}
-
-export function fieldErrors(response: ApiResponse, field: string): string[] {
-  const errors = response.flashMessages().inputErrorsBag as Record<string, string[]> | undefined
-  return errors?.[field] ?? []
 }

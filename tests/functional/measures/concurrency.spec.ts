@@ -4,13 +4,13 @@ import type { ApiResponse } from '@japa/api-client'
 import testUtils from '@adonisjs/core/services/test_utils'
 import { waitForLockWaiters } from '#tests/helpers/locks'
 import {
-  fieldErrors,
   measuresOf,
   postReading,
   putReading,
   storeMeasures,
   vivariumTracking,
-} from '#tests/functional/measures/helpers'
+} from '#tests/helpers/measures'
+import { fieldErrors } from '#tests/helpers/responses'
 
 /**
  * Changes of readings that overlap, on several connections

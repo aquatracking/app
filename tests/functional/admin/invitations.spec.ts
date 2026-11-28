@@ -4,16 +4,14 @@ import User from '#models/user'
 import Invitation from '#models/invitation'
 import app from '@adonisjs/core/services/app'
 import mail from '@adonisjs/mail/services/main'
-import type { ApiClient, ApiResponse } from '@japa/api-client'
+import type { ApiClient } from '@japa/api-client'
 import testUtils from '@adonisjs/core/services/test_utils'
 import { UserFactory } from '#database/factories/user_factory'
 import type { GeneratedLink } from '#middleware/inertia_middleware'
 import InvitationNotification from '#mails/invitation_notification'
 import { InvitationFactory } from '#database/factories/invitation_factory'
-
-function useMail(enabled: boolean) {
-  app.config.set('app.mail.enabled', enabled)
-}
+import { generatedLink } from '#tests/helpers/responses'
+import { useMail } from '#tests/helpers/mail'
 
 function invite(client: ApiClient, admin: User, email: string) {
   return client
@@ -24,10 +22,6 @@ function invite(client: ApiClient, admin: User, email: string) {
     .withCsrfToken()
     .loginAs(admin)
     .redirects(0)
-}
-
-function generatedLink(response: ApiResponse): GeneratedLink {
-  return response.flashMessages().generatedLink as GeneratedLink
 }
 
 /**

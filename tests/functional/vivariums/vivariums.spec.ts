@@ -4,9 +4,11 @@ import type User from '#models/user'
 import Vivarium from '#models/vivarium'
 import router from '@adonisjs/core/services/router'
 import testUtils from '@adonisjs/core/services/test_utils'
-import type { ApiClient, ApiResponse } from '@japa/api-client'
+import type { ApiClient } from '@japa/api-client'
 import { UserFactory } from '#database/factories/user_factory'
 import { VivariumFactory } from '#database/factories/vivarium_factory'
+import { fieldErrors } from '#tests/helpers/responses'
+import { createVivarium } from '#tests/helpers/vivariums'
 
 function vivariumForm(overrides: Record<string, string> = {}) {
   return {
@@ -21,22 +23,6 @@ function vivariumForm(overrides: Record<string, string> = {}) {
     startedOn: '2025-03-14',
     ...overrides,
   }
-}
-
-function fieldErrors(response: ApiResponse, field: string): string[] {
-  const errors = response.flashMessages().inputErrorsBag as Record<string, string[]> | undefined
-  return errors?.[field] ?? []
-}
-
-function createVivarium(client: ApiClient, user: User, form: Record<string, string>) {
-  return client
-    .post('/vivariums')
-    .withInertia()
-    .header('referer', '/vivariums/create')
-    .form(form)
-    .withCsrfToken()
-    .loginAs(user)
-    .redirects(0)
 }
 
 function updateVivarium(

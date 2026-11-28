@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 import Measure from '#models/measure'
 import db from '@adonisjs/lucid/services/db'
 import testUtils from '@adonisjs/core/services/test_utils'
-import { storeMeasures, vivariumTracking } from '#tests/functional/measures/helpers'
+import { storeMeasures, vivariumTracking } from '#tests/helpers/measures'
 
 type HistoryProps = {
   readings: {

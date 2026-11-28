@@ -5,11 +5,13 @@ import Vivarium from '#models/vivarium'
 import app from '@adonisjs/core/services/app'
 import TrackedMeasure from '#models/tracked_measure'
 import testUtils from '@adonisjs/core/services/test_utils'
-import type { ApiClient, ApiResponse } from '@japa/api-client'
+import type { ApiClient } from '@japa/api-client'
 import { UserFactory } from '#database/factories/user_factory'
 import { VivariumFactory } from '#database/factories/vivarium_factory'
 import { TrackedMeasureService } from '#services/tracked_measure_service'
 import { MEASURE_TYPES, MeasureTypeCatalog } from '#catalog/measure_types'
+import { fieldErrors } from '#tests/helpers/responses'
+import { createVivarium } from '#tests/helpers/vivariums'
 
 /**
  * Codes tracked by a vivarium, in their order.
@@ -29,24 +31,20 @@ async function track(vivarium: Vivarium, codes: string[]) {
   return tracked
 }
 
-function createVivarium(client: ApiClient, user: User, form: Record<string, string>) {
-  return client
-    .post('/vivariums')
-    .withInertia()
-    .header('referer', '/vivariums/create')
-    .form({
-      name: 'New',
-      description: '',
-      lengthCm: '',
-      widthCm: '',
-      heightCm: '',
-      volumeLiters: '',
-      startedOn: '2025-03-14',
-      ...form,
-    })
-    .withCsrfToken()
-    .loginAs(user)
-    .redirects(0)
+/**
+ * The form that creates a vivarium, for the given type and profile.
+ */
+function vivariumForm(profile: Record<string, string>) {
+  return {
+    name: 'New',
+    description: '',
+    lengthCm: '',
+    widthCm: '',
+    heightCm: '',
+    volumeLiters: '',
+    startedOn: '2025-03-14',
+    ...profile,
+  }
 }
 
 function page(vivarium: Vivarium) {
@@ -85,11 +83,6 @@ function remove(client: ApiClient, user: User, vivarium: Vivarium, trackedMeasur
     .redirects(0)
 }
 
-function fieldErrors(response: ApiResponse, field: string): string[] {
-  const errors = response.flashMessages().inputErrorsBag as Record<string, string[]> | undefined
-  return errors?.[field] ?? []
-}
-
 type PageProps = {
   trackedMeasures: { id: string; measureType: { code: string; unit: string } }[]
   addableTypes: { code: string; unit: string }[]
@@ -105,7 +98,11 @@ test.group('Tracked measures', (group) => {
   }) => {
     const user = await UserFactory.create()
 
-    const response = await createVivarium(client, user, { kind: 'aquarium', waterType: 'salt' })
+    const response = await createVivarium(
+      client,
+      user,
+      vivariumForm({ kind: 'aquarium', waterType: 'salt' })
+    )
 
     const vivarium = await Vivarium.findByOrFail('user_id', user.id)
     response.assertHeader('location', `/vivariums/${vivarium.id}`)
@@ -129,7 +126,7 @@ test.group('Tracked measures', (group) => {
   test('TRK-5 a desert terrarium tracks temperature and humidity', async ({ client, assert }) => {
     const user = await UserFactory.create()
 
-    await createVivarium(client, user, { kind: 'terrarium', climate: 'desert' })
+    await createVivarium(client, user, vivariumForm({ kind: 'terrarium', climate: 'desert' }))
 
     const vivarium = await Vivarium.findByOrFail('user_id', user.id)
     assert.deepEqual(await trackedCodes(vivarium), ['temperature', 'humidity'])
@@ -141,11 +138,15 @@ test.group('Tracked measures', (group) => {
   }) => {
     const user = await UserFactory.create()
 
-    await createVivarium(client, user, {
-      kind: 'paludarium',
-      waterType: 'fresh',
-      climate: 'tropical',
-    })
+    await createVivarium(
+      client,
+      user,
+      vivariumForm({
+        kind: 'paludarium',
+        waterType: 'fresh',
+        climate: 'tropical',
+      })
+    )
 
     const vivarium = await Vivarium.findByOrFail('user_id', user.id)
     assert.deepEqual(await trackedCodes(vivarium), [

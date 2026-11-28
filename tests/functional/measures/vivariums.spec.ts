@@ -5,7 +5,8 @@ import db from '@adonisjs/lucid/services/db'
 import testUtils from '@adonisjs/core/services/test_utils'
 import { UserFactory } from '#database/factories/user_factory'
 import { VivariumFactory } from '#database/factories/vivarium_factory'
-import { fieldErrors, storeMeasures, vivariumTracking } from '#tests/functional/measures/helpers'
+import { storeMeasures, vivariumTracking } from '#tests/helpers/measures'
+import { fieldErrors } from '#tests/helpers/responses'
 
 /**
  * Rules of feature 04 that need the measures (docs/features/06-measures.md,

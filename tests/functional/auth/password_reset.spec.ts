@@ -11,6 +11,7 @@ import PasswordResetToken from '#models/password_reset_token'
 import { UserFactory } from '#database/factories/user_factory'
 import { PasswordResetService } from '#services/password_reset_service'
 import PasswordResetNotification from '#mails/password_reset_notification'
+import { useMail } from '#tests/helpers/mail'
 
 const SENT_MESSAGE = {
   type: 'success',
@@ -43,14 +44,6 @@ function resetPassword(client: ApiClient, token: string, password = 'new-secret-
 async function assertPassword(assert: any, email: string, password: string) {
   const user = await User.verifyCredentials(email, password)
   assert.equal(user.email, email)
-}
-
-/**
- * The instance sends emails or not depending on SMTP_HOST: each test
- * chooses, and the configured value is restored after it.
- */
-function useMail(enabled: boolean) {
-  app.config.set('app.mail.enabled', enabled)
 }
 
 test.group('Password reset', (group) => {

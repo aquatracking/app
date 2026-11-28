@@ -1,12 +1,12 @@
 import { test } from '@japa/runner'
 import { TIMEZONES } from '#catalog/timezones'
-import type { ApiResponse } from '@japa/api-client'
 import User from '#models/user'
 import { SetupService } from '#services/setup_service'
 import testUtils from '@adonisjs/core/services/test_utils'
 import db from '@adonisjs/lucid/services/db'
 import limiter from '@adonisjs/limiter/services/main'
 import { waitForLockWaiters } from '#tests/helpers/locks'
+import { fieldErrors } from '#tests/helpers/responses'
 
 /**
  * A valid submission of the setup form.
@@ -22,14 +22,6 @@ function setupForm(overrides: Record<string, string> = {}) {
     timezone: 'Europe/Paris',
     ...overrides,
   }
-}
-
-/**
- * Validation errors of a field, as flashed for the next page.
- */
-function fieldErrors(response: ApiResponse, field: string): string[] {
-  const errors = response.flashMessages().inputErrorsBag as Record<string, string[]> | undefined
-  return errors?.[field] ?? []
 }
 
 /**
