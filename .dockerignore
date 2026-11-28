@@ -10,3 +10,7 @@ tmp/*
 !.env.example
 docs
 *.md
+# Test suite, its runner and its factories: never in the image
+tests
+bin/test.ts
+database/factories
