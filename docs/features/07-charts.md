@@ -11,7 +11,7 @@ Voir d'un coup d'œil l'état actuel d'un bac et l'évolution de chaque paramèt
 ## Règles métier
 
 ### Tableau de bord (`/vivariums/:id`)
-- En-tête : créé par [04](04-vivariums.md) (image, nom, type et profil, volume, âge, actions modifier et archiver, bandeau archivé avec « Désarchiver »). Les liens « Mesures suivies » ([05](05-tracked-measures.md)) et « Historique » ([06](06-measures.md)) y sont ajoutés par leurs features ; sur un vivarium archivé, seuls « Désarchiver » et « Historique » restent.
+- En-tête : créé par [04](04-vivariums.md) (image, nom, type et profil, volume, âge, actions modifier et archiver, bandeau archivé avec « Désarchiver »). Les liens « Paramètres suivis » ([05](05-tracked-measures.md), page des mesures suivies) et « Historique » ([06](06-measures.md)) y sont ajoutés par leurs features ; sur un vivarium archivé, seuls « Désarchiver » et « Historique » restent.
 - Une **tuile par mesure suivie**, dans l'ordre des mesures suivies :
   - libellé, dernière valeur avec unité, ancienneté (« il y a 3 jours ») ;
   - variation par rapport à la mesure précédente du même type (flèche et écart, ex. « ▲ 0,3 ») ;
@@ -43,7 +43,7 @@ Voir d'un coup d'œil l'état actuel d'un bac et l'évolution de chaque paramèt
 
 ### Performance
 - Le tableau de bord exécute un nombre de requêtes **constant**, quel que soit le nombre de mesures suivies : une requête `LATERAL` pour la dernière et l'avant-dernière valeur de chaque mesure suivie (deux lignes par type, lues à rebours sur l'index unique), une requête pour les mini-courbes (pas de N+1, cf. le correctif de la v0.1.1).
-- La série d'un graphe est calculée par `MeasureSeriesService` et testée unitairement (agrégation, statistiques).
+- La série d'un graphe est calculée par `MeasureSeriesService`. Ses tests appellent directement le service (agrégation, statistiques), dans la suite `functional` car le calcul se fait en SQL ([architecture](../architecture.md#tests)).
 
 ## Données
 `measures`, `tracked_measures`, `measure_types`, `vivariums` (en-tête) en lecture.

@@ -17,7 +17,7 @@ Application auto-hébergée de suivi des paramètres d'aquariums, terrariums et 
 
 ## Règles
 1. **Les specs font foi.** Une feature est implémentée d'après `docs/features/NN-*.md`. Si le code doit s'en écarter, on modifie d'abord la spec (et l'ADR concernée si c'est une décision).
-2. **Vocabulaire de `CONTEXT.md` uniquement.** `Vivarium`, jamais `biotope` ou `tank`. Un terme nouveau est ajouté au glossaire avant d'apparaître dans le code.
+2. **Vocabulaire de `CONTEXT.md` uniquement.** Dans le code et les identifiants, `Vivarium`, jamais `biotope` ou `tank`. Dans l'interface, les libellés sont ceux du glossaire : « bac » (fr) et « tank » (en) pour un vivarium, « paramètre » / « parameter » pour un type de mesure ou une mesure suivie. Un terme nouveau est ajouté au glossaire avant d'apparaître dans le code ou l'interface.
 3. **Utiliser Adonis avant d'écrire du code.** Consulter le tableau « Besoin → brique Adonis » d'`architecture.md`. Créer les fichiers avec `node ace make:*`.
 4. **Autorisation par policies Bouncer**, jamais par des conditions sur `userId` dans les contrôleurs.
 5. **Données vers les pages par transformers.** Pas de DTO écrit à la main, pas de modèle sérialisé brut.

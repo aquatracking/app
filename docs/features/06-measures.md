@@ -12,7 +12,7 @@ Saisir en quelques secondes les valeurs d'un test, retrouver tous les relevés p
 ## Règles métier
 
 ### Relevé ([ADR 0006](../adr/0006-releve-sans-entite.md))
-- Accessible depuis le tableau de bord du vivarium par un bouton « Nouveau relevé » toujours visible (bouton flottant sur mobile). S'ouvre dans une fenêtre (plein écran sur mobile).
+- Accessible depuis le tableau de bord du vivarium et depuis la page du graphe d'un type ([07](07-charts.md)) par un bouton « Nouveau relevé » toujours visible (bouton flottant sur mobile), sauf sur un vivarium archivé. S'ouvre dans une fenêtre (plein écran sur mobile), avec les mêmes champs sur les deux pages.
 - Champs : date et heure (défaut maintenant), saisies et affichées dans le **fuseau de l'utilisateur** ([CONTEXT](../CONTEXT.md)), puis un champ numérique par **mesure suivie**, dans l'ordre des mesures suivies, avec l'unité affichée et au plus le nombre de décimales du type ([05](05-tracked-measures.md), sens de `decimals`).
 - Les champs vides sont ignorés. Il faut au moins une valeur.
 - Un nouveau relevé ne peut contenir que des types **suivis** par le vivarium (la modification accepte en plus les types déjà présents dans le groupe, voir plus bas).
@@ -24,13 +24,14 @@ Saisir en quelques secondes les valeurs d'un test, retrouver tous les relevés p
 - L'instant est **tronqué à la minute** (secondes et millisecondes à zéro), y compris pour la valeur par défaut « maintenant ». Saisir la même date et la même heure qu'un relevé existant revient donc à le rejoindre. Les mesures de capteurs (hors 2.0) garderont leur précision à la seconde.
 - Chaque valeur crée une `Measure` (`source = manual`), toutes avec le même `measured_at`. L'ensemble est enregistré dans une transaction.
 - **Unicité** : un vivarium ne peut pas avoir deux mesures du même type au même instant (contrainte unique en base). Si un nouveau relevé tombe sur une minute qui contient déjà une valeur d'un des types saisis, il est refusé en entier, avec un message qui propose de modifier le relevé existant. Cela empêche aussi les doublons par double envoi du formulaire : quand deux envois simultanés passent la vérification en même temps, la contrainte unique refuse le second, présenté comme le même conflit et jamais comme une erreur serveur.
-- Après enregistrement : retour au tableau de bord, mis à jour, avec un message « Relevé enregistré (n mesures) ».
+- Après enregistrement : retour au tableau de bord, mis à jour, avec un message « Relevé enregistré (n mesures) », y compris quand le relevé a été ouvert depuis la page du graphe.
 - Impossible sur un vivarium archivé.
 - Si le vivarium ne suit aucun type, le formulaire n'a aucun champ de valeur : il invite à ajouter des mesures suivies ([05](05-tracked-measures.md)), avec un lien vers leur page.
 
 ### Historique
 - Page par vivarium, relevés les plus récents en premier : chaque groupe réunit les mesures de même `measured_at` (un groupe = un relevé).
 - Filtre par type de mesure (tous les types ayant au moins une mesure, suivis ou non). Un type inconnu dans l'URL (`?type=`) renvoie une liste vide.
+- Filtré sur un type qui a des mesures, l'historique propose un bouton « Voir le graphe » qui ouvre le graphe de ce type ([07](07-charts.md)), y compris pour un type qui n'est plus suivi.
 - Pagination **par relevés** : 20 relevés par page. Un relevé n'est jamais coupé entre deux pages.
 - Valeurs affichées telles que saisies, sans zéros forcés, et formatées selon la langue (`7,25` / `7.25`).
 
@@ -64,7 +65,7 @@ La 04 a été livrée avant la table `measures`. La 06 y ajoute :
 ## Routes et pages
 | Méthode | Route | Action | Page |
 |---|---|---|---|
-| POST | `/vivariums/:id/readings` | `measures.storeReading` | — (fenêtre sur `vivariums/show`) |
+| POST | `/vivariums/:id/readings` | `measures.storeReading` | — (fenêtre sur `vivariums/show` et `charts/show`) |
 | GET | `/vivariums/:id/measures` | `measures.index` | `measures/index` |
 | GET | `/vivariums/:id/readings/:measuredAt/edit` | `measures.editReading` | — (fenêtre sur `measures/index`) |
 | PUT | `/vivariums/:id/readings/:measuredAt` | `measures.updateReading` | — |

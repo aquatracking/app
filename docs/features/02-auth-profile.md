@@ -14,6 +14,7 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 ### Connexion
 - Par email (insensible à la casse) et mot de passe.
 - Case « se souvenir de moi » : remember me token valable 1 an. Sans elle, la session expire à la fermeture du navigateur.
+- **Limite connue** : la session est gardée dans un cookie chiffré, sans trace côté serveur ([architecture](../architecture.md)). Le serveur ne peut pas la révoquer : une copie du cookie de session reste valide jusqu'à la fermeture du navigateur qui la porte. La déconnexion, la réinitialisation et le changement de mot de passe ne coupent que les remember me tokens (en base), pas les sessions déjà ouvertes ailleurs.
 - Message d'erreur unique « identifiants invalides », que l'email existe ou non.
 - Limitation des échecs de connexion, deux compteurs cumulés (`limiter.multi`) :
   - **IP + email** : 5 échecs en 15 minutes. Freine la recherche du mot de passe d'un compte précis. Une connexion réussie remet à zéro ce compteur (pas l'historique des blocages) ;
@@ -32,6 +33,7 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 - L'email est celui de l'invitation et n'est pas modifiable.
 - Champs : prénom, nom (facultatif), mot de passe et confirmation, langue (préremplie depuis le navigateur), fuseau horaire (liste avec recherche, préremplie après chargement avec celui du navigateur, `UTC` s'il n'en donne pas, modifiable ; un nom hors de la liste est refusé, voir [Profil](#profil)).
 - À la création du compte, l'auteur de l'invitation est enregistré comme `invited_by_id` du nouvel utilisateur, puis l'invitation est supprimée et l'utilisateur est connecté.
+- Si un compte existe déjà avec l'email de l'invitation au moment de la soumission (créé entre-temps, par exemple par une autre invitation), l'inscription est refusée avec le message « invitation invalide ou expirée » et aucun compte n'est créé. La vérification est faite dans la transaction qui verrouille l'invitation.
 - Un utilisateur déjà connecté qui ouvre un lien d'invitation est redirigé vers l'accueil avec un message (comme pour les autres pages réservées aux visiteurs) ; l'invitation reste valable.
 
 ### Mot de passe oublié
@@ -43,7 +45,7 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 ### Profil
 - Modifiable : prénom, nom, langue (fr ou en), fuseau horaire (liste IANA avec recherche, ex. « Europe/Paris »).
 - Si la zone du navigateur diffère de la zone **enregistrée** (comparées en entrées de la liste, et non avec la valeur en cours de saisie), le profil le signale avec un bouton « Utiliser Europe/Paris » (utile après un déménagement). Rien n'est changé automatiquement.
-- **Liste des fuseaux** : `UTC` et les zones géographiques, sous leur nom IANA canonique (`Asia/Kolkata`, `Europe/Kyiv`, `America/Nuuk`). Elle est figée dans le code (`app/catalog/timezones.ts`) et non lue dans `Intl.supportedValuesOf('timeZone')`, qui donne des noms CLDR historiques (`Asia/Calcutta`, `Europe/Kiev`) variables selon la version d'ICU, dont certains sont inconnus de PostgreSQL (les graphes convertissent avec `AT TIME ZONE`). Chaque nom est reconnu par `Intl` et par PostgreSQL.
+- **Liste des fuseaux** : `UTC` et une entrée par zone géographique du fichier `zone.tab` de l'IANA (une ligne par pays et par zone), sous le nom que ce fichier lui donne (`Asia/Kolkata`, `Europe/Kyiv`, `America/Nuuk`). Ce nom n'est pas toujours celui d'une zone principale de l'IANA : de nombreuses entrées sont des liens (`Europe/Amsterdam`, lien vers `Europe/Brussels`), gardés car `zone.tab` donne une entrée par pays. Seule exception à `zone.tab` : `America/Coral_Harbour`, nom CLDR d'`America/Atikokan`, que `Intl` ne liste pas sous ce dernier nom. Elle est figée dans le code (`app/catalog/timezones.ts`) et non lue dans `Intl.supportedValuesOf('timeZone')`, qui donne des noms CLDR historiques (`Asia/Calcutta`, `Europe/Kiev`) variables selon la version d'ICU, dont certains sont inconnus de PostgreSQL (les graphes convertissent avec `AT TIME ZONE`). Chaque nom est reconnu par `Intl` et par PostgreSQL.
 - Le navigateur, ou un nom enregistré avant cette liste, peut désigner une zone sous un autre nom (`Asia/Calcutta`, `America/Montreal`) : le formulaire affiche, préremplit et propose alors l'entrée de la liste qui désigne la même zone (`Asia/Kolkata`, `America/Toronto`), jamais un nom hors de la liste.
 - Un fuseau hors de la liste est refusé, y compris un nom IANA qui ne désigne qu'un décalage fixe (`Etc/GMT+5`) ou une abréviation (`EST`, `CET`) : ils ignoreraient le changement d'heure. Les décalages écrits (`+01:00`, `UTC+1`) sont refusés aussi. La casse est corrigée (`europe/paris` devient `Europe/Paris`).
 - L'**email n'est pas modifiable** dans le périmètre 2.0 : c'est l'identifiant de connexion, et sans SMTP on ne peut pas vérifier une nouvelle adresse. Voir la piste dans [vision](../vision.md).
@@ -80,7 +82,7 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 - **AUTH-3** Après 5 échecs pour un même email et une même IP, la tentative suivante est refusée même avec le bon mot de passe.
 - **AUTH-4** Avec « se souvenir de moi », un remember me token est créé.
 - **AUTH-5** Un lien d'invitation valide affiche le formulaire avec l'email verrouillé ; le soumettre crée le compte (non admin), supprime l'invitation et connecte l'utilisateur.
-- **AUTH-6** Un lien d'invitation expiré, inconnu ou déjà utilisé affiche le message d'invitation invalide et ne permet pas de créer de compte.
+- **AUTH-6** Un lien d'invitation expiré, inconnu ou déjà utilisé affiche le message d'invitation invalide et ne permet pas de créer de compte ; une invitation dont l'email a déjà un compte au moment de la soumission est refusée avec le même message, sans créer de compte.
 - **AUTH-7** Avec SMTP, « mot de passe oublié » envoie un email pour un compte existant et aucun pour un email inconnu, avec la même réponse affichée.
 - **AUTH-8** Sans SMTP, la page « mot de passe oublié » n'affiche pas de formulaire et renvoie vers l'administrateur.
 - **AUTH-9** Un lien de réinitialisation expiré ou déjà utilisé est refusé dès l'affichage.

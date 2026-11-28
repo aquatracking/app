@@ -50,6 +50,7 @@ Justification des décimales notables : pH au 0,01 (pH-mètres, suivi récifal) 
 - Les libellés et une courte description de chaque type sont dans `resources/lang/{fr,en}/measure_types.json`.
 
 ## Règles métier — mesures suivies
+- Dans l'interface, les types de mesure s'appellent « paramètres » et les mesures suivies « paramètres suivis » (en anglais « parameters », « tracked parameters ») : la page des mesures suivies est titrée « Paramètres suivis » ([CONTEXT](../CONTEXT.md)).
 - À la création d'un vivarium, une mesure suivie est créée pour chaque type « suivi par défaut » de son profil, dans l'ordre du catalogue, dans la transaction de `VivariumService.create` (critère VIV-5 de [04](04-vivariums.md), reporté ici).
 - L'utilisateur peut **ajouter** n'importe quel type du catalogue non encore suivi et non retiré (ajouté en dernière position), **retirer** un type suivi et **réordonner** les types suivis (glisser-déposer, y compris au toucher, et flèches haut/bas). Chaque déplacement est enregistré aussitôt.
 - Retirer un type ne supprime aucune mesure. Le réajouter fait réapparaître sa dernière valeur et son historique.

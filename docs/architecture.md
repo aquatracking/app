@@ -23,7 +23,7 @@ On n'écrit pas ce que le framework fournit. Avant d'ajouter une abstraction, v�
 
 | Besoin | Brique | Notes |
 |---|---|---|
-| Connexion, session, « se souvenir de moi » | `@adonisjs/auth` guard session + remember me tokens | `withAuthFinder` sur `User` |
+| Connexion, session, « se souvenir de moi » | `@adonisjs/auth` guard session + remember me tokens | `withAuthFinder` sur `User`. Session dans un cookie chiffré (store `cookie`), effacée à la fermeture du navigateur (`clearWithBrowser`) : voir la limite ci-dessous |
 | Validation des entrées | VineJS, un validator par action | Messages traduits via i18n |
 | « Ce vivarium est-il à moi ? » | Bouncer, `VivariumPolicy` | Aucun contrôle de propriété écrit à la main dans les contrôleurs |
 | Réservé aux admins | Bouncer, `UserPolicy` / `InvitationPolicy` + middleware `admin` | Le middleware vérifie l'ability `administer` (`app/abilities/main.ts`). Un refus répond 403 avec la page `errors/forbidden`, formulaires compris |
@@ -34,10 +34,12 @@ On n'écrit pas ce que le framework fournit. Avant d'ajouter une abstraction, v�
 | Tokens à usage unique (invitation, reset) | Token aléatoire, **haché** en base | Voir [data-model](data-model.md) |
 | Traductions | `@adonisjs/i18n` (serveur) + mêmes fichiers côté Vue | Un seul jeu de fichiers `resources/lang/{fr,en}/*.json` |
 | Fichiers | Drive, disque `vivariums` local | Servis par un contrôleur protégé par la policy |
-| Santé | Health checks Adonis, route `/health/live` seulement | Pour Docker et les orchestrateurs. Pas de `/health/ready` public : son rapport expose des détails du serveur (versions, mémoire, disque) |
+| Santé | Route `/health/live` seulement, servie par un contrôleur simple (`HealthChecksController`) qui répond 200 | Sonde de vivacité pour Docker et les orchestrateurs : elle dit seulement que le serveur HTTP répond, il n'y a rien à vérifier. La classe `HealthChecks` d'Adonis sert aux rapports de disponibilité (base, mémoire, disque), qu'on n'expose pas : pas de `/health/ready` public, son rapport expose des détails du serveur (versions, mémoire, disque) |
 | Variables d'environnement | `start/env.ts`, `Env.schema` | Secrets en `Env.schema.secret()`, support `file:` pour Docker secrets |
 | Données de référence | Seeder idempotent du catalogue | Lancé à chaque démarrage, comme les migrations |
 | Mise à jour en direct *(après 2.0)* | `@adonisjs/transmit` (SSE) + `router.reload({ only })` d'Inertia | Canal `vivariums/:id` autorisé par `VivariumPolicy` ; le serveur recalcule les props, aucune logique dupliquée côté client. Transport en mémoire pour une instance, Redis si plusieurs. Le reverse proxy doit désactiver le buffering sur la route SSE |
+
+**Limite des sessions.** Le store `cookie` garde la session dans le navigateur, sans trace côté serveur : le serveur ne peut donc pas la révoquer. Une copie du cookie de session reste valide jusqu'à la fermeture du navigateur qui la porte, même après une déconnexion, une réinitialisation du mot de passe ou un changement de mot de passe : ces actions ne coupent que les remember me tokens, qui sont en base ([02](features/02-auth-profile.md)). La session n'a pas d'autre durée de vie : l'option `age` de `config/session.ts` est sans effet avec `clearWithBrowser` et le store `cookie`, elle n'est donc pas renseignée. Choix assumé pour une instance auto-hébergée servie en HTTPS (cookie `HttpOnly`, `Secure`, `SameSite=Lax`) ; révoquer les sessions demanderait le store `database`.
 
 ## Organisation du code
 
@@ -84,7 +86,7 @@ tests/functional/<feature>/…
 
   Un service reçoit des données déjà validées (validators Vine) et l'utilisateur concerné, et non le `HttpContext`. L'autorisation reste faite par l'appelant avec les policies Bouncer, utilisables hors HTTP. Un simple CRUD sans règle (renommer un vivarium) peut rester dans le contrôleur. Pas de couche *repository* : Lucid en tient lieu.
 - **Points d'entrée** : les contrôleurs, et plus tard les outils MCP et l'API capteurs, ne font que brancher validation, autorisation, service et transformer. Aucune règle métier ne doit exister dans un seul d'entre eux.
-- **Un nom par concept** : celui de `CONTEXT.md`. Pas de synonymes (`tank`, `biotope`, `setting`…).
+- **Un nom par concept** : celui de `CONTEXT.md`. Pas de synonymes dans le code ni les identifiants (`tank`, `biotope`, `setting`…). Dans l'interface, les libellés sont ceux que le glossaire donne : « bac » (fr) et « tank » (en) pour un vivarium, « paramètre » (« parameter ») pour un type de mesure ou une mesure suivie.
 - **Erreurs métier** : exceptions Adonis nommées (`E_INVITATION_EXPIRED`…) traduites, rendues en messages flash.
 - **Dates** : `DateTime` Luxon côté serveur, en UTC dans le code et en base. Conversion vers le **fuseau de l'utilisateur** (`user.timezone`) seulement pour l'affichage et l'interprétation des saisies. Jamais de décalage fixe : toujours un nom de zone IANA, pour que Luxon applique les changements d'heure de la date concernée.
 - **Pas de code mort** : pas d'alias d'import, de dépendance ou de colonne sans usage. Exception : les alias `#…` du champ `imports` de `package.json` (`#models/*`, `#mails/*`, `#events/*`…) sont ceux du framework, utilisés par les commandes `node ace make:*` : ils restent même si le dossier n'existe pas encore.
@@ -94,7 +96,7 @@ tests/functional/<feature>/…
 - Formulaires avec le composant `<Form>` d'Inertia et routes typées ; les erreurs de validation reviennent par session.
 - Les messages de succès ou d'erreur métier passent par un flash `notification` partagé par le middleware Inertia. Un lien à usage unique généré par un administrateur (invitation, réinitialisation) passe par un flash `generatedLink`, seul moment où il est connu.
 - Données partagées à toutes les pages (`InertiaMiddleware`) : utilisateur courant (transformé), langue, fuseau de l'utilisateur, notification, `mailEnabled`.
-- **Fuseau horaire** : stocké sur l'utilisateur. Les formulaires d'installation, d'inscription et de profil le font choisir dans une liste avec recherche, fournie par le serveur (`app/catalog/timezones.ts` : `UTC` et les zones sous leur nom IANA canonique, figée pour ne pas dépendre de la version d'ICU et rester reconnue par PostgreSQL ; c'est la liste que le validateur accepte). L'installation et l'inscription la préremplissent après montage avec `Intl.DateTimeFormat().resolvedOptions().timeZone`, ramené à l'entrée de la liste qui désigne la même zone, comme un nom enregistré qui n'est pas dans la liste ; le serveur refuse tout nom hors de la liste et l'enregistre. Rendu SSR et client utilisent ce même fuseau partagé : pas d'écart à l'hydratation. Pas de cookie ni de détection à chaque requête.
+- **Fuseau horaire** : stocké sur l'utilisateur. Les formulaires d'installation, d'inscription et de profil le font choisir dans une liste avec recherche, fournie par le serveur (`app/catalog/timezones.ts` : `UTC` et une entrée par zone géographique de `zone.tab` (IANA), sous le nom qu'il lui donne, figée pour ne pas dépendre de la version d'ICU et rester reconnue par PostgreSQL ; c'est la liste que le validateur accepte). L'installation et l'inscription la préremplissent après montage avec `Intl.DateTimeFormat().resolvedOptions().timeZone`, ramené à l'entrée de la liste qui désigne la même zone, comme un nom enregistré qui n'est pas dans la liste ; le serveur refuse tout nom hors de la liste et l'enregistre. Rendu SSR et client utilisent ce même fuseau partagé : pas d'écart à l'hydratation. Pas de cookie ni de détection à chaque requête.
 - Interface pensée **mobile d'abord** : le relevé se fait souvent devant le bac, téléphone en main.
 
 ## Environnement
@@ -128,7 +130,7 @@ tests/functional/<feature>/…
 - Chaque critère d'acceptation d'une spec correspond à au moins un test fonctionnel Japa dans `tests/functional/<feature>/`.
 - La base de test est réinitialisée par transaction globale par test. Exception : un test qui a besoin de plusieurs connexions simultanées (concurrence, verrous) vide la base par troncature, car la transaction globale réunirait ses requêtes sur une seule connexion. Pour que les requêtes se chevauchent, le test tient un verrou dans sa propre transaction et ne le relâche que lorsqu'elles l'attendent toutes (`waitForLockWaiters`, `tests/helpers/locks.ts`).
 - Les emails sont capturés avec `mail.fake()`.
-- Tests unitaires seulement pour la logique pure (catalogue). Le calcul des séries (`MeasureSeriesService`) se fait en SQL : ses tests appellent directement le service, dans la suite `functional` car ils ont besoin de la base (`tests/functional/charts/measure_series.spec.ts`).
+- Une seule suite, `functional` : pas de suite `unit`. Ce qui serait testé unitairement l'est par les tests fonctionnels de sa feature, avec la base. Le calcul des séries (`MeasureSeriesService`) se fait en SQL : ses tests appellent directement le service (`tests/functional/charts/measure_series.spec.ts`) ; le catalogue est testé par les critères TRK et le seeder. Une suite `unit` ne sera déclarée dans `adonisrc.ts` qu'avec son premier test.
 
 ## CI (GitHub Actions)
 

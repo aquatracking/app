@@ -10,7 +10,7 @@ Les versions précédentes appelaient « biotope » l'entité qui regroupe aquar
 - `kind` : `aquarium`, `terrarium`, `paludarium`, fixé à la création.
 - `water_type` (`fresh`, `brackish`, `salt`) et `climate` (`tropical`, `desert`, `temperate`), obligatoires ou interdits selon le type, garantis par une contrainte `CHECK`.
 - Taille : dimensions facultatives en cm et volume net facultatif en litres.
-- L'interface dit « bac » ou affiche le type, rarement « vivarium ».
+- L'interface dit « bac » (en anglais « tank ») ou affiche le type, rarement « vivarium ». Ces libellés ne passent jamais dans le code ([CONTEXT](../CONTEXT.md)).
 
 ## Conséquences
 - Mesures, graphes et futurs seuils, journal et partage s'écrivent une seule fois pour tous les types.
