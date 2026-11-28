@@ -15,12 +15,12 @@ L'image est publiée sur GHCR pour `linux/amd64` et `linux/arm64` :
 
 | Tag | Contenu |
 |---|---|
-| `ghcr.io/aquatracking/app:2` | dernière version 2.x : mises à jour mineures et correctifs |
-| `ghcr.io/aquatracking/app:2.0` | dernière version 2.0.x : correctifs seulement |
+| `ghcr.io/aquatracking/app:2` | plus haute version 2.x : mises à jour mineures et correctifs |
+| `ghcr.io/aquatracking/app:2.0` | plus haute version 2.0.x : correctifs seulement |
 | `ghcr.io/aquatracking/app:2.0.0` | version exacte, ne change jamais |
-| `ghcr.io/aquatracking/app:latest` | dernière version stable, quelle que soit la version majeure |
+| `ghcr.io/aquatracking/app:latest` | plus haute version stable, quelle que soit la version majeure |
 
-Les pré-versions (`2.1.0-rc.1`) n'ont que leur propre tag. Conseil : `2` pour suivre les mises à jour, une version exacte pour décider soi-même de chaque mise à jour. Évitez `latest`, qui passera à la v3 sans prévenir.
+Ces tags ne reculent jamais : un correctif d'une ancienne ligne (`2.0.5` publié après `2.1.0`) met à jour `2.0`, mais ni `2` ni `latest`. Les pré-versions (`2.1.0-rc.1`) n'ont que leur propre tag. Conseil : `2` pour suivre les mises à jour, une version exacte pour décider soi-même de chaque mise à jour. Évitez `latest`, qui passera à la v3 sans prévenir.
 
 Ce que fait l'image :
 
@@ -79,6 +79,14 @@ services:
       - caddy_data:/data
       - caddy_config:/config
 
+networks:
+  default:
+    # Plage fixe, pour que TRUSTED_PROXIES puisse la désigner. À changer si
+    # elle est déjà utilisée sur le serveur (docker network ls / ip route).
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+
 volumes:
   app_storage:
   postgres_data:
@@ -103,7 +111,7 @@ Caddy obtient et renouvelle seul le certificat Let's Encrypt : le domaine doit p
 ```dotenv
 APP_KEY=<clé générée, voir ci-dessous>
 APP_URL=https://aquatracking.example.com
-TRUSTED_PROXIES=uniquelocal
+TRUSTED_PROXIES=172.30.0.0/24
 
 DB_USER=aquatracking
 DB_PASSWORD=<mot de passe long et aléatoire>
@@ -213,12 +221,12 @@ Avec Traefik plutôt que Caddy, retirez le service `caddy` et ajoutez à `app` (
 
 L'application limite les tentatives de connexion, de « mot de passe oublié » et d'installation **par adresse IP**. Derrière un proxy, l'adresse vue est celle du proxy : sans `TRUSTED_PROXIES`, tous les visiteurs partagent donc le même compteur, et quelques échecs bloquent tout le monde.
 
-`TRUSTED_PROXIES` liste les proxies dont l'application croit l'en-tête `X-Forwarded-For`. Valeurs acceptées, séparées par des virgules : des adresses IP, des plages CIDR (`172.18.0.0/16`) et les noms `loopback` (127.0.0.1/8, ::1), `linklocal` et `uniquelocal` (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, fc00::/7).
+`TRUSTED_PROXIES` liste les proxies dont l'application croit l'en-tête `X-Forwarded-For`. Valeurs acceptées, séparées par des virgules : des adresses IP (`172.30.0.10`), des plages CIDR (`172.30.0.0/24`) et les noms `loopback` (127.0.0.1/8, ::1), `linklocal` (169.254.0.0/16, fe80::/10) et `uniquelocal` (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, fc00::/7). L'application remonte `X-Forwarded-For` de droite à gauche et s'arrête à la première adresse qui n'est pas de confiance : c'est l'IP retenue.
 
-- Proxy dans le même réseau Docker (exemple ci-dessus) : `uniquelocal`, ou plus strictement la plage du réseau Compose (`docker network inspect <projet>_default`). Le port de l'application ne doit pas être publié, pour que seul le proxy puisse l'atteindre.
-- Proxy sur l'hôte, application publiée sur `127.0.0.1:3333` : les requêtes arrivent par la passerelle du réseau Docker, pas par `loopback` ; indiquez la plage du réseau Docker (souvent dans `172.16.0.0/12`).
+- **Proxy dans le même réseau Docker** (exemple ci-dessus) : donnez au réseau Compose une plage fixe (`networks.default.ipam`) et mettez cette plage dans `TRUSTED_PROXIES` (`172.30.0.0/24`). Seuls vos conteneurs y ont une adresse. Le port de l'application ne doit pas être publié : le proxy doit être le seul chemin vers elle. Avec Traefik dans son propre réseau Docker, indiquez la plage de ce réseau (`docker network inspect <réseau>`).
+- **Proxy sur l'hôte**, application publiée sur `127.0.0.1:3333` : les requêtes arrivent par la passerelle du réseau Docker, pas par `loopback`. Indiquez l'adresse de cette passerelle (`172.30.0.1` avec la plage ci-dessus).
 
-Ne faites confiance qu'à vos propres proxies : un client qui atteint directement l'application avec une adresse de confiance pourrait choisir l'IP vue par le limiteur.
+N'utilisez pas `uniquelocal` sans y réfléchir : il fait confiance à tout le réseau local (`192.168.0.0/16`, `10.0.0.0/8`…), pas seulement à votre proxy. Derrière un proxy qui **ajoute** l'adresse du client à un `X-Forwarded-For` reçu (Nginx avec `$proxy_add_x_forwarded_for`, par exemple), un poste du réseau local peut alors envoyer un faux `X-Forwarded-For`, choisir l'IP vue par l'application et contourner la limitation de débit. Caddy, qui par défaut remplace l'en-tête reçu au lieu de le compléter, n'a pas ce problème, mais une plage précise reste préférable.
 
 ## Sessions
 
@@ -237,10 +245,17 @@ La base référence les images par leur chemin (`vivariums.image_path`). Pour qu
 Depuis le dossier du `compose.yml` :
 
 ```bash
+#!/bin/sh
 set -e
+# La sauvegarde contient les emails, les hachés de mots de passe et APP_KEY :
+# lisible par vous seul
+umask 077
 backup="backups/$(date +%Y-%m-%d_%H%M)"
 mkdir -p "$backup"
+
 docker compose stop app
+# Redémarre l'application à la fin, même si une étape échoue
+trap 'docker compose start app' EXIT
 
 # Base : format custom de pg_dump, compressé, restaurable avec pg_restore
 docker compose exec -T postgres pg_dump -U aquatracking -Fc aquatracking > "$backup/aquatracking.dump"
@@ -248,9 +263,10 @@ docker compose exec -T postgres pg_dump -U aquatracking -Fc aquatracking > "$bac
 # Images : archive du volume, lue avec l'utilisateur de l'image
 docker compose run --rm --no-deps -T app tar -C /app/storage -czf - . > "$backup/storage.tar.gz"
 
-docker compose start app
 cp .env "$backup/env"
 ```
+
+Si une étape échoue, le script s'arrête avec une erreur et l'application redémarre quand même ; la sauvegarde incomplète reste dans son dossier, à supprimer.
 
 L'arrêt dure quelques secondes. Planifiez ce script (cron, timer systemd), copiez les sauvegardes **hors du serveur** et testez régulièrement une restauration.
 
