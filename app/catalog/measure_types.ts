@@ -1,4 +1,5 @@
 import {
+  VIVARIUM_KINDS,
   WATER_TYPES,
   type VivariumKind,
   type VivariumProfile,
@@ -52,7 +53,7 @@ export const MEASURE_TYPES: readonly MeasureTypeDefinition[] = [
     decimals: 1,
     min: -10,
     max: 60,
-    defaultFor: { kinds: ['aquarium', 'terrarium', 'paludarium'] },
+    defaultFor: { kinds: VIVARIUM_KINDS },
   },
   {
     code: 'ph',
