@@ -1,4 +1,5 @@
 import { usePage } from '@inertiajs/vue3'
+import { useNow } from '~/composables/use_now'
 
 /**
  * Units of a relative time ("3 days ago"), from the largest, with their
@@ -19,6 +20,7 @@ const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
  */
 export function useDates() {
   const page = usePage()
+  const now = useNow()
 
   function formatDate(iso: string): string {
     return new Intl.DateTimeFormat(page.props.locale, {
@@ -36,12 +38,12 @@ export function useDates() {
   }
 
   /**
-   * "3 days ago", "in 2 hours": the largest unit that fits. Counted from
-   * the instant of the response shared by the server, not from the clock
-   * of the browser: the server rendering and the hydration agree.
+   * "3 days ago", "in 2 hours": the largest unit that fits, from now
+   * (useNow): the server rendering and the hydration agree, then it
+   * follows the clock of the browser.
    */
   function formatRelative(iso: string): string {
-    const seconds = (Date.parse(iso) - Date.parse(page.props.now)) / 1000
+    const seconds = (Date.parse(iso) - now.value) / 1000
     const format = new Intl.RelativeTimeFormat(page.props.locale, { numeric: 'auto' })
     for (const [unit, length] of UNITS) {
       if (Math.abs(seconds) >= length) {

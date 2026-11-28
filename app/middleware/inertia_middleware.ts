@@ -44,8 +44,9 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
       mailEnabled: ctx.inertia.always(app.config.get<boolean>('app.mail.enabled')),
       /**
        * Instant of the response, in UTC: the pages compute relative times
-       * and today's date from it, so the server rendering and the
-       * hydration in the browser give the same text.
+       * and today's date from it until mounted, so the server rendering
+       * and the hydration in the browser give the same text
+       * (inertia/composables/use_now.ts).
        */
       now: ctx.inertia.always(DateTime.utc().toISO()),
     }
