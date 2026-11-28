@@ -13,12 +13,14 @@ import {
 /**
  * Metadata of the vivarium validators: the time zone of the user, whose
  * local date is "today", and on update the kind of the vivarium, which
- * cannot change, and the local date of its oldest reading, with its label
- * in the language of the user (none without reading).
+ * cannot change, its stored set-up date ("YYYY-MM-DD") and the local date
+ * of its oldest reading, with its label in the language of the user (none
+ * without reading).
  */
 type Meta = {
   timezone: string
   kind?: VivariumKind
+  startedOn?: string
   firstReading?: { date: string; label: string } | null
 }
 
@@ -42,16 +44,18 @@ const allowedByKind = vine.createRule((_, allowed: (kind: VivariumKind) => boole
 })
 
 /**
- * Refuses a set-up date after the local date of the oldest reading: no
- * reading is before the set-up (docs/features/06-measures.md).
+ * Refuses moving the set-up date after the local date of the oldest
+ * reading: no reading is before the set-up (docs/features/06-measures.md).
+ * An unchanged date is accepted: the local date of the oldest reading
+ * moves back a day when the user changes time zone.
  */
 const notAfterFirstReading = vine.createRule((value, _, field) => {
-  const firstReading = (field.meta as Meta).firstReading
+  const { firstReading, startedOn } = field.meta as Meta
   /**
    * A Luxon date (start/validator.ts), at midnight in the zone of the
    * process, where VineJS parses it.
    */
-  if (!DateTime.isDateTime(value) || !firstReading) {
+  if (!DateTime.isDateTime(value) || !firstReading || value.toISODate() === startedOn) {
     return
   }
   if (value.toISODate()! > firstReading.date) {
@@ -111,7 +115,9 @@ export const createVivariumValidator = vine.withMetaData<Meta>().create({
  * reading.
  */
 export const updateVivariumValidator = vine
-  .withMetaData<Meta & { kind: VivariumKind; firstReading: Meta['firstReading'] }>()
+  .withMetaData<
+    Meta & { kind: VivariumKind; startedOn: string; firstReading: Meta['firstReading'] }
+  >()
   .create(fields)
 
 /**

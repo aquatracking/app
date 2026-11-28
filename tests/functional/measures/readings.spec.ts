@@ -1,8 +1,11 @@
 import { test } from '@japa/runner'
 import { DateTime, Settings } from 'luxon'
+import app from '@adonisjs/core/services/app'
 import testUtils from '@adonisjs/core/services/test_utils'
+import { ReadingService } from '#services/reading_service'
 import { UserFactory } from '#database/factories/user_factory'
 import {
+  failWritesOf,
   fieldErrors,
   measuresOf,
   postReading,
@@ -39,6 +42,25 @@ test.group('Readings', (group) => {
       '2026-01-15T18:00:00Z ph=7.2',
       '2026-01-15T18:00:00Z temperature=25.5',
     ])
+  })
+
+  test('MEA-1 a failure on one measure leaves none of the reading', async ({ assert }) => {
+    const { vivarium } = await vivariumTracking(FIVE_TYPES)
+    await failWritesOf('kh')
+    const service = await app.container.make(ReadingService)
+
+    /**
+     * pH is inserted before kH, whose insertion fails.
+     */
+    await assert.rejects(
+      () =>
+        service.create(vivarium, {
+          measuredAt: DateTime.fromISO('2026-01-15T18:00:00Z', { zone: 'utc' }),
+          values: { ph: 7.2, kh: 6 },
+        }),
+      /measure write refused by the test/
+    )
+    assert.deepEqual(await measuresOf(vivarium), [])
   })
 
   test('MEA-2 a reading without any value is refused', async ({ client, assert }) => {

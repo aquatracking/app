@@ -121,6 +121,7 @@ export default class VivariumsController {
       meta: {
         timezone,
         kind: vivarium.kind,
+        startedOn: vivarium.startedOn.toISODate()!,
         firstReading: firstReading && {
           date: firstReading.toISODate()!,
           label: firstReading.setLocale(i18n.locale).toLocaleString(DateTime.DATE_MED),

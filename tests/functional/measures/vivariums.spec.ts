@@ -57,6 +57,53 @@ test.group('Vivariums and their readings', (group) => {
     assert.equal(vivarium.startedOn.toISODate(), '2026-01-15')
   })
 
+  test('MEA-21 an unchanged set-up date is accepted, even after the local date of the oldest reading', async ({
+    client,
+    assert,
+  }) => {
+    const user = await UserFactory.merge({ timezone: 'Europe/Paris' }).create()
+    const { vivarium } = await vivariumTracking(['ph'], user)
+    /**
+     * 2026-01-15 at 23:30 UTC is 2026-01-16 in Paris, the day the
+     * vivarium was set up, but 2026-01-15 in Montreal, where the user
+     * moves afterwards.
+     */
+    await storeMeasures(vivarium, '2026-01-15T23:30:00Z', { ph: 7 })
+    vivarium.startedOn = DateTime.fromISO('2026-01-16')
+    await vivarium.save()
+    user.timezone = 'America/Montreal'
+    await user.save()
+    const update = (fields: { name: string; startedOn: string }) =>
+      client
+        .put(`/vivariums/${vivarium.id}`)
+        .withInertia()
+        .header('referer', `/vivariums/${vivarium.id}/edit`)
+        .form({
+          description: '',
+          waterType: 'fresh',
+          lengthCm: '',
+          widthCm: '',
+          heightCm: '',
+          volumeLiters: '',
+          ...fields,
+        })
+        .withCsrfToken()
+        .loginAs(user)
+        .redirects(0)
+
+    const renamed = await update({ name: 'Renamed', startedOn: '2026-01-16' })
+    renamed.assertHeader('location', `/vivariums/${vivarium.id}`)
+    await vivarium.refresh()
+    assert.equal(vivarium.name, 'Renamed')
+
+    const moved = await update({ name: 'Renamed', startedOn: '2026-01-17' })
+    assert.deepEqual(fieldErrors(moved, 'startedOn'), [
+      'The set-up date cannot be after the first reading, on Jan 15, 2026',
+    ])
+    await vivarium.refresh()
+    assert.equal(vivarium.startedOn.toISODate(), '2026-01-16')
+  })
+
   test('MEA-21 the cards of the home page and of the archived ones show the last reading, in one query', async ({
     client,
     assert,
