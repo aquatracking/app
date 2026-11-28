@@ -387,17 +387,19 @@ test.group('Measure series', (group) => {
     assert.equal(bins['2027-10-31T01:00:00.000Z'].count, 2)
   })
 
-  test('CHT-15 the interval is the smallest that cuts the range into at most 500, from its start', async ({
+  test('CHT-15 a range is cut into at most 500 intervals from its start, the smallest below a day, with an extra day beyond', async ({
     assert,
   }) => {
     const { vivarium } = await vivariumTracking(['temperature'])
     /**
      * 600 measures in the last 7 days, so that every range is aggregated,
-     * and a first measure three years ago for "all".
+     * and a first measure that makes "all" last 999.5 days: 2 days would
+     * cut it into 500 intervals, but the extra day for the 25-hour days
+     * gives 3.
      */
     const recent = utc('2026-03-04T00:00:00Z')
     await storeSeries(vivarium, 'temperature', [
-      { measuredAt: utc('2023-03-10T08:00:00Z'), value: 25 },
+      { measuredAt: utc('2023-06-15T08:00:00Z'), value: 25 },
       ...Array.from({ length: 600 }, (_, index) => ({
         measuredAt: recent.plus({ minutes: 15 * index }),
         value: 25,
@@ -409,6 +411,9 @@ test.group('Measure series', (group) => {
     for (const range of ['7d', '30d', '3m', '6m', '1y', 'all'] as const) {
       const result = await series(vivarium, 'temperature', range, options)
       const { unit, size } = result.interval!
+      if (range === 'all') {
+        assert.equal(options.now.diff(result.start, 'days').days, 999.5)
+      }
       intervals[range] = `${size} ${unit}`
       const duration = size * { minute: 60, hour: 3600, day: 86400 }[unit] * 1000
       assert.isAtMost(Math.ceil(options.now.diff(result.start).toMillis() / duration), 500)
