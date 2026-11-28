@@ -11,7 +11,7 @@ type Tile = {
   measureType: { code: string; unit: string; decimals: number }
   last: { measuredAt: string; value: number } | null
   variation: number | null
-  sparkline: { measuredAt: string; value: number }[]
+  sparkline: { start: string; end: string; points: { measuredAt: string; value: number }[] }
 }
 
 /**
@@ -59,11 +59,11 @@ test.group('Dashboard tiles', (group) => {
     const response = await client.get(`/vivariums/${vivarium.id}`).withInertia().loginAs(user)
 
     const [temperature, ph] = response.inertiaProps.tiles as Tile[]
-    assert.deepEqual(temperature.sparkline, [
+    assert.deepEqual(temperature.sparkline.points, [
       { measuredAt: daysAgo(20), value: 25 },
       { measuredAt: daysAgo(10), value: 26 },
     ])
-    assert.deepEqual(ph.sparkline, [])
+    assert.deepEqual(ph.sparkline.points, [])
     assert.equal(ph.variation, 0.1)
   })
 
@@ -77,12 +77,32 @@ test.group('Dashboard tiles', (group) => {
     const response = await client.get(`/vivariums/${vivarium.id}`).withInertia().loginAs(user)
 
     const [, ph] = response.inertiaProps.tiles as Tile[]
-    assert.deepEqual(ph, {
-      measureType: { code: 'ph', unit: '', decimals: 2 },
-      last: null,
-      variation: null,
-      sparkline: [],
-    })
+    assert.deepEqual(ph.measureType, { code: 'ph', unit: '', decimals: 2 })
+    assert.isNull(ph.last)
+    assert.isNull(ph.variation)
+    assert.deepEqual(ph.sparkline.points, [])
+  })
+
+  test('CHT-13 the time axis of the sparkline is the 30d range, whatever the measures', async ({
+    client,
+    assert,
+  }) => {
+    const { user, vivarium } = await vivariumTracking(['temperature'])
+    user.timezone = 'Pacific/Auckland'
+    await user.save()
+    await storeMeasures(vivarium, daysAgo(14), { temperature: 25 })
+    await storeMeasures(vivarium, daysAgo(7), { temperature: 26 })
+
+    const before = DateTime.utc().startOf('second')
+    const response = await client.get(`/vivariums/${vivarium.id}`).withInertia().loginAs(user)
+    const after = DateTime.utc()
+
+    const [{ sparkline }] = response.inertiaProps.tiles as Tile[]
+    const end = DateTime.fromISO(sparkline.end, { zone: 'utc' })
+    assert.isTrue(end >= before && end <= after)
+    const start = end.setZone('Pacific/Auckland').startOf('day').minus({ days: 29 })
+    assert.equal(sparkline.start, start.toUTC().toISO({ suppressMilliseconds: true }))
+    assert.equal(DateTime.fromISO(sparkline.start, { zone: 'Pacific/Auckland' }).hour, 0)
   })
 
   test('CHT-3 the dashboard runs the same number of queries with 2 and 15 tracked measures', async ({

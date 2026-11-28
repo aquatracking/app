@@ -23,21 +23,21 @@ const WIDTH = 100
 const HEIGHT = 32
 
 /**
- * The sparkline on a real time axis, as SVG coordinates.
+ * The sparkline on a real time axis, the bounds of the 30d range, as SVG
+ * coordinates.
  */
 const sparkline = computed(() => {
-  const points = props.tile.sparkline.map(({ measuredAt, value }) => ({
+  const points = props.tile.sparkline.points.map(({ measuredAt, value }) => ({
     x: new Date(measuredAt).getTime(),
     y: value,
   }))
   if (points.length < 2) {
     return null
   }
-  const xs = points.map(({ x }) => x)
   const ys = points.map(({ y }) => y)
   const [minX, maxX, minY, maxY] = [
-    Math.min(...xs),
-    Math.max(...xs),
+    new Date(props.tile.sparkline.start).getTime(),
+    new Date(props.tile.sparkline.end).getTime(),
     Math.min(...ys),
     Math.max(...ys),
   ]

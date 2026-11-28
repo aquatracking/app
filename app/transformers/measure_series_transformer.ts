@@ -1,5 +1,4 @@
-import type { DateTime } from 'luxon'
-import { point } from '#transformers/tile_transformer'
+import { iso, point } from '#transformers/tile_transformer'
 import { BaseTransformer } from '@adonisjs/core/transformers'
 import type { MeasureSeries } from '#services/measure_series_service'
 
@@ -31,8 +30,4 @@ export default class MeasureSeriesTransformer extends BaseTransformer<MeasureSer
       },
     }
   }
-}
-
-function iso(instant: DateTime) {
-  return instant.toUTC().toISO({ suppressMilliseconds: true })!
 }

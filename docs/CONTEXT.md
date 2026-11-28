@@ -48,7 +48,7 @@ Termes utilisés dans les specs, le code et l'interface. Le code est en anglais 
 
 **Tuile** (`Tile`) — Carré du tableau de bord pour une mesure suivie : dernière valeur, ancienneté, variation et mini-courbe.
 
-**Mini-courbe** (`Tile.sparkline`) — Petite courbe sans axes d'une tuile : les mesures des 30 derniers jours, affichée à partir de 2 mesures.
+**Mini-courbe** (`Tile.sparkline`) — Petite courbe sans axes d'une tuile : les mesures des 30 derniers jours, sur un axe temporel qui couvre toute la plage `30d`, affichée à partir de 2 mesures.
 
 ## Mesures
 
