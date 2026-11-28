@@ -16,6 +16,7 @@ import { InvitationFactory } from '#database/factories/invitation_factory'
 import PasswordResetNotification from '#mails/password_reset_notification'
 import { UserAdministrationService } from '#services/user_administration_service'
 import LastAdminException from '#exceptions/last_admin_exception'
+import { errors as bouncerErrors } from '@adonisjs/bouncer'
 
 function useMail(enabled: boolean) {
   app.config.set('app.mail.enabled', enabled)
@@ -204,6 +205,29 @@ test.group('Administration of users', (group) => {
       message: 'You cannot delete your own account from the administration.',
     })
     assert.isNotNull(await User.find(admin.id))
+  })
+
+  test('ADM-14 an administrator deleted or deprived of their rights in the meantime cannot delete an account', async ({
+    assert,
+  }) => {
+    const demoted = await UserFactory.merge({ isAdmin: true }).create()
+    const deleted = await UserFactory.merge({ isAdmin: true }).create()
+    const target = await UserFactory.merge({ isAdmin: true }).create()
+    /**
+     * The actors were loaded as administrators by the request, before
+     * the change.
+     */
+    await User.query().where('id', demoted.id).update({ is_admin: false })
+    await User.query().where('id', deleted.id).delete()
+    const service = await app.container.make(UserAdministrationService)
+
+    for (const actor of [demoted, deleted]) {
+      await assert.rejects(
+        () => service.delete(actor, target),
+        bouncerErrors.E_AUTHORIZATION_FAILURE
+      )
+    }
+    assert.isNotNull(await User.find(target.id))
   })
 
   test('ADM-10 a generated reset link works once and invalidates the previous ones', async ({
