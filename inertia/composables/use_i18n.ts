@@ -6,10 +6,15 @@ type Messages = Record<string, string>
 /**
  * The translation files of the server ("resources/lang/<locale>/<file>.json"),
  * loaded on demand, one chunk per language (vite.config.ts). The emails
- * are only sent by the server.
+ * and the validation messages are only used by the server: validation
+ * errors reach the pages already translated.
  */
 const files = import.meta.glob<Record<string, unknown>>(
-  ['../../resources/lang/*/*.json', '!../../resources/lang/*/emails.json'],
+  [
+    '../../resources/lang/*/*.json',
+    '!../../resources/lang/*/emails.json',
+    '!../../resources/lang/*/validator.json',
+  ],
   { import: 'default' }
 )
 
@@ -48,7 +53,13 @@ export function loadTranslations(locale: string) {
       })
     )
     translations[locale] = messages
-  })()
+  })().catch((error) => {
+    /**
+     * A failed load (network) is retried by the next page.
+     */
+    delete loading[locale]
+    throw error
+  })
   return loading[locale]
 }
 
