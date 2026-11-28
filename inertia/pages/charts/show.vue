@@ -164,7 +164,8 @@ function changeType(event: Event) {
 
 <template>
   <Head :title="typeLabel(props.measureType)" />
-  <div class="flex flex-col gap-6">
+  <!-- On mobile, room for the floating "New reading" button at the end of the page -->
+  <div class="flex flex-col gap-6" :class="{ 'pb-16 sm:pb-0': !props.vivarium.isArchived }">
     <Link
       route="vivariums.show"
       :params="{ id: props.vivarium.id }"

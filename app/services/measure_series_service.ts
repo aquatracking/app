@@ -84,13 +84,14 @@ export interface MeasureSeries {
 /**
  * A tile of the dashboard (docs/CONTEXT.md): the last value of a tracked
  * measure, its variation from the previous measure and the measures of
- * the last 30 days ("sparkline", empty below 2 measures).
+ * the last 30 days ("sparkline": the bounds of the 30d range, its time
+ * axis, and its points, empty below 2 measures).
  */
 export interface Tile {
   measureType: MeasureType
   last: SeriesPoint | null
   variation: number | null
-  sparkline: SeriesPoint[]
+  sparkline: { start: DateTime; end: DateTime; points: SeriesPoint[] }
 }
 
 interface Options {
@@ -154,13 +155,15 @@ export class MeasureSeriesService {
       .where('t.vivarium_id', vivarium.id)
       .orderBy('recent.measured_at', 'desc')
 
+    const sparklineStart = this.rangeStart('30d', timezone, now)
+    const sparklineEnd = now.toUTC()
     const sparklineRows: MeasureRow[] = await db
       .from('measures')
       .select('measure_type_id', 'value', 'measured_at')
       .where('vivarium_id', vivarium.id)
       .whereIn('measure_type_id', typeIds)
-      .where('measured_at', '>=', this.rangeStart('30d', timezone, now).toISO()!)
-      .where('measured_at', '<=', now.toISO()!)
+      .where('measured_at', '>=', sparklineStart.toISO()!)
+      .where('measured_at', '<=', sparklineEnd.toISO()!)
       .orderBy('measured_at', 'asc')
 
     return tracked.map(({ measureType }) => {
@@ -174,7 +177,11 @@ export class MeasureSeriesService {
           last && previous
             ? round(Number(last.value) - Number(previous.value), measureType.decimals)
             : null,
-        sparkline: sparkline.length >= 2 ? sparkline : [],
+        sparkline: {
+          start: sparklineStart,
+          end: sparklineEnd,
+          points: sparkline.length >= 2 ? sparkline : [],
+        },
       }
     })
   }

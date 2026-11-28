@@ -102,6 +102,26 @@ test.group('Password reset', (group) => {
     response.assertInertiaPropsContains({ valid: true })
   })
 
+  test('AUTH-7 the text part of the email is plain text, without HTML entities', async ({
+    client,
+    assert,
+  }) => {
+    const { mails } = mail.fake()
+    await UserFactory.merge({
+      email: 'ada@example.com',
+      firstName: "D'Arcy & Co",
+      locale: 'fr',
+    }).create()
+
+    await requestLink(client, 'ada@example.com')
+
+    const [sent] = mails.queued()
+    const text = sent.message.toJSON().message.text as string
+    assert.include(text, "Bonjour D'Arcy & Co,")
+    assert.include(text, "Si vous n'êtes pas à l'origine de cette demande")
+    assert.notMatch(text, /&#?\w+;/)
+  })
+
   test('AUTH-7 an unknown email receives nothing, with the same answer', async ({ client }) => {
     const { mails } = mail.fake()
     await UserFactory.merge({ email: 'ada@example.com' }).create()

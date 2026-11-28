@@ -1,9 +1,11 @@
+import type { DateTime } from 'luxon'
 import { BaseTransformer } from '@adonisjs/core/transformers'
 import type { SeriesPoint, Tile } from '#services/measure_series_service'
 
 /**
  * A tile of the dashboard. Instants in UTC, values as numbers: shown
- * without forced trailing zeros.
+ * without forced trailing zeros. The sparkline carries the bounds of the
+ * 30d range, its time axis.
  */
 export default class TileTransformer extends BaseTransformer<Tile> {
   toObject() {
@@ -12,11 +14,19 @@ export default class TileTransformer extends BaseTransformer<Tile> {
       measureType: this.pick(measureType, ['code', 'unit', 'decimals']),
       last: last && point(last),
       variation,
-      sparkline: sparkline.map(point),
+      sparkline: {
+        start: iso(sparkline.start),
+        end: iso(sparkline.end),
+        points: sparkline.points.map(point),
+      },
     }
   }
 }
 
+export function iso(instant: DateTime) {
+  return instant.toUTC().toISO({ suppressMilliseconds: true })!
+}
+
 export function point({ measuredAt, value }: SeriesPoint) {
-  return { measuredAt: measuredAt.toUTC().toISO({ suppressMilliseconds: true })!, value }
+  return { measuredAt: iso(measuredAt), value }
 }

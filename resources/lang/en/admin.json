@@ -5,7 +5,6 @@
   "users": {
     "title": "Users",
     "name": "Name",
-    "email": "Email",
     "role": "Role",
     "admin": "Administrator",
     "invited_by": "Invited by",

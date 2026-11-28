@@ -211,6 +211,27 @@ test.group('Administration of invitations', (group) => {
     })
   })
 
+  test('ADM-5 the text part of the invitation email is plain text, without HTML entities', async ({
+    client,
+    assert,
+  }) => {
+    useMail(true)
+    const { mails } = mail.fake()
+    const admin = await UserFactory.merge({
+      isAdmin: true,
+      firstName: "D'Arcy & Co",
+      locale: 'fr',
+    }).create()
+
+    await invite(client, admin, 'grace@example.com')
+
+    const [sent] = mails.queued()
+    const text = sent.message.toJSON().message.text as string
+    assert.include(text, "D'Arcy & Co vous invite")
+    assert.include(text, "ne peut servir qu'une fois")
+    assert.notMatch(text, /&#?\w+;/)
+  })
+
   test('ADM-5 without SMTP, no email is sent', async ({ client, assert }) => {
     const { mails } = mail.fake()
     const admin = await UserFactory.merge({ isAdmin: true }).create()

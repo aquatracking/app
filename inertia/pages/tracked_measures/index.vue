@@ -113,10 +113,12 @@ function move(index: number, offset: number) {
         :key="item.id"
         class="flex items-center gap-2 bg-background px-2 py-2"
       >
+        <!-- Pointer only: screen readers and keyboards use "Move up" and "Move down" -->
         <span
           data-drag-handle
           class="cursor-grab touch-none p-2 text-muted-foreground"
-          :aria-label="t('tracked_measures.drag', { name: label(item.measureType) })"
+          aria-hidden="true"
+          :title="t('tracked_measures.drag', { name: label(item.measureType) })"
         >
           <GripVertical class="size-4" />
         </span>

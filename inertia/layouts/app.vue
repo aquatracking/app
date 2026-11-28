@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { Head, usePage } from '@inertiajs/vue3'
+import { LogOut, Shield, UserRound } from '@lucide/vue'
 import { Link } from '@adonisjs/inertia/vue'
 import { Button } from '~/components/ui/button'
 import { useI18n } from '~/composables/use_i18n'
@@ -7,6 +9,11 @@ import FlashNotification from '~/components/flash_notification.vue'
 
 const { t } = useI18n()
 const page = usePage()
+
+/**
+ * Every page of the administration (users and invitations) marks its link.
+ */
+const inAdministration = computed(() => page.component.startsWith('admin/'))
 </script>
 
 <template>
@@ -15,16 +22,33 @@ const page = usePage()
   <div class="min-h-svh bg-background">
     <header class="border-b">
       <div class="mx-auto flex h-14 max-w-5xl items-center gap-4 px-4">
-        <Link route="vivariums.index" class="font-semibold">{{ t('app.name') }}</Link>
-        <nav v-if="page.props.user" class="ml-auto flex items-center gap-2">
-          <Button v-if="page.props.user.isAdmin" variant="ghost" size="sm" as-child>
-            <Link route="admin.users.index">{{ t('admin.title') }}</Link>
+        <Link route="vivariums.index" class="shrink-0 font-semibold">{{ t('app.name') }}</Link>
+        <!-- Below "sm", the links are icons: their text is read by screen readers and shown as a tooltip -->
+        <nav v-if="page.props.user" class="ml-auto flex min-w-0 items-center gap-2">
+          <Button
+            v-if="page.props.user.isAdmin"
+            :variant="inAdministration ? 'secondary' : 'ghost'"
+            size="sm"
+            as-child
+          >
+            <Link
+              route="admin.users.index"
+              :title="t('admin.title')"
+              :aria-current="inAdministration ? 'true' : undefined"
+              ><Shield /><span class="sr-only sm:not-sr-only">{{ t('admin.title') }}</span></Link
+            >
           </Button>
-          <Button variant="ghost" size="sm" as-child>
-            <Link route="profile.edit">{{ page.props.user.firstName }}</Link>
+          <Button variant="ghost" size="sm" class="min-w-0 shrink" as-child>
+            <Link route="profile.edit" :title="page.props.user.firstName"
+              ><UserRound /><span class="sr-only sm:not-sr-only sm:min-w-0 sm:truncate">{{
+                page.props.user.firstName
+              }}</span></Link
+            >
           </Button>
           <Button variant="outline" size="sm" as-child>
-            <Link route="session.destroy" as="button">{{ t('auth.logout') }}</Link>
+            <Link route="session.destroy" as="button" :title="t('auth.logout')"
+              ><LogOut /><span class="sr-only sm:not-sr-only">{{ t('auth.logout') }}</span></Link
+            >
           </Button>
         </nav>
       </div>

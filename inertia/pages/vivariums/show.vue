@@ -33,7 +33,8 @@ const { profileLabel, ageLabel, volumeLabel } = useVivarium()
 
 <template>
   <Head :title="props.vivarium.name" />
-  <div class="flex flex-col gap-6">
+  <!-- On mobile, room for the floating "New reading" button at the end of the page -->
+  <div class="flex flex-col gap-6" :class="{ 'pb-16 sm:pb-0': !props.vivarium.isArchived }">
     <Link
       :route="props.vivarium.isArchived ? 'vivariums.archived' : 'vivariums.index'"
       class="text-sm text-muted-foreground hover:underline"

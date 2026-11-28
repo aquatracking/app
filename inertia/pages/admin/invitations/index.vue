@@ -9,6 +9,7 @@ import { useDates } from '~/composables/use_dates'
 import { useI18n } from '~/composables/use_i18n'
 import AdminTabs from '~/components/admin/admin_tabs.vue'
 import GeneratedLinkDialog from '~/components/admin/generated_link_dialog.vue'
+import InvitationActions from '~/components/admin/invitation_actions.vue'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Field, FieldError, FieldLabel } from '~/components/ui/field'
 import {
@@ -59,7 +60,7 @@ const { formatDateTime } = useDates()
           reset-on-success
           class="flex flex-wrap items-start gap-2"
         >
-          <Field :data-invalid="!!errors.email" class="min-w-64 flex-1">
+          <Field :data-invalid="!!errors.email" class="min-w-0 flex-1 basis-56">
             <FieldLabel for="email" class="sr-only">{{ t('auth.email') }}</FieldLabel>
             <Input
               id="email"
@@ -81,7 +82,36 @@ const { formatDateTime } = useDates()
       </CardContent>
     </Card>
 
-    <Table>
+    <!-- Below "md", one card per invitation: the table would scroll horizontally -->
+    <p
+      v-if="props.invitations.length === 0"
+      class="rounded-lg border border-dashed p-6 text-center text-sm md:hidden"
+    >
+      {{ t('admin.invitations.empty') }}
+    </p>
+    <ul v-else class="flex flex-col gap-3 md:hidden">
+      <li v-for="invitation in props.invitations" :key="invitation.id">
+        <Card class="gap-3 p-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <h2 class="font-medium break-all">{{ invitation.email }}</h2>
+            <Badge :variant="invitation.expired ? 'destructive' : 'secondary'">
+              {{
+                invitation.expired ? t('admin.invitations.expired') : t('admin.invitations.pending')
+              }}
+            </Badge>
+          </div>
+          <dl class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1 text-sm">
+            <dt class="text-muted-foreground">{{ t('admin.invitations.invited_by') }}</dt>
+            <dd>{{ invitation.invitedByName ?? '—' }}</dd>
+            <dt class="text-muted-foreground">{{ t('admin.invitations.expires_at') }}</dt>
+            <dd>{{ formatDateTime(invitation.expiresAt) }}</dd>
+          </dl>
+          <InvitationActions :invitation="invitation" />
+        </Card>
+      </li>
+    </ul>
+
+    <Table class="hidden md:table">
       <TableHeader>
         <TableRow>
           <TableHead>{{ t('admin.invitations.email') }}</TableHead>
@@ -93,8 +123,12 @@ const { formatDateTime } = useDates()
       </TableHeader>
       <TableBody>
         <TableRow v-for="invitation in props.invitations" :key="invitation.id">
-          <TableCell class="font-medium">{{ invitation.email }}</TableCell>
-          <TableCell>{{ invitation.invitedByName ?? '—' }}</TableCell>
+          <TableCell class="min-w-40 font-medium whitespace-normal wrap-anywhere">{{
+            invitation.email
+          }}</TableCell>
+          <TableCell class="whitespace-normal wrap-anywhere">{{
+            invitation.invitedByName ?? '—'
+          }}</TableCell>
           <TableCell>{{ formatDateTime(invitation.expiresAt) }}</TableCell>
           <TableCell>
             <Badge :variant="invitation.expired ? 'destructive' : 'secondary'">
@@ -104,18 +138,7 @@ const { formatDateTime } = useDates()
             </Badge>
           </TableCell>
           <TableCell>
-            <div class="flex flex-wrap justify-end gap-2">
-              <Form route="admin.invitations.renew" :params="{ id: invitation.id }">
-                <Button type="submit" variant="outline" size="sm">
-                  {{ t('admin.invitations.renew') }}
-                </Button>
-              </Form>
-              <Form route="admin.invitations.destroy" :params="{ id: invitation.id }">
-                <Button type="submit" variant="destructive" size="sm">
-                  {{ t('admin.invitations.revoke') }}
-                </Button>
-              </Form>
-            </div>
+            <InvitationActions :invitation="invitation" class="justify-end" />
           </TableCell>
         </TableRow>
         <TableEmpty v-if="props.invitations.length === 0" :colspan="5">

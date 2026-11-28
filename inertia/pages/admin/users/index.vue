@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import AppLayout from '~/layouts/app.vue'
-import { Form } from '@adonisjs/inertia/vue'
-import { Head, usePage } from '@inertiajs/vue3'
+import { Head } from '@inertiajs/vue3'
+import { Card } from '~/components/ui/card'
 import { Badge } from '~/components/ui/badge'
-import { Button } from '~/components/ui/button'
 import { useDates } from '~/composables/use_dates'
 import { useI18n } from '~/composables/use_i18n'
 import AdminTabs from '~/components/admin/admin_tabs.vue'
-import DeleteUserDialog from '~/components/admin/delete_user_dialog.vue'
+import UserActions from '~/components/admin/user_actions.vue'
 import GeneratedLinkDialog from '~/components/admin/generated_link_dialog.vue'
 import {
   Table,
@@ -35,7 +34,6 @@ const props = defineProps<{
 
 const { t } = useI18n()
 const { formatDate, formatDateTime, formatRelative } = useDates()
-const page = usePage()
 </script>
 
 <template>
@@ -46,11 +44,42 @@ const page = usePage()
       <AdminTabs current="users" />
     </div>
 
-    <Table>
+    <!-- Below "lg", one card per account: the table would scroll horizontally -->
+    <ul class="flex flex-col gap-3 lg:hidden">
+      <li v-for="user in props.users" :key="user.id">
+        <Card class="gap-3 p-4">
+          <div class="flex flex-wrap items-center gap-2">
+            <h2 class="font-medium">{{ user.displayName }}</h2>
+            <Badge v-if="user.isAdmin">{{ t('admin.users.admin') }}</Badge>
+          </div>
+          <p class="-mt-2 text-sm break-all text-muted-foreground">{{ user.email }}</p>
+          <dl class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1 text-sm">
+            <dt class="text-muted-foreground">{{ t('admin.users.invited_by') }}</dt>
+            <dd>{{ user.invitedByName ?? '—' }}</dd>
+            <dt class="text-muted-foreground">{{ t('admin.users.signed_up') }}</dt>
+            <dd>{{ formatDate(user.createdAt) }}</dd>
+            <dt class="text-muted-foreground">{{ t('admin.users.last_seen') }}</dt>
+            <dd>
+              <time
+                v-if="user.lastSeenAt"
+                :datetime="user.lastSeenAt"
+                :title="formatDateTime(user.lastSeenAt)"
+                >{{ formatRelative(user.lastSeenAt) }}</time
+              >
+              <template v-else>{{ t('admin.users.never_seen') }}</template>
+            </dd>
+            <dt class="text-muted-foreground">{{ t('admin.users.vivariums') }}</dt>
+            <dd class="tabular-nums">{{ user.vivariumsCount }}</dd>
+          </dl>
+          <UserActions :user="user" />
+        </Card>
+      </li>
+    </ul>
+
+    <Table class="hidden lg:table">
       <TableHeader>
         <TableRow>
           <TableHead>{{ t('admin.users.name') }}</TableHead>
-          <TableHead>{{ t('admin.users.email') }}</TableHead>
           <TableHead>{{ t('admin.users.role') }}</TableHead>
           <TableHead>{{ t('admin.users.invited_by') }}</TableHead>
           <TableHead>{{ t('admin.users.signed_up') }}</TableHead>
@@ -61,12 +90,17 @@ const page = usePage()
       </TableHeader>
       <TableBody>
         <TableRow v-for="user in props.users" :key="user.id">
-          <TableCell class="font-medium">{{ user.displayName }}</TableCell>
-          <TableCell>{{ user.email }}</TableCell>
+          <!-- Name and email in one column, so that the actions fit without scrolling -->
+          <TableCell class="min-w-40 whitespace-normal wrap-anywhere">
+            <div class="font-medium">{{ user.displayName }}</div>
+            <div class="text-muted-foreground">{{ user.email }}</div>
+          </TableCell>
           <TableCell>
             <Badge v-if="user.isAdmin">{{ t('admin.users.admin') }}</Badge>
           </TableCell>
-          <TableCell>{{ user.invitedByName ?? '—' }}</TableCell>
+          <TableCell class="whitespace-normal wrap-anywhere">{{
+            user.invitedByName ?? '—'
+          }}</TableCell>
           <TableCell>{{ formatDate(user.createdAt) }}</TableCell>
           <TableCell>
             <time
@@ -78,24 +112,8 @@ const page = usePage()
             <span v-else class="text-muted-foreground">{{ t('admin.users.never_seen') }}</span>
           </TableCell>
           <TableCell class="text-right tabular-nums">{{ user.vivariumsCount }}</TableCell>
-          <TableCell>
-            <div class="flex flex-wrap justify-end gap-2">
-              <Form route="admin.users.create_password_reset" :params="{ id: user.id }">
-                <Button type="submit" variant="outline" size="sm">
-                  {{ t('admin.users.password_reset') }}
-                </Button>
-              </Form>
-              <!-- Own account: neither rights removal nor deletion -->
-              <template v-if="user.id !== page.props.user?.id">
-                <Form route="admin.users.toggle_admin" :params="{ id: user.id }">
-                  <input type="hidden" name="isAdmin" :value="String(!user.isAdmin)" />
-                  <Button type="submit" variant="outline" size="sm">
-                    {{ user.isAdmin ? t('admin.users.remove_admin') : t('admin.users.make_admin') }}
-                  </Button>
-                </Form>
-                <DeleteUserDialog :user="user" />
-              </template>
-            </div>
+          <TableCell class="whitespace-normal">
+            <UserActions :user="user" class="justify-end" />
           </TableCell>
         </TableRow>
       </TableBody>
