@@ -2,16 +2,18 @@ name: Release
 
 # Publishes the Docker image of a version on GHCR (ADR 0007) when a tag v2.*
 # is pushed, then creates the GitHub Release. The tag must match the version
-# of package.json, and the CI checks are replayed on the tagged commit first.
+# of package.json and point to a commit of main; the CI checks are replayed
+# on the tagged commit first.
 on:
   push:
     tags: ['v2.*']
 
 permissions: {}
 
-# Never two publications of the same tag at once
+# One publication at a time, whatever the tag: floating tags (2, 2.Y,
+# latest) are never written by two runs at once
 concurrency:
-  group: release-${{ github.ref }}
+  group: release
   cancel-in-progress: false
 
 env:
@@ -19,19 +21,61 @@ env:
 
 jobs:
   version:
-    name: Tag matches package.json
+    name: Check the tag
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    outputs:
+      minor: ${{ steps.floating.outputs.minor }}
+      major: ${{ steps.floating.outputs.major }}
+      latest: ${{ steps.floating.outputs.latest }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Compare the tag with the version of package.json
+        with:
+          # All tags and origin/main, to compare versions and ancestry
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Tag matches package.json
         run: |
           expected="v$(jq -r .version package.json)"
           if [ "$GITHUB_REF_NAME" != "$expected" ]; then
             echo "::error::Tag $GITHUB_REF_NAME does not match package.json ($expected)"
             exit 1
           fi
+
+      - name: Tag points to a commit of main
+        run: |
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::Tag $GITHUB_REF_NAME ($GITHUB_SHA) is not on main"
+            exit 1
+          fi
+
+      # Floating tags only move forward: X.Y for the highest stable version
+      # of the X.Y line, X for the highest of the X line, latest for the
+      # highest of all (git tags vX.Y.Z sorted as semver). A pre-release gets
+      # none of them.
+      - id: floating
+        name: Floating tags
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          minor=false
+          major=false
+          latest=false
+          if echo "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            stable="$(git tag --list 'v*' | sed 's/^v//' | { grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' || true; } | sort -V)"
+            # Highest stable version starting with the prefix $1
+            highest() { echo "$stable" | awk -v p="$1" 'p == "" || index($0, p) == 1' | tail -n 1; }
+            [ "$version" = "$(highest "${version%.*}.")" ] && minor=true
+            [ "$version" = "$(highest "${version%%.*}.")" ] && major=true
+            [ "$version" = "$(highest '')" ] && latest=true
+          fi
+          {
+            echo "minor=$minor"
+            echo "major=$major"
+            echo "latest=$latest"
+          } >> "$GITHUB_OUTPUT"
+          echo "$GITHUB_REF_NAME: X.Y=$minor X=$major latest=$latest"
 
   # Same checks as on a pull request (lint, typecheck, tests on PostgreSQL 16
   # and 18, image smoke test), replayed on the tagged commit
@@ -43,28 +87,31 @@ jobs:
 
   publish:
     name: Publish the image on GHCR
-    needs: ci
+    needs: [version, ci]
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      # v2.0.0 gives 2.0.0, 2.0, 2 and latest; a pre-release (v2.1.0-rc.1)
-      # gives only 2.1.0-rc.1, never latest. Labels and annotations carry the
-      # OCI source, version and revision.
+      # Labels and annotations carry the OCI source, version and revision
       - id: meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         env:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
         with:
           images: ${{ env.IMAGE }}
-          flavor: latest=auto
+          flavor: latest=false
           tags: |
             type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
+            type=semver,pattern={{major}}.{{minor}},enable=${{ needs.version.outputs.minor == 'true' }}
+            type=semver,pattern={{major}},enable=${{ needs.version.outputs.major == 'true' }}
+            type=raw,value=latest,enable=${{ needs.version.outputs.latest == 'true' }}
           labels: |
             org.opencontainers.image.title=AquaTracking
             org.opencontainers.image.description=Self-hosted tracking of aquarium, terrarium and paludarium parameters
@@ -83,7 +130,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+      # No build cache: nothing written by an earlier job can end up in the
+      # published image
+      - id: build
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           platforms: linux/amd64,linux/arm64
@@ -91,12 +141,74 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           annotations: ${{ steps.meta.outputs.annotations }}
-          cache-from: type=gha,scope=release
-          cache-to: type=gha,scope=release,mode=max
+          provenance: mode=max
+          sbom: true
+
+  # Starts the published image, by digest, on each architecture
+  smoke-test:
+    name: Smoke test (${{ matrix.platform }})
+    needs: publish
+    strategy:
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-latest
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      packages: read
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: aquatracking
+          POSTGRES_PASSWORD: aquatracking
+          POSTGRES_DB: aquatracking
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U aquatracking"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Migrations, catalog seeder and server
+        env:
+          IMAGE_REF: ${{ env.IMAGE }}@${{ needs.publish.outputs.digest }}
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          docker run -d --name app --network host --platform "$PLATFORM" \
+            -e APP_KEY=ci-only-app-key-not-a-secret-000 \
+            -e APP_URL=http://localhost:3333 \
+            -e DB_HOST=127.0.0.1 -e DB_USER=aquatracking \
+            -e DB_PASSWORD=aquatracking -e DB_DATABASE=aquatracking \
+            "$IMAGE_REF"
+          for _ in $(seq 1 30); do
+            if curl -fsS http://localhost:3333/health/live; then
+              curl -fsS http://localhost:3333/ > /dev/null
+              # Node reports x64 for amd64
+              arch="$(docker exec app node -p process.arch)"
+              echo "Running on $arch"
+              case "$PLATFORM:$arch" in
+                linux/amd64:x64 | linux/arm64:arm64) exit 0 ;;
+                *) echo "::error::Expected $PLATFORM, got $arch"; exit 1 ;;
+              esac
+            fi
+            sleep 2
+          done
+          docker logs app
+          exit 1
 
   github-release:
     name: GitHub Release
-    needs: publish
+    needs: smoke-test
     runs-on: ubuntu-latest
     permissions:
       contents: write

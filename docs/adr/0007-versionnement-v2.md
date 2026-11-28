@@ -9,6 +9,7 @@ Versions publiées jusqu'ici : application Flutter `1.x` (seule version stable),
 - La refonte est la **v2**, sur la branche `rewrite/v2` puis `main`.
 - Pré-versions `2.0.0-alpha.N` pendant le développement ; `2.0.0` quand les 7 features du périmètre 2.0 sont livrées.
 - Semver ensuite. Tags git `vX.Y.Z`, images Docker `X`, `X.Y`, `X.Y.Z` et `latest`. Une pré-version (`X.Y.Z-rc.N`) n'a que son propre tag : ni `X`, ni `X.Y`, ni `latest`.
+- Les tags flottants ne reculent jamais : `X.Y` désigne la plus haute version stable de la ligne `X.Y`, `X` celle de la ligne `X`, `latest` la plus haute de toutes. Un correctif d'une ancienne ligne (`2.0.5` publié après `2.1.0`) reçoit `2.0.5` et `2.0`, mais ni `2` ni `latest`.
 - Les images sont publiées sur **GHCR seul** (`ghcr.io/aquatracking/app`), par le workflow `release.yml` au push d'un tag `v2.*`. GHCR suffit avec le `GITHUB_TOKEN` du dépôt, sans secret à gérer. Docker Hub (`aquatracking/app`, où sont les images `0.1.x`) pourra être ajouté plus tard si le besoin apparaît.
 - Dans les specs, on parle de « périmètre 2.0 » et jamais de « V1 ».
 
