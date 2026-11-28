@@ -20,7 +20,7 @@ Permettre à chaque utilisateur de décrire ses bacs (aquariums, terrariums, pal
 - État vide : explication et bouton « Créer mon premier bac ».
 
 ### Création et modification
-- Champs : type (aquarium / terrarium / paludarium), nom, description, type d'eau (si aquarium ou paludarium), climat (si terrarium ou paludarium), longueur / largeur / hauteur en cm, volume net en litres, date de mise en service (défaut aujourd'hui, pas dans le futur ; « aujourd'hui » est la date locale dans le fuseau de l'utilisateur).
+- Champs : type (aquarium / terrarium / paludarium), nom, description, type d'eau (si aquarium ou paludarium), climat (si terrarium ou paludarium), longueur / largeur / hauteur en cm, volume net en litres, date de mise en service (défaut aujourd'hui, pas dans le futur ; « aujourd'hui » est la date locale dans le fuseau de l'utilisateur). En modification, cette règle ne s'applique que si la date change : après un changement de fuseau, la date enregistrée peut être « demain » dans le nouveau fuseau, et le vivarium reste modifiable tant qu'on ne touche pas à cette date.
 - Le formulaire n'affiche que les champs qui correspondent au type choisi.
 - Si les trois dimensions sont saisies et le volume vide, le formulaire propose le volume brut `L × l × H / 1000`, que l'utilisateur peut modifier.
 - La date de mise en service ne peut pas être déplacée après un relevé existant : si la nouvelle date est postérieure à la date locale (fuseau de l'utilisateur) du plus ancien relevé, elle est refusée avec un message qui indique cette date. La règle ne s'applique que si la date de mise en service change : un vivarium dont la date enregistrée est déjà postérieure à celle du plus ancien relevé (la date locale de ce relevé peut reculer d'un jour quand l'utilisateur change de fuseau) reste modifiable tant qu'on ne touche pas à cette date. Règle ajoutée par [06](06-measures.md), qui crée les relevés.
@@ -73,7 +73,7 @@ Le paramètre `:id` est contraint au format UUID (`router.matchers.uuid()`) sur 
 - **VIV-1** L'accueil liste uniquement les vivariums en service de l'utilisateur connecté.
 - **VIV-2** Accéder au vivarium d'un autre utilisateur (page, modification, archivage, image) répond 404.
 - **VIV-3** Créer un aquarium sans type d'eau est refusé ; créer un terrarium avec un type d'eau est refusé ; un paludarium exige les deux.
-- **VIV-4** Une date de mise en service postérieure à la date du jour dans le fuseau de l'utilisateur est refusée ; la date du jour est acceptée.
+- **VIV-4** Une date de mise en service postérieure à la date du jour dans le fuseau de l'utilisateur est refusée ; la date du jour est acceptée. En modification, une date enregistrée inchangée est acceptée, même si elle est postérieure à la date du jour (changement de fuseau).
 - **VIV-5** *Reporté en [05](05-tracked-measures.md), testé par TRK-4 et TRK-5.* Créer un vivarium crée les mesures suivies par défaut de son profil.
 - **VIV-6** La modification ne permet pas de changer le type.
 - **VIV-7** Une image valide est stockée en WebP de 1600 px maximum sans EXIF ; un fichier non image ou de plus de 15 Mo est refusé.

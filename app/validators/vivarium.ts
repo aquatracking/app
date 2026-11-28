@@ -44,18 +44,24 @@ const allowedByKind = vine.createRule((_, allowed: (kind: VivariumKind) => boole
 })
 
 /**
+ * Whether the submitted set-up date is the stored one, on update. The
+ * value is a Luxon date (start/validator.ts), at midnight in the zone of
+ * the process, where VineJS parses it.
+ */
+function isStoredStartedOn(field: FieldContext) {
+  const { startedOn } = field.meta as Meta
+  return !!startedOn && DateTime.isDateTime(field.value) && field.value.toISODate() === startedOn
+}
+
+/**
  * Refuses moving the set-up date after the local date of the oldest
  * reading: no reading is before the set-up (docs/features/06-measures.md).
  * An unchanged date is accepted: the local date of the oldest reading
  * moves back a day when the user changes time zone.
  */
 const notAfterFirstReading = vine.createRule((value, _, field) => {
-  const { firstReading, startedOn } = field.meta as Meta
-  /**
-   * A Luxon date (start/validator.ts), at midnight in the zone of the
-   * process, where VineJS parses it.
-   */
-  if (!DateTime.isDateTime(value) || !firstReading || value.toISODate() === startedOn) {
+  const { firstReading } = field.meta as Meta
+  if (!DateTime.isDateTime(value) || !firstReading || isStoredStartedOn(field)) {
     return
   }
   if (value.toISODate()! > firstReading.date) {
@@ -92,15 +98,16 @@ const fields = {
   heightCm: dimension(),
   volumeLiters: vine.number().positive().decimal([0, 1]).max(999999.9).nullable(),
   /**
-   * Not after today, in the time zone of the user.
+   * Not after today, in the time zone of the user. An unchanged date is
+   * accepted: after a change of time zone, it can be tomorrow there.
    */
   startedOn: vine
     .date({ formats: ['YYYY-MM-DD'] })
-    .beforeOrEqual((field) =>
-      DateTime.now()
-        .setZone((field.meta as Meta).timezone)
-        .toISODate()!
-    )
+    .beforeOrEqual((field) => {
+      const { timezone, startedOn } = field.meta as Meta
+      const today = DateTime.now().setZone(timezone).toISODate()!
+      return isStoredStartedOn(field) && startedOn! > today ? startedOn! : today
+    })
     .use(notAfterFirstReading()),
 }
 
