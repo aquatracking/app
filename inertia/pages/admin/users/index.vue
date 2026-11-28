@@ -91,14 +91,16 @@ const { formatDate, formatDateTime, formatRelative } = useDates()
       <TableBody>
         <TableRow v-for="user in props.users" :key="user.id">
           <!-- Name and email in one column, so that the actions fit without scrolling -->
-          <TableCell>
+          <TableCell class="min-w-40 whitespace-normal wrap-anywhere">
             <div class="font-medium">{{ user.displayName }}</div>
             <div class="text-muted-foreground">{{ user.email }}</div>
           </TableCell>
           <TableCell>
             <Badge v-if="user.isAdmin">{{ t('admin.users.admin') }}</Badge>
           </TableCell>
-          <TableCell>{{ user.invitedByName ?? '—' }}</TableCell>
+          <TableCell class="whitespace-normal wrap-anywhere">{{
+            user.invitedByName ?? '—'
+          }}</TableCell>
           <TableCell>{{ formatDate(user.createdAt) }}</TableCell>
           <TableCell>
             <time

@@ -123,8 +123,12 @@ const { formatDateTime } = useDates()
       </TableHeader>
       <TableBody>
         <TableRow v-for="invitation in props.invitations" :key="invitation.id">
-          <TableCell class="font-medium">{{ invitation.email }}</TableCell>
-          <TableCell>{{ invitation.invitedByName ?? '—' }}</TableCell>
+          <TableCell class="min-w-40 font-medium whitespace-normal wrap-anywhere">{{
+            invitation.email
+          }}</TableCell>
+          <TableCell class="whitespace-normal wrap-anywhere">{{
+            invitation.invitedByName ?? '—'
+          }}</TableCell>
           <TableCell>{{ formatDateTime(invitation.expiresAt) }}</TableCell>
           <TableCell>
             <Badge :variant="invitation.expired ? 'destructive' : 'secondary'">
