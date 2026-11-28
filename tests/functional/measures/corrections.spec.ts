@@ -190,7 +190,15 @@ test.group('Reading corrections', (group) => {
       .loginAs(user)
       .redirects(0)
     const deleted = await client
-      .delete(`${readingUrl(vivarium, '2026-01-16T18:00:00Z')}?page=2`)
+      .delete(`${readingUrl(vivarium, '2026-01-16T18:00:00Z')}?page=2&other=1`)
+      .withInertia()
+      .header('referer', `/vivariums/${vivarium.id}/measures`)
+      .withCsrfToken()
+      .loginAs(user)
+      .redirects(0)
+    await storeMeasures(vivarium, '2026-01-17T18:00:00Z', { ph: 7.3 })
+    const invalidPage = await client
+      .delete(`${readingUrl(vivarium, '2026-01-17T18:00:00Z')}?type=&page=abc`)
       .withInertia()
       .header('referer', `/vivariums/${vivarium.id}/measures`)
       .withCsrfToken()
@@ -198,7 +206,9 @@ test.group('Reading corrections', (group) => {
       .redirects(0)
 
     edited.assertHeader('location', `/vivariums/${vivarium.id}/measures?type=ph&page=2`)
+    // Only the filter and the page are carried back, cleaned
     deleted.assertHeader('location', `/vivariums/${vivarium.id}/measures?page=2`)
+    invalidPage.assertHeader('location', `/vivariums/${vivarium.id}/measures`)
     assert.deepEqual(await measuresOf(vivarium), ['2026-01-15T18:00:00Z ph=7.1'])
   })
 
