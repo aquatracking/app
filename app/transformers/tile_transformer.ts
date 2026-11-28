@@ -1,5 +1,6 @@
 import type { DateTime } from 'luxon'
 import { BaseTransformer } from '@adonisjs/core/transformers'
+import MeasureTypeTransformer from '#transformers/measure_type_transformer'
 import type { SeriesPoint, Tile } from '#services/measure_series_service'
 
 /**
@@ -11,7 +12,7 @@ export default class TileTransformer extends BaseTransformer<Tile> {
   toObject() {
     const { measureType, last, variation, sparkline } = this.resource
     return {
-      measureType: this.pick(measureType, ['code', 'unit', 'decimals']),
+      measureType: MeasureTypeTransformer.transform(measureType).useVariant('withDecimals'),
       last: last && point(last),
       variation,
       sparkline: {

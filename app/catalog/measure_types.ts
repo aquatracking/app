@@ -1,4 +1,9 @@
-import type { VivariumKind, VivariumProfile, WaterType } from '#models/vivarium'
+import {
+  WATER_TYPES,
+  type VivariumKind,
+  type VivariumProfile,
+  type WaterType,
+} from '#models/vivarium'
 
 /**
  * An entry of the catalog of measure types (ADR 0005,
@@ -29,15 +34,13 @@ export interface MeasureTypeDefinition {
    * whatever their water type and climate, and vivariums with one of
    * these water types (aquariums, aquatic part of paludariums).
    */
-  defaultFor: { kinds?: VivariumKind[]; waterTypes?: WaterType[] }
+  defaultFor: { kinds?: readonly VivariumKind[]; waterTypes?: readonly WaterType[] }
   /**
    * A type that is no longer offered. An entry is never removed: a
    * retired one keeps its rules for the vivariums and measures that use it.
    */
   retired?: boolean
 }
-
-const ALL_WATER_TYPES: WaterType[] = ['fresh', 'brackish', 'salt']
 
 /**
  * The catalog, in display order.
@@ -57,7 +60,7 @@ export const MEASURE_TYPES: readonly MeasureTypeDefinition[] = [
     decimals: 2,
     min: 0,
     max: 14,
-    defaultFor: { waterTypes: ALL_WATER_TYPES },
+    defaultFor: { waterTypes: WATER_TYPES },
   },
   { code: 'gh', unit: '°dGH', decimals: 0, min: 0, max: 50, defaultFor: { waterTypes: ['fresh'] } },
   {
@@ -66,7 +69,7 @@ export const MEASURE_TYPES: readonly MeasureTypeDefinition[] = [
     decimals: 1,
     min: 0,
     max: 50,
-    defaultFor: { waterTypes: ALL_WATER_TYPES },
+    defaultFor: { waterTypes: WATER_TYPES },
   },
   {
     code: 'no2',
@@ -82,7 +85,7 @@ export const MEASURE_TYPES: readonly MeasureTypeDefinition[] = [
     decimals: 1,
     min: 0,
     max: 500,
-    defaultFor: { waterTypes: ALL_WATER_TYPES },
+    defaultFor: { waterTypes: WATER_TYPES },
   },
   { code: 'nh3', unit: 'mg/L', decimals: 2, min: 0, max: 50, defaultFor: {} },
   { code: 'po4', unit: 'mg/L', decimals: 3, min: 0, max: 50, defaultFor: { waterTypes: ['salt'] } },
