@@ -5,7 +5,7 @@ import db from '@adonisjs/lucid/services/db'
 import testUtils from '@adonisjs/core/services/test_utils'
 import { storeMeasures, vivariumTracking } from '#tests/helpers/measures'
 import { UserFactory } from '#database/factories/user_factory'
-import { renderedPage, textOf } from '#tests/helpers/responses'
+import { renderedPage, selectedOptions, textOf } from '#tests/helpers/responses'
 
 type HistoryProps = {
   readings: {
@@ -233,5 +233,22 @@ test.group('History', (group) => {
     const history = `/vivariums/${vivarium.id}/measures`
     assert.deepEqual(await buttons(history), { edit: 2, delete: 2 })
     assert.deepEqual(await buttons(`${history}?type=ph`), { edit: 2, delete: 0 })
+  })
+
+  test('MEA-32 the history rendered by the server has the type of the URL selected in the filter', async ({
+    client,
+    assert,
+  }) => {
+    const { user, vivarium } = await vivariumTracking(['temperature', 'ph'])
+    await storeMeasures(vivarium, '2026-01-15T17:00:00Z', { temperature: 25, ph: 7 })
+    const history = `/vivariums/${vivarium.id}/measures`
+
+    const filtered = await client.get(`${history}?type=ph`).loginAs(user)
+    const unfiltered = await client.get(history).loginAs(user)
+
+    filtered.assertStatus(200)
+    assert.deepEqual(selectedOptions(filtered, 'measure-type'), ['ph'])
+    unfiltered.assertStatus(200)
+    assert.deepEqual(selectedOptions(unfiltered, 'measure-type'), [''])
   })
 })

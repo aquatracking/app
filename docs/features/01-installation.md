@@ -12,7 +12,7 @@ Une instance fraîchement déployée doit devenir utilisable sans qu'aucune vari
 - Une fois un utilisateur créé, `/setup` répond 404 et la redirection disparaît.
 - Le compte créé est administrateur. La création et la vérification « aucun utilisateur » se font dans une transaction avec verrou : deux soumissions simultanées ne créent qu'un administrateur.
 - Après création, l'administrateur est connecté et arrive sur la page d'accueil.
-- La langue du formulaire suit le navigateur (`Accept-Language`), l'anglais s'il ne demande ni `fr` ni `en` ; la langue choisie est enregistrée comme `locale`.
+- La langue du formulaire suit le navigateur (`Accept-Language`), l'anglais s'il ne demande ni `fr` ni `en` ; la liste des langues la montre choisie dès la page rendue par le serveur, avant le chargement des scripts. La langue choisie est enregistrée comme `locale`.
 - Le fuseau horaire est un champ visible : une liste avec recherche des fuseaux acceptés ([02](02-auth-profile.md#profil)), préremplie après chargement avec celui du navigateur (ou le nom de la liste qui lui correspond, `UTC` si le navigateur n'en donne pas), et enregistré comme `timezone`. Un nom hors de la liste (décalage fixe `+01:00` ou `Etc/GMT+5`, abréviation `EST`, nom inconnu) est refusé comme toute autre erreur de validation.
 
 ## Données
@@ -46,4 +46,4 @@ Prénom (requis, 100 caractères maximum ; les espaces autour sont retirés, et 
 - **INS-9** Un email de plus de 254 caractères est refusé avec un message sur le champ.
 - **INS-10** Un prénom vide ou fait d'espaces, un prénom ou un nom de famille de plus de 100 caractères sont refusés avec un message sur le champ ; un prénom et un nom de famille de 100 caractères sont acceptés.
 - **INS-11** Un nom de famille fait d'espaces est enregistré comme absent (`null`) ; les espaces autour du prénom sont retirés.
-- **INS-12** Le formulaire s'affiche dans la langue du navigateur (`Accept-Language`), en anglais si elle n'est ni `fr` ni `en`, et la langue préremplie est celle-ci. Les textes sont vérifiés sur la page rendue par le serveur (SSR) ; la langue préremplie, sur la langue partagée avec la page (prop `locale`), à laquelle le champ est lié.
+- **INS-12** Le formulaire s'affiche dans la langue du navigateur (`Accept-Language`), en anglais si elle n'est ni `fr` ni `en`, et la langue préremplie est celle-ci. Les textes et la langue choisie dans la liste des langues sont vérifiés sur la page rendue par le serveur (SSR).

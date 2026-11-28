@@ -6,7 +6,7 @@ import testUtils from '@adonisjs/core/services/test_utils'
 import db from '@adonisjs/lucid/services/db'
 import limiter from '@adonisjs/limiter/services/main'
 import { waitForLockWaiters } from '#tests/helpers/locks'
-import { fieldErrors, renderedPage, textOf } from '#tests/helpers/responses'
+import { fieldErrors, renderedPage, selectedOptions, textOf } from '#tests/helpers/responses'
 
 /**
  * A valid submission of the setup form.
@@ -178,25 +178,24 @@ test.group('Setup', (group) => {
   }) => {
     /**
      * The texts of the page as rendered by the server (SSR), and the
-     * language that prefills the language field of the form.
+     * language selected in its language field.
      */
     const page = async (acceptLanguage: string) => {
       const rendered = await client.get('/setup').header('accept-language', acceptLanguage)
       rendered.assertStatus(200)
-      const props = await client
-        .get('/setup')
-        .header('accept-language', acceptLanguage)
-        .withInertia()
-      return { text: textOf(renderedPage(rendered)), locale: props.inertiaProps.locale }
+      return {
+        text: textOf(renderedPage(rendered)),
+        locale: selectedOptions(rendered, 'locale'),
+      }
     }
 
     const french = await page('fr-FR,fr;q=0.9,en;q=0.8')
     assert.include(french.text, 'Créer le compte administrateur')
-    assert.equal(french.locale, 'fr')
+    assert.deepEqual(french.locale, ['fr'])
 
     const german = await page('de-DE,de;q=0.9')
     assert.include(german.text, 'Create the administrator account')
-    assert.equal(german.locale, 'en')
+    assert.deepEqual(german.locale, ['en'])
   })
 
   test('INS-4 once installed, the setup routes answer 404', async ({ client }) => {

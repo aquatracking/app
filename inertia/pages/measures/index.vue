@@ -88,7 +88,7 @@ function closeEdit(open: boolean) {
         </Button>
         <label v-if="props.measuredTypes.length > 0" class="flex flex-col gap-1 text-sm">
           <span class="text-muted-foreground">{{ t('measures.filter.label') }}</span>
-          <NativeSelect :model-value="props.type ?? ''" @change="filter">
+          <NativeSelect id="measure-type" :model-value="props.type ?? ''" @change="filter">
             <NativeSelectOption value="">{{ t('measures.filter.all') }}</NativeSelectOption>
             <NativeSelectOption
               v-for="measureType in props.measuredTypes"
