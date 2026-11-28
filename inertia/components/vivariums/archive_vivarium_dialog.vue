@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import type { Data } from '@generated/data'
 import { Archive } from '@lucide/vue'
 import { Form } from '@adonisjs/inertia/vue'
 import { Button } from '~/components/ui/button'
@@ -14,7 +15,7 @@ import {
   DialogTrigger,
 } from '~/components/ui/dialog'
 
-const props = defineProps<{ vivarium: { id: string; name: string } }>()
+const props = defineProps<{ vivarium: Pick<Data.Vivarium, 'id' | 'name'> }>()
 
 const { t } = useI18n()
 const open = ref(false)

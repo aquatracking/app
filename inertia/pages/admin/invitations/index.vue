@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3'
+import type { Data } from '@generated/data'
 import AppLayout from '~/layouts/app.vue'
 import { Form } from '@adonisjs/inertia/vue'
 import { Badge } from '~/components/ui/badge'
@@ -24,15 +25,7 @@ import {
 
 defineOptions({ layout: AppLayout })
 
-const props = defineProps<{
-  invitations: {
-    id: string
-    email: string
-    invitedByName: string | null
-    expiresAt: string
-    expired: boolean
-  }[]
-}>()
+const props = defineProps<{ invitations: Data.Invitation.Variants['forAdmin'][] }>()
 
 const { t } = useI18n()
 const { formatDateTime } = useDates()

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '~/layouts/app.vue'
+import type { Data } from '@generated/data'
 import { Head } from '@inertiajs/vue3'
 import { Card } from '~/components/ui/card'
 import { Badge } from '~/components/ui/badge'
@@ -19,18 +20,7 @@ import {
 
 defineOptions({ layout: AppLayout })
 
-const props = defineProps<{
-  users: {
-    id: string
-    displayName: string
-    email: string
-    isAdmin: boolean
-    invitedByName: string | null
-    createdAt: string
-    lastSeenAt: string | null
-    vivariumsCount: number
-  }[]
-}>()
+const props = defineProps<{ users: Data.User.Variants['forAdmin'][] }>()
 
 const { t } = useI18n()
 const { formatDate, formatDateTime, formatRelative } = useDates()

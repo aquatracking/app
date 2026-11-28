@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import type { Data } from '@generated/data'
 import { Form } from '@adonisjs/inertia/vue'
 import { ImagePlus } from '@lucide/vue'
 import { Input } from '~/components/ui/input'
@@ -10,7 +11,7 @@ import { Field, FieldDescription, FieldError, FieldLabel } from '~/components/ui
 /**
  * Upload, replacement and removal of the photo of a vivarium.
  */
-const props = defineProps<{ vivarium: { id: string; imageUrl: string | null } }>()
+const props = defineProps<{ vivarium: Pick<Data.Vivarium, 'id' | 'imageUrl'> }>()
 
 const { t } = useI18n()
 const chosen = ref(false)
