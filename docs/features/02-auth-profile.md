@@ -100,3 +100,6 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 - **AUTH-18** Un deuxième blocage de la même clé dure 30 minutes, un troisième 1 heure ; la durée ne dépasse jamais 24 heures.
 - **AUTH-19** Une connexion réussie remet à zéro le compteur IP + email.
 - **AUTH-20** Dans « mot de passe oublié », un email de plus de 254 caractères est refusé avec un message sur le champ, sans envoi.
+- **AUTH-21** Un utilisateur connecté qui ouvre la connexion, un lien d'invitation, « mot de passe oublié » ou la réinitialisation est redirigé vers l'accueil avec le message « vous êtes déjà connecté » ; l'invitation reste valable.
+- **AUTH-22** Sans SMTP, une soumission du formulaire « mot de passe oublié » répond 404, sans envoi ni lien créé.
+- **AUTH-23** Un profil enregistré sans le champ nom garde le nom enregistré.

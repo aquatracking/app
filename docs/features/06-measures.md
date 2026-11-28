@@ -34,6 +34,7 @@ Saisir en quelques secondes les valeurs d'un test, retrouver tous les relevés p
 - Filtré sur un type qui a des mesures, l'historique propose un bouton « Voir le graphe » qui ouvre le graphe de ce type ([07](07-charts.md)), y compris pour un type qui n'est plus suivi.
 - Pagination **par relevés** : 20 relevés par page. Un relevé n'est jamais coupé entre deux pages.
 - Valeurs affichées telles que saisies, sans zéros forcés, et formatées selon la langue (`7,25` / `7.25`).
+- Après la modification ou la suppression d'un relevé, l'historique revient avec le même filtre et la même page.
 
 ### Modifier un relevé
 - Chaque groupe de l'historique a un bouton « Modifier ». Depuis l'historique filtré par type, cliquer sur une mesure ouvre de même son relevé. C'est le **seul** moyen de corriger des mesures : il n'y a pas d'édition mesure par mesure.
@@ -71,7 +72,7 @@ La 04 a été livrée avant la table `measures`. La 06 y ajoute :
 | PUT | `/vivariums/:id/readings/:measuredAt` | `measures.updateReading` | — |
 | DELETE | `/vivariums/:id/readings/:measuredAt` | `measures.destroyReading` | — |
 
-`:measuredAt` est l'instant du relevé en ISO 8601 UTC (`2026-11-26T17:42:00Z`). Un relevé qui n'existe pas (aucune mesure à cet instant sur ce vivarium) répond 404.
+`:measuredAt` est l'instant du relevé en ISO 8601 UTC (`2026-11-26T17:42:00Z`), accepté aussi avec les « : » encodés (`%3A`), comme le client construit l'URL. Un relevé qui n'existe pas (aucune mesure à cet instant sur ce vivarium) répond 404.
 
 ## Critères d'acceptation
 - **MEA-1** Un relevé avec trois valeurs remplies sur cinq champs crée exactement trois mesures avec le même `measured_at`, en une seule transaction : une erreur sur l'une des mesures n'en laisse aucune.
@@ -99,3 +100,6 @@ La 04 a été livrée avant la table `measures`. La 06 y ajoute :
 - **MEA-23** ([TRK-3](05-tracked-measures.md)) Les bornes et les décimales d'un type marqué `retired` valident toujours la modification d'un relevé qui le contient.
 - **MEA-24** ([05](05-tracked-measures.md)) Sur un vivarium qui ne suit aucun type, le relevé invite à ajouter des mesures suivies.
 - **MEA-25** Enregistrer la modification d'un relevé supprimé ou déplacé entre-temps répond 404 et ne crée aucune mesure.
+- **MEA-26** Après la modification ou la suppression d'un relevé, l'historique revient avec le filtre et la page d'où elle a été faite.
+- **MEA-27** Les routes d'un relevé acceptent l'instant avec les « : » encodés (`%3A`).
+- **MEA-28** L'historique filtré par type ne propose pas « Supprimer le relevé », seulement « Modifier » ; l'historique sans filtre propose les deux. Vérifié sur la page rendue par le serveur (SSR).

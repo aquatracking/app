@@ -82,3 +82,4 @@ Justification des décimales notables : pH au 0,01 (pH-mètres, suivi récifal) 
 - **TRK-10** Les routes répondent 404 pour le vivarium d'un autre utilisateur.
 - **TRK-11** Le type densité existe dans le catalogue mais n'est suivi par défaut par aucun profil.
 - **TRK-12** ([VIV-13](04-vivariums.md)) Supprimer un utilisateur depuis l'administration supprime les mesures suivies de ses vivariums.
+- **TRK-13** La page des mesures suivies les liste dans leur ordre et propose à l'ajout les autres types du catalogue ; ajouter un type le fait suivre en dernière position.
