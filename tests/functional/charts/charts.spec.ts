@@ -2,6 +2,7 @@ import { test } from '@japa/runner'
 import { DateTime } from 'luxon'
 import testUtils from '@adonisjs/core/services/test_utils'
 import { UserFactory } from '#database/factories/user_factory'
+import { selectedOptions } from '#tests/helpers/responses'
 import { storeMeasures, vivariumTracking } from '#tests/helpers/measures'
 import { daysAgo } from '#tests/helpers/dates'
 
@@ -132,5 +133,21 @@ test.group('Charts', (group) => {
       const response = await client.get(url).withInertia().loginAs(stranger)
       response.assertStatus(404)
     }
+  })
+
+  test('CHT-17 the chart rendered by the server has the displayed type selected in the list', async ({
+    client,
+    assert,
+  }) => {
+    const { user, vivarium } = await vivariumTracking(['temperature', 'ph'])
+    await storeMeasures(vivarium, daysAgo(2), { ph: 7, no3: 10 })
+
+    const tracked = await client.get(`/vivariums/${vivarium.id}/charts/ph`).loginAs(user)
+    const untracked = await client.get(`/vivariums/${vivarium.id}/charts/no3`).loginAs(user)
+
+    tracked.assertStatus(200)
+    assert.deepEqual(selectedOptions(tracked, 'measure-type'), ['ph'])
+    untracked.assertStatus(200)
+    assert.deepEqual(selectedOptions(untracked, 'measure-type'), ['no3'])
   })
 })

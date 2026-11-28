@@ -5,7 +5,7 @@ import Invitation from '#models/invitation'
 import testUtils from '@adonisjs/core/services/test_utils'
 import { UserFactory } from '#database/factories/user_factory'
 import { InvitationFactory } from '#database/factories/invitation_factory'
-import { fieldErrors } from '#tests/helpers/responses'
+import { fieldErrors, selectedOptions } from '#tests/helpers/responses'
 
 /**
  * A pending invitation from an administrator, and the token of its link.
@@ -169,6 +169,25 @@ test.group('Registration by invitation', (group) => {
       .header('accept-language', 'de-DE,de;q=0.9')
       .withInertia()
     german.assertInertiaPropsContains({ locale: 'en' })
+  })
+
+  test('AUTH-30 the form rendered by the server has the browser language selected', async ({
+    client,
+    assert,
+  }) => {
+    const { token } = await invite()
+
+    const french = await client
+      .get(`/invitations/${token}`)
+      .header('accept-language', 'fr-FR,fr;q=0.9')
+    const german = await client
+      .get(`/invitations/${token}`)
+      .header('accept-language', 'de-DE,de;q=0.9')
+
+    french.assertStatus(200)
+    assert.deepEqual(selectedOptions(french, 'locale'), ['fr'])
+    german.assertStatus(200)
+    assert.deepEqual(selectedOptions(german, 'locale'), ['en'])
   })
 
   test('AUTH-12 the registration saves the submitted language', async ({ client, assert }) => {

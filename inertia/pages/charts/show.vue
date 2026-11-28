@@ -179,7 +179,11 @@ function changeType(event: Event) {
       <div class="flex flex-wrap items-end gap-2">
         <label v-if="navigation.length > 1" class="flex flex-col gap-1 text-sm">
           <span class="text-muted-foreground">{{ t('charts.parameter') }}</span>
-          <NativeSelect :model-value="props.measureType.code" @change="changeType">
+          <NativeSelect
+            id="measure-type"
+            :model-value="props.measureType.code"
+            @change="changeType"
+          >
             <NativeSelectOption
               v-for="navigationType in navigation"
               :key="navigationType.code"

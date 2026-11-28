@@ -7,7 +7,7 @@ import testUtils from '@adonisjs/core/services/test_utils'
 import type { ApiClient } from '@japa/api-client'
 import { UserFactory } from '#database/factories/user_factory'
 import { VivariumFactory } from '#database/factories/vivarium_factory'
-import { fieldErrors } from '#tests/helpers/responses'
+import { fieldErrors, selectedOptions } from '#tests/helpers/responses'
 import { createVivarium, sendDuringArchiving } from '#tests/helpers/vivariums'
 
 function vivariumForm(overrides: Record<string, string> = {}) {
@@ -295,6 +295,25 @@ test.group('Vivariums', (group) => {
     creation.assertInertiaPropsContains({ kinds })
     edition.assertStatus(200)
     edition.assertInertiaPropsContains({ kinds })
+  })
+
+  test('VIV-20 the edit form rendered by the server has the saved water type and climate selected', async ({
+    client,
+    assert,
+  }) => {
+    const user = await UserFactory.create()
+    const vivarium = await VivariumFactory.merge({
+      userId: user.id,
+      kind: 'paludarium',
+      waterType: 'brackish',
+      climate: 'temperate',
+    }).create()
+
+    const response = await client.get(`/vivariums/${vivarium.id}/edit`).loginAs(user)
+
+    response.assertStatus(200)
+    assert.deepEqual(selectedOptions(response, 'waterType'), ['brackish'])
+    assert.deepEqual(selectedOptions(response, 'climate'), ['temperate'])
   })
 
   test('VIV-4 a set-up date after today in the time zone of the user is refused', async ({

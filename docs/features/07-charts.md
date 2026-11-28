@@ -37,7 +37,7 @@ Voir d'un coup d'œil l'état actuel d'un bac et l'évolution de chaque paramèt
   - Plus grande variation : le plus grand écart en valeur absolue entre deux mesures consécutives de la plage, affiché avec son signe (« ▼ 0,6 ») ; à égalité, la plus récente. Aucune avec une seule mesure.
 - Les valeurs calculées (moyennes des intervalles, moyenne, variation) sont affichées arrondies à la précision maximale du type (`decimals`), sans zéros forcés.
 - Plage sans mesure : message qui renvoie au bouton « Nouveau relevé » de la page ([06](06-measures.md), sauf si archivé ; après enregistrement, retour au tableau de bord).
-- Navigation vers les autres types suivis sans revenir au tableau de bord : liste déroulante des types suivis, dans leur ordre, plus le type affiché s'il n'est plus suivi.
+- Navigation vers les autres types suivis sans revenir au tableau de bord : liste déroulante des types suivis, dans leur ordre, plus le type affiché s'il n'est plus suivi. Le type affiché y est choisi dès la page rendue par le serveur.
 - Fonctionne aussi pour un type qui n'est plus suivi mais qui a des mesures : un bandeau le signale. Accès depuis l'historique filtré sur ce type (« Voir le graphe »).
 - Lecture seule : consultable aussi sur un vivarium archivé.
 
@@ -71,3 +71,4 @@ Voir d'un coup d'œil l'état actuel d'un bac et l'évolution de chaque paramèt
 - **CHT-14** Chaque plage commence à minuit local et compte sa durée aujourd'hui compris (`7d` : aujourd'hui et les 6 jours précédents ; `3m` : le lendemain de la même date 3 mois plus tôt) ; `all` commence à minuit local du jour de la première mesure.
 - **CHT-15** Une plage agrégée est découpée en au plus 500 intervalles qui partent de son début. Les intervalles de moins d'un jour sont la plus petite durée de la liste qui le permet (le 10 mars à midi : `7d` → 30 min, `30d` → 3 h, `3m` → 6 h, `6m` → 12 h) ; au-delà, le nombre de jours de la plage plus un, divisé par 500 et arrondi à l'entier supérieur (`1y` → 1 jour, `all` de 999,5 jours → 3 jours).
 - **CHT-16** À égalité, la plus grande variation retenue est la plus récente ; avec une seule mesure, il n'y en a aucune.
+- **CHT-17** La page du graphe rendue par le serveur (SSR) a le type affiché comme choix de la liste des types, y compris un type qui n'est plus suivi.

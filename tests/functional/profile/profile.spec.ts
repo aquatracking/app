@@ -5,7 +5,7 @@ import db from '@adonisjs/lucid/services/db'
 import testUtils from '@adonisjs/core/services/test_utils'
 import { UserFactory } from '#database/factories/user_factory'
 import Measure from '#models/measure'
-import { fieldErrors } from '#tests/helpers/responses'
+import { fieldErrors, selectedOptions } from '#tests/helpers/responses'
 import { storeMeasures, vivariumTracking } from '#tests/helpers/measures'
 
 function profileForm(overrides: Record<string, string> = {}) {
@@ -293,6 +293,18 @@ test.group('Profile', (group) => {
       .withInertia()
       .loginAs(user)
     response.assertInertiaPropsContains({ locale: 'fr' })
+  })
+
+  test('AUTH-30 the profile rendered by the server has the saved language selected', async ({
+    client,
+    assert,
+  }) => {
+    const user = await UserFactory.merge({ locale: 'fr' }).create()
+
+    const response = await client.get('/profile').header('accept-language', 'en').loginAs(user)
+
+    response.assertStatus(200)
+    assert.deepEqual(selectedOptions(response, 'locale'), ['fr'])
   })
 
   test('AUTH-15 changing the time zone changes the displayed time of the measures, not the stored instants', async ({

@@ -60,3 +60,20 @@ export function textOf(html: string): string {
     .replace(/\s+/g, ' ')
     .trim()
 }
+
+/**
+ * Values of the options marked `selected` in a select of the page as
+ * rendered by the server (SSR): what the browser shows before the
+ * scripts run.
+ */
+export function selectedOptions(response: ApiResponse, selectId: string): string[] {
+  const select = renderedPage(response).match(
+    new RegExp(`<select[^>]*\\sid="${selectId}"[^>]*>([\\s\\S]*?)</select>`)
+  )
+  if (!select) {
+    throw new Error(`No select "${selectId}" in the page rendered by the server`)
+  }
+  return [...select[1].matchAll(/<option([^>]*)>/g)]
+    .filter(([, attributes]) => /\sselected(?=[\s=>]|$)/.test(attributes))
+    .map(([, attributes]) => attributes.match(/\svalue="([^"]*)"/)?.[1] ?? '')
+}

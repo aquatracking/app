@@ -30,7 +30,7 @@ Saisir en quelques secondes les valeurs d'un test, retrouver tous les relevés p
 
 ### Historique
 - Page par vivarium, relevés les plus récents en premier : chaque groupe réunit les mesures de même `measured_at` (un groupe = un relevé).
-- Filtre par type de mesure (tous les types ayant au moins une mesure, suivis ou non). Un type inconnu dans l'URL (`?type=`) renvoie une liste vide.
+- Filtre par type de mesure (tous les types ayant au moins une mesure, suivis ou non). Un type inconnu dans l'URL (`?type=`) renvoie une liste vide. La liste du filtre montre le type de l'URL (ou « Tous les paramètres ») dès la page rendue par le serveur.
 - Filtré sur un type qui a des mesures, l'historique propose un bouton « Voir le graphe » qui ouvre le graphe de ce type ([07](07-charts.md)), y compris pour un type qui n'est plus suivi.
 - Pagination **par relevés** : 20 relevés par page. Un relevé n'est jamais coupé entre deux pages.
 - Valeurs affichées telles que saisies, sans zéros forcés, et formatées selon la langue (`7,25` / `7.25`).
@@ -108,3 +108,4 @@ La 04 a été livrée avant la table `measures`. La 06 y ajoute :
 - **MEA-29** Pour un utilisateur en `Europe/Paris`, un relevé stocké à `2027-10-31T01:30Z` (seconde occurrence de 02:30, affichée « 02:30 ») et enregistré de nouveau sans changer sa date ni son heure garde son instant, au lieu de reculer à 00:30 UTC comme un nouveau relevé saisi à « 02:30 » (MEA-14).
 - **MEA-30** Un relevé (création, modification, suppression) envoyé pendant l'archivage du bac, qui attend la fin de l'archivage, est refusé avec la notification « bac archivé », et rien n'est modifié.
 - **MEA-31** Modifier un relevé applique les règles de date de la création (MEA-5, MEA-14) : une date au-delà de 5 minutes dans le futur, une date locale antérieure à la mise en service ou une heure inexistante dans le fuseau de l'utilisateur sont refusées, et le relevé reste inchangé.
+- **MEA-32** L'historique rendu par le serveur (SSR) a comme choix du filtre le type de l'URL (`?type=ph` : « pH »), et « Tous les paramètres » sans filtre.
