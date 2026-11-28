@@ -163,16 +163,25 @@ test.group('Password reset', (group) => {
     client,
   }) => {
     useMail(false)
-    const { mails } = mail.fake()
-    await UserFactory.merge({ email: 'ada@example.com' }).create()
 
     const show = await client.get('/forgot-password').withInertia()
     show.assertInertiaComponent('auth/forgot_password')
     show.assertInertiaPropsContains({ mailEnabled: false })
+  })
+
+  test('AUTH-22 without SMTP, a submission of the form answers 404 and sends nothing', async ({
+    client,
+    assert,
+  }) => {
+    useMail(false)
+    const { mails } = mail.fake()
+    const user = await UserFactory.merge({ email: 'ada@example.com' }).create()
 
     const response = await requestLink(client, 'ada@example.com')
+
     response.assertStatus(404)
     mails.assertNoneQueued()
+    assert.lengthOf(await PasswordResetToken.query().where('userId', user.id), 0)
   })
 
   test('AUTH-9 an expired, used, replaced or unknown link is refused as soon as it is shown', async ({

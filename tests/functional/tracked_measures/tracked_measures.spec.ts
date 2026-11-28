@@ -160,7 +160,7 @@ test.group('Tracked measures', (group) => {
     ])
   })
 
-  test('TRK-6 the page lists the tracked measures in order and offers the other types', async ({
+  test('TRK-13 the page lists the tracked measures in order and offers the other types', async ({
     client,
     assert,
   }) => {
@@ -188,7 +188,7 @@ test.group('Tracked measures', (group) => {
     )
   })
 
-  test('TRK-6 adding a type tracks it in last position', async ({ client, assert }) => {
+  test('TRK-13 adding a type tracks it in last position', async ({ client, assert }) => {
     const user = await UserFactory.create()
     const vivarium = await VivariumFactory.merge({ userId: user.id }).create()
     await track(vivarium, ['temperature', 'ph'])

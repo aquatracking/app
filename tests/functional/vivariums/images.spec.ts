@@ -125,18 +125,39 @@ test.group('Vivarium images', (group) => {
     const vivarium = await VivariumFactory.merge({ userId: user.id }).create()
 
     /**
-     * The type comes from the content, not the file name. A truncated
-     * JPEG has the right content type but cannot be decoded.
+     * The type comes from the content, not the file name.
      */
     const text = await uploadImage(client, user, vivarium, Buffer.from('not an image'), 'notes.txt')
     const disguised = await uploadImage(client, user, vivarium, Buffer.from('text'), 'photo.jpg')
-    const jpeg = await photo()
-    const truncated = await uploadImage(client, user, vivarium, jpeg.subarray(0, 300))
 
     for (const response of [text, disguised]) {
       const errors = response.flashMessages().inputErrorsBag as Record<string, string[]>
       assert.deepEqual(errors.image, ['Choose a JPEG, PNG or WebP image'])
     }
+    await vivarium.refresh()
+    assert.isNull(vivarium.imagePath)
+    assert.deepEqual(
+      await drive
+        .use('vivariums')
+        .listAll(vivarium.id)
+        .then((list) => [...list.objects]),
+      []
+    )
+  })
+
+  test('VIV-14 a file of an accepted type that cannot be decoded is refused', async ({
+    client,
+    assert,
+  }) => {
+    const user = await UserFactory.create()
+    const vivarium = await VivariumFactory.merge({ userId: user.id }).create()
+
+    /**
+     * A truncated JPEG has the signature of a JPEG but cannot be decoded.
+     */
+    const jpeg = await photo()
+    const truncated = await uploadImage(client, user, vivarium, jpeg.subarray(0, 300))
+
     truncated.assertFlashMessage('notification', {
       type: 'error',
       message: 'This image cannot be read. Try a JPEG, PNG or WebP file.',
@@ -150,6 +171,26 @@ test.group('Vivarium images', (group) => {
         .then((list) => [...list.objects]),
       []
     )
+  })
+
+  test('VIV-15 an image whose file is missing from the disk answers 404, for the page to show the default illustration', async ({
+    client,
+  }) => {
+    const user = await UserFactory.create()
+    const vivarium = await VivariumFactory.merge({ userId: user.id }).create()
+    await uploadImage(client, user, vivarium, await photo())
+    await vivarium.refresh()
+    const filename = vivarium.imagePath!.split('/')[1]
+    await drive.use('vivariums').delete(vivarium.imagePath!)
+
+    const show = await client.get(`/vivariums/${vivarium.id}`).withInertia().loginAs(user)
+    const served = await client.get(`/vivariums/${vivarium.id}/image/${filename}`).loginAs(user)
+
+    show.assertStatus(200)
+    show.assertInertiaPropsContains({
+      vivarium: { imageUrl: `/vivariums/${vivarium.id}/image/${filename}` },
+    })
+    served.assertStatus(404)
   })
 
   test('VIV-7 an image in another format than JPEG, PNG or WebP is refused, whatever its name', async ({

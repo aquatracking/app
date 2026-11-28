@@ -225,7 +225,7 @@ test.group('Registration by invitation', (group) => {
       assert.isNotNull(await Invitation.find(invitation.id))
     })
 
-  test('a signed-in user opening an invitation link is sent home with a message', async ({
+  test('AUTH-21 a signed-in user opening an invitation link is sent home with a message, the invitation kept', async ({
     client,
     assert,
   }) => {

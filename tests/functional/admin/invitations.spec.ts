@@ -149,20 +149,22 @@ test.group('Administration of invitations', (group) => {
     assert.isAbove(invitations[0].expiresAt.toMillis(), DateTime.now().plus({ days: 6 }).toMillis())
   })
 
-  test('ADM-4 renewing an invitation gives a new link and invalidates the old one', async ({
+  test('ADM-4 renewing an invitation gives a new link, invalidates the old one and makes the renewing administrator its author', async ({
     client,
     assert,
   }) => {
-    const admin = await UserFactory.merge({ isAdmin: true }).create()
-    const oldLink = generatedLink(await invite(client, admin, 'grace@example.com'))
+    const first = await UserFactory.merge({ isAdmin: true }).create()
+    const second = await UserFactory.merge({ isAdmin: true }).create()
+    const oldLink = generatedLink(await invite(client, first, 'grace@example.com'))
     const invitation = await Invitation.findByOrFail('email', 'grace@example.com')
+    assert.equal(invitation.invitedById, first.id)
     await invitation.merge({ expiresAt: DateTime.now().minus({ days: 1 }) }).save()
 
     const response = await client
       .post(`/admin/invitations/${invitation.id}/renew`)
       .withInertia()
       .withCsrfToken()
-      .loginAs(admin)
+      .loginAs(second)
       .redirects(0)
 
     response.assertHeader('location', '/admin/invitations')
@@ -172,6 +174,7 @@ test.group('Administration of invitations', (group) => {
     await assertLinkValid(client, pathOf(oldLink), false)
     await assertLinkValid(client, pathOf(link), true)
     await invitation.refresh()
+    assert.equal(invitation.invitedById, second.id)
     assert.closeTo(
       invitation.expiresAt.toMillis(),
       DateTime.now().plus({ days: 7 }).toMillis(),

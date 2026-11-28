@@ -274,7 +274,10 @@ test.group('Setup', (group) => {
       assert.lengthOf(await User.all(), 0)
     })
 
-  test('INS-8 submissions are limited to 10 per minute and per IP', async ({ client }) => {
+  test('INS-8 a submission other than Inertia over the limit gets a 429, without being processed', async ({
+    client,
+    assert,
+  }) => {
     const invalidForm = setupForm({ password: 'short' })
 
     for (let attempt = 1; attempt <= 10; attempt++) {
@@ -282,11 +285,15 @@ test.group('Setup', (group) => {
       response.assertStatus(302)
     }
 
-    const response = await client.post('/setup').form(invalidForm).withCsrfToken().redirects(0)
+    const response = await client.post('/setup').form(setupForm()).withCsrfToken().redirects(0)
     response.assertStatus(429)
+    assert.lengthOf(await User.all(), 0)
   })
 
-  test('INS-8 an Inertia submission over the limit gets a notification', async ({ client }) => {
+  test('INS-8 an Inertia submission over the limit goes back to the form with a notification, without being processed', async ({
+    client,
+    assert,
+  }) => {
     const invalidForm = setupForm({ password: 'short' })
 
     for (let attempt = 1; attempt <= 10; attempt++) {
@@ -298,7 +305,7 @@ test.group('Setup', (group) => {
       .header('accept-language', 'en')
       .header('referer', '/setup')
       .withInertia()
-      .form(invalidForm)
+      .form(setupForm())
       .withCsrfToken()
       .redirects(0)
 
@@ -308,5 +315,6 @@ test.group('Setup', (group) => {
       type: 'error',
       message: 'Too many attempts. Please try again in a moment.',
     })
+    assert.lengthOf(await User.all(), 0)
   })
 })

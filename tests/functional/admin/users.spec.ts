@@ -119,7 +119,10 @@ test.group('Administration of users', (group) => {
     assert.isTrue(lastAdmin.isAdmin)
   })
 
-  test('ADM-7 the last administrator message is translated', async ({ client, assert }) => {
+  test("ADM-7 the message refusing to remove one's own rights is translated", async ({
+    client,
+    assert,
+  }) => {
     const admin = await UserFactory.merge({ isAdmin: true, locale: 'fr' }).create()
 
     const response = await setAdmin(client, admin, admin, false)
