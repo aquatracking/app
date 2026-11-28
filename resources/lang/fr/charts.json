@@ -35,6 +35,6 @@
     "decrease": "Baisse de {value}",
     "unchanged": "Stable",
     "no_tracked": "Ce bac ne suit aucun paramètre.",
-    "add_tracked": "Choisir les mesures suivies"
+    "add_tracked": "Choisir les paramètres suivis"
   }
 }

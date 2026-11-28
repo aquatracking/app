@@ -1,9 +1,9 @@
 {
-  "title": "Tracked measures",
-  "link": "Tracked measures",
+  "title": "Tracked parameters",
+  "link": "Tracked parameters",
   "back": "Back to {name}",
   "description": "Tracked parameters make the tiles of the dashboard and the fields of a reading, in this order. Removing a parameter deletes no measure.",
-  "archived": "This tank is archived: its tracked measures cannot be changed.",
+  "archived": "This tank is archived: its tracked parameters cannot be changed.",
   "empty": "This tank tracks no parameter. Add one to start taking readings.",
   "add": {
     "label": "Add a parameter",
