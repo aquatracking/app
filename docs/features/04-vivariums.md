@@ -32,7 +32,7 @@ Permettre à chaque utilisateur de décrire ses bacs (aquariums, terrariums, pal
 - Les tuiles, les graphes et les liens vers les mesures suivies et l'historique sont ajoutés par [05](05-tracked-measures.md), [06](06-measures.md) et [07](07-charts.md).
 
 ### Image
-- Formats acceptés : JPEG, PNG, WebP, reconnus d'après le contenu du fichier et non son nom ; 15 Mo maximum. Un fichier qui a le bon type mais ne se décode pas est refusé. (HEIC exclu : non décodé par les binaires standards de `sharp` ; les navigateurs mobiles convertissent généralement en JPEG à l'envoi.)
+- Formats acceptés : JPEG, PNG, WebP, reconnus d'après le contenu du fichier et non son nom ; 15 Mo maximum. Le format est reconnu à la signature binaire du début du fichier : tout autre contenu (SVG, GIF, TIFF…) est refusé avec le même message qu'un fichier non reconnu, même nommé `.png`. `sharp` ne décode que ces trois formats : ses autres chargeurs (SVG avec librsvg, GIF, TIFF, HEIF…) sont bloqués au démarrage. Un fichier qui a le bon type mais ne se décode pas est refusé. (HEIC exclu : non décodé par les binaires standards de `sharp` ; les navigateurs mobiles convertissent généralement en JPEG à l'envoi.)
 - Redimensionnée (côté le plus long 1600 px), convertie en WebP, métadonnées EXIF retirées (orientation appliquée avant).
 - Stockée sur le disque Drive `vivariums` sous `<vivarium_id>/<uuid>.webp`. Remplacer ou retirer l'image supprime l'ancien fichier.
 - Servie par une route protégée par la policy, avec cache navigateur (le nom de fichier change à chaque remplacement).
@@ -76,7 +76,7 @@ Le paramètre `:id` est contraint au format UUID (`router.matchers.uuid()`) sur 
 - **VIV-4** Une date de mise en service postérieure à la date du jour dans le fuseau de l'utilisateur est refusée ; la date du jour est acceptée. En modification, une date enregistrée inchangée est acceptée, même si elle est postérieure à la date du jour (changement de fuseau).
 - **VIV-5** *Reporté en [05](05-tracked-measures.md), testé par TRK-4 et TRK-5.* Créer un vivarium crée les mesures suivies par défaut de son profil.
 - **VIV-6** La modification ne permet pas de changer le type.
-- **VIV-7** Une image valide est stockée en WebP de 1600 px maximum sans EXIF ; un fichier non image ou de plus de 15 Mo est refusé.
+- **VIV-7** Une image valide est stockée en WebP de 1600 px maximum sans EXIF ; un fichier non image, d'un autre format que JPEG, PNG ou WebP (un SVG nommé `.png`, par exemple) ou de plus de 15 Mo est refusé.
 - **VIV-8** Remplacer ou retirer l'image supprime l'ancien fichier du disque.
 - **VIV-9** Archiver retire le vivarium de l'accueil et l'affiche dans « Archivés » ; désarchiver fait l'inverse.
 - **VIV-10** Aucune route ne permet à un utilisateur de supprimer un vivarium.

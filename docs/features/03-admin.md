@@ -16,7 +16,7 @@ Permettre aux administrateurs d'inviter des personnes et de gérer les comptes d
 - Un administrateur ne voit **aucune** donnée de vivarium des autres utilisateurs, seulement leur nombre de vivariums.
 
 ### Invitations
-- Créer : un email. Refusé si un utilisateur a déjà cet email. Si une invitation existe déjà pour cet email, elle est renouvelée.
+- Créer : un email (format email, 254 caractères maximum, comme dans [02](02-auth-profile.md#champs-communs)). Refusé si un utilisateur a déjà cet email. Si une invitation existe déjà pour cet email, elle est renouvelée.
 - Après création ou renouvellement, l'interface **affiche le lien** avec un bouton « copier ». C'est le seul moment où le lien est visible : le token n'est stocké que haché.
 - Si SMTP est configuré, un email d'invitation est aussi envoyé (dans la langue de l'administrateur).
 - Renouveler : nouveau token, expiration repoussée à +7 jours, l'ancien lien ne fonctionne plus. L'administrateur qui renouvelle devient l'invitant (`invited_by_id`) : c'est lui qui a envoyé le lien valable.

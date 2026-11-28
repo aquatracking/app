@@ -1,4 +1,5 @@
 import { test } from '@japa/runner'
+import { TIMEZONES } from '#catalog/timezones'
 import User from '#models/user'
 import db from '@adonisjs/lucid/services/db'
 import type { ApiResponse } from '@japa/api-client'
@@ -46,7 +47,7 @@ test.group('Profile', (group) => {
       .put('/profile')
       .withInertia()
       .loginAs(user)
-      .form(profileForm({ lastName: '', locale: 'fr', timezone: 'America/Montreal' }))
+      .form(profileForm({ lastName: '', locale: 'fr', timezone: 'America/Toronto' }))
       .withCsrfToken()
       .redirects(0)
 
@@ -59,7 +60,26 @@ test.group('Profile', (group) => {
     assert.equal(user.firstName, 'Ada')
     assert.isNull(user.lastName)
     assert.equal(user.locale, 'fr')
-    assert.equal(user.timezone, 'America/Montreal')
+    assert.equal(user.timezone, 'America/Toronto')
+  })
+
+  test('a profile saved without last name keeps the saved one', async ({ client, assert }) => {
+    const user = await UserFactory.merge({ lastName: 'Byron' }).create()
+    const { lastName, ...form } = profileForm({ firstName: 'Augusta' })
+    assert.notEqual(lastName, 'Byron')
+
+    const response = await client
+      .put('/profile')
+      .withInertia()
+      .loginAs(user)
+      .form(form)
+      .withCsrfToken()
+      .redirects(0)
+
+    response.assertHeader('location', '/profile')
+    await user.refresh()
+    assert.equal(user.firstName, 'Augusta')
+    assert.equal(user.lastName, 'Byron')
   })
 
   test('AUTH-11 the profile form ignores a submitted email', async ({ client, assert }) => {
@@ -167,17 +187,42 @@ test.group('Profile', (group) => {
       .put('/profile')
       .withInertia()
       .loginAs(user)
-      .form(profileForm({ timezone: 'America/Montreal' }))
+      .form(profileForm({ timezone: 'America/Toronto' }))
       .withCsrfToken()
 
     const response = await client.get('/profile').withInertia().loginAs(user)
-    response.assertInertiaPropsContains({ timezone: 'America/Montreal' })
+    response.assertInertiaPropsContains({ timezone: 'America/Toronto' })
     const instantsAfter = await db.from('users').where('id', user.id).select('created_at').first()
     assert.equal(instantsAfter.created_at.getTime(), instantsBefore.created_at.getTime())
   })
 
-  test('AUTH-16 a name that is not an IANA time zone is refused')
-    .with(['Mars/Olympus', '+01:00', 'UTC+1'])
+  test('AUTH-16 the profile page lists the time zones it accepts', async ({ client, assert }) => {
+    const user = await UserFactory.create()
+
+    const response = await client.get('/profile').withInertia().loginAs(user)
+
+    assert.deepEqual(response.inertiaProps.timezones, TIMEZONES)
+  })
+
+  test('AUTH-16 every time zone of the list is known by Intl and PostgreSQL', async ({
+    assert,
+  }) => {
+    assert.includeMembers(TIMEZONES, ['UTC', 'Asia/Kolkata', 'Europe/Kyiv', 'America/Nuuk'])
+    assert.notIncludeMembers(TIMEZONES, ['Asia/Calcutta', 'Europe/Kiev', 'Etc/GMT+5', 'EST'])
+    assert.equal(new Set(TIMEZONES).size, TIMEZONES.length)
+
+    for (const timezone of TIMEZONES) {
+      assert.doesNotThrow(() => new Intl.DateTimeFormat('en', { timeZone: timezone }), timezone)
+      /**
+       * The charts convert instants with "AT TIME ZONE", which fails on a
+       * name PostgreSQL does not know.
+       */
+      await db.rawQuery('select now() at time zone ?', [timezone])
+    }
+  })
+
+  test('AUTH-16 a name that is not in the list of time zones is refused')
+    .with(['Mars/Olympus', '+01:00', 'UTC+1', 'Etc/GMT+5', 'EST', 'Asia/Calcutta'])
     .run(async ({ client, assert }, timezone) => {
       const user = await UserFactory.merge({ timezone: 'Europe/Paris' }).create()
 
@@ -190,9 +235,7 @@ test.group('Profile', (group) => {
         .withCsrfToken()
         .redirects(0)
 
-      assert.deepEqual(fieldErrors(response, 'timezone'), [
-        'Enter a valid time zone name, for example Europe/Paris',
-      ])
+      assert.deepEqual(fieldErrors(response, 'timezone'), ['Choose a time zone from the list'])
       await user.refresh()
       assert.equal(user.timezone, 'Europe/Paris')
     })

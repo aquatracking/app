@@ -1,4 +1,5 @@
 import vine from '@vinejs/vine'
+import { email } from '#validators/user'
 import { accountEmail } from '#validators/rules/account_email'
 import { emailWithoutAccount } from '#validators/rules/email_without_account'
 
@@ -7,7 +8,7 @@ import { emailWithoutAccount } from '#validators/rules/email_without_account'
  * lowercase, like the emails of the accounts.
  */
 export const createInvitationValidator = vine.create({
-  email: vine.string().trim().email().maxLength(254).toLowerCase().use(emailWithoutAccount()),
+  email: email().use(emailWithoutAccount()),
 })
 
 /**

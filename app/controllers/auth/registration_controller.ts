@@ -1,4 +1,5 @@
 import { inject } from '@adonisjs/core'
+import { TIMEZONES } from '#catalog/timezones'
 import type { HttpContext } from '@adonisjs/core/http'
 import { registrationValidator } from '#validators/auth'
 import { RegistrationService } from '#services/registration_service'
@@ -18,6 +19,7 @@ export default class RegistrationController {
     return inertia.render('auth/register', {
       token: params.token,
       invitation: invitation ? InvitationTransformer.transform(invitation) : null,
+      timezones: TIMEZONES,
     })
   }
 

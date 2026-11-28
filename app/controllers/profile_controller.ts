@@ -1,4 +1,5 @@
 import { inject } from '@adonisjs/core'
+import { TIMEZONES } from '#catalog/timezones'
 import type { HttpContext } from '@adonisjs/core/http'
 import i18nManager from '@adonisjs/i18n/services/main'
 import { ProfileService } from '#services/profile_service'
@@ -7,11 +8,12 @@ import { updatePasswordValidator, updateProfileValidator } from '#validators/pro
 
 /**
  * The user's own profile (docs/features/02-auth-profile.md). The page reads
- * the shared user, language and time zone.
+ * the shared user, language and time zone, and receives the list of time
+ * zones.
  */
 export default class ProfileController {
   async edit({ inertia }: HttpContext) {
-    return inertia.render('profile/edit', {})
+    return inertia.render('profile/edit', { timezones: TIMEZONES })
   }
 
   /**

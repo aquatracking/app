@@ -5,5 +5,9 @@
   "locales": {
     "en": "English",
     "fr": "Français"
+  },
+  "timezones": {
+    "search": "Rechercher un fuseau horaire",
+    "empty": "Aucun fuseau horaire trouvé"
   }
 }
