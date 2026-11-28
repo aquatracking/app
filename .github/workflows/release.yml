@@ -1,9 +1,14 @@
 name: Release
 
 # Publishes the Docker image of a version on GHCR (ADR 0007) when a tag v2.*
-# is pushed, then creates the GitHub Release. The tag must match the version
-# of package.json and point to a commit of main; the CI checks are replayed
-# on the tagged commit first.
+# is pushed, then creates the GitHub Release:
+#   version       the tag matches package.json, is on main; computes the tags
+#   ci            ci.yml replayed on the tagged commit
+#   publish       multi-arch image pushed by digest only, without any tag
+#   smoke-test    that digest started on native amd64 and arm64 runners
+#   tag           version and floating tags set on the tested digest
+#   github-release
+# A failed run must be re-run with "Re-run all jobs" (docs/architecture.md).
 on:
   push:
     tags: ['v2.*']
@@ -26,9 +31,7 @@ jobs:
     permissions:
       contents: read
     outputs:
-      minor: ${{ steps.floating.outputs.minor }}
-      major: ${{ steps.floating.outputs.major }}
-      latest: ${{ steps.floating.outputs.latest }}
+      tags: ${{ steps.tags.outputs.tags }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -51,31 +54,26 @@ jobs:
             exit 1
           fi
 
-      # Floating tags only move forward: X.Y for the highest stable version
-      # of the X.Y line, X for the highest of the X line, latest for the
-      # highest of all (git tags vX.Y.Z sorted as semver). A pre-release gets
-      # none of them.
-      - id: floating
-        name: Floating tags
+      # Image tags: the exact version, plus floating tags that only move
+      # forward. X.Y for the highest stable version of the X.Y line, X for the
+      # highest of the X line, latest for the highest of all, among the
+      # vX.Y.Z git tags reachable from main, sorted as semver. A pre-release
+      # gets its own tag only.
+      - id: tags
+        name: Image tags
         run: |
           version="${GITHUB_REF_NAME#v}"
-          minor=false
-          major=false
-          latest=false
+          tags="$version"
           if echo "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
-            stable="$(git tag --list 'v*' | sed 's/^v//' | { grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' || true; } | sort -V)"
+            stable="$(git tag --merged origin/main --list 'v*' | sed 's/^v//' | { grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' || true; } | sort -V)"
             # Highest stable version starting with the prefix $1
             highest() { echo "$stable" | awk -v p="$1" 'p == "" || index($0, p) == 1' | tail -n 1; }
-            [ "$version" = "$(highest "${version%.*}.")" ] && minor=true
-            [ "$version" = "$(highest "${version%%.*}.")" ] && major=true
-            [ "$version" = "$(highest '')" ] && latest=true
+            if [ "$version" = "$(highest "${version%.*}.")" ]; then tags="$tags ${version%.*}"; fi
+            if [ "$version" = "$(highest "${version%%.*}.")" ]; then tags="$tags ${version%%.*}"; fi
+            if [ "$version" = "$(highest '')" ]; then tags="$tags latest"; fi
           fi
-          {
-            echo "minor=$minor"
-            echo "major=$major"
-            echo "latest=$latest"
-          } >> "$GITHUB_OUTPUT"
-          echo "$GITHUB_REF_NAME: X.Y=$minor X=$major latest=$latest"
+          echo "tags=$tags" >> "$GITHUB_OUTPUT"
+          echo "$GITHUB_REF_NAME: $tags"
 
   # Same checks as on a pull request (lint, typecheck, tests on PostgreSQL 16
   # and 18, image smoke test), replayed on the tagged commit
@@ -85,9 +83,11 @@ jobs:
       contents: read
     uses: ./.github/workflows/ci.yml
 
+  # Pushes the image by digest only: no tag points to it until it has passed
+  # the smoke test
   publish:
-    name: Publish the image on GHCR
-    needs: [version, ci]
+    name: Push the image by digest
+    needs: ci
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -106,12 +106,7 @@ jobs:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
         with:
           images: ${{ env.IMAGE }}
-          flavor: latest=false
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}},enable=${{ needs.version.outputs.minor == 'true' }}
-            type=semver,pattern={{major}},enable=${{ needs.version.outputs.major == 'true' }}
-            type=raw,value=latest,enable=${{ needs.version.outputs.latest == 'true' }}
+          tags: type=semver,pattern={{version}}
           labels: |
             org.opencontainers.image.title=AquaTracking
             org.opencontainers.image.description=Self-hosted tracking of aquarium, terrarium and paludarium parameters
@@ -137,14 +132,13 @@ jobs:
         with:
           context: .
           platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true
           labels: ${{ steps.meta.outputs.labels }}
           annotations: ${{ steps.meta.outputs.annotations }}
           provenance: mode=max
           sbom: true
 
-  # Starts the published image, by digest, on each architecture
+  # Starts the pushed digest on each architecture
   smoke-test:
     name: Smoke test (${{ matrix.platform }})
     needs: publish
@@ -206,9 +200,38 @@ jobs:
           docker logs app
           exit 1
 
+  # Points the version and floating tags to the tested digest
+  tag:
+    name: Tag the image
+    needs: [version, publish, smoke-test]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set the tags on the digest
+        env:
+          TAGS: ${{ needs.version.outputs.tags }}
+          SOURCE: ${{ env.IMAGE }}@${{ needs.publish.outputs.digest }}
+        run: |
+          args=""
+          for tag in $TAGS; do
+            args="$args --tag $IMAGE:$tag"
+          done
+          # shellcheck disable=SC2086 # one word per argument
+          docker buildx imagetools create $args "$SOURCE"
+          docker buildx imagetools inspect "$IMAGE:${GITHUB_REF_NAME#v}"
+
   github-release:
     name: GitHub Release
-    needs: smoke-test
+    needs: tag
     runs-on: ubuntu-latest
     permissions:
       contents: write
