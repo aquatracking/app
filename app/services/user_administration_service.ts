@@ -1,6 +1,7 @@
 import User from '#models/user'
 import { inject } from '@adonisjs/core'
 import db from '@adonisjs/lucid/services/db'
+import { AuthorizationResponse, errors as bouncerErrors } from '@adonisjs/bouncer'
 import { VivariumImageService } from '#services/vivarium_image_service'
 import LastAdminException from '#exceptions/last_admin_exception'
 import OwnAdminRightsException from '#exceptions/own_admin_rights_exception'
@@ -56,18 +57,39 @@ export class UserAdministrationService {
    * and empties the "invited_by_id" of the users and invitations it sent.
    * The image files of its vivariums are deleted after the database: a
    * failure leaves orphan files, never a vivarium without its image.
-   * Deleting one's own account is refused, which also guarantees that an
-   * administrator remains.
+   *
+   * Deleting one's own account is refused, and the actor must still be an
+   * administrator when the account is deleted: an administrator remains,
+   * even when two of them delete each other at the same time.
    *
    * @throws OwnAccountDeletionException when the actor deletes their own account
+   * @throws E_AUTHORIZATION_FAILURE when the actor was deleted or lost their rights
    */
   async delete(actor: User, target: User) {
     if (actor.id === target.id) {
       throw new OwnAccountDeletionException()
     }
 
-    const vivariums = await target.related('vivariums').query().select('id')
-    await target.delete()
+    const vivariums = await db.transaction(async (trx) => {
+      /**
+       * The administrators stay locked until the end of the transaction,
+       * as in "setAdmin": of two administrators deleting each other, the
+       * second one waits, then finds that they no longer exist.
+       */
+      const admins = await User.query({ client: trx })
+        .where('is_admin', true)
+        .select('id')
+        .orderBy('id')
+        .forUpdate()
+      if (!admins.some((admin) => admin.id === actor.id)) {
+        throw new bouncerErrors.E_AUTHORIZATION_FAILURE(AuthorizationResponse.deny())
+      }
+
+      target.useTransaction(trx)
+      const deleted = await target.related('vivariums').query().select('id')
+      await target.delete()
+      return deleted
+    })
     await this.vivariumImageService.deleteFilesOf(vivariums.map((vivarium) => vivarium.id))
   }
 }

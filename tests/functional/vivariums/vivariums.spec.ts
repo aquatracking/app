@@ -339,6 +339,41 @@ test.group('Vivariums', (group) => {
     assert.equal(vivarium.startedOn.toISODate(), startedOn)
   })
 
+  test('VIV-4 an unchanged set-up date is accepted, even after today in a new time zone', async ({
+    client,
+    assert,
+  }) => {
+    /**
+     * Set up today in Pacific/Kiritimati (UTC+14), a date still in the
+     * future in Pacific/Pago_Pago (UTC-11), where the user moves.
+     */
+    const user = await UserFactory.merge({ timezone: 'Pacific/Kiritimati' }).create()
+    const startedOn = DateTime.now().setZone('Pacific/Kiritimati').startOf('day')
+    const vivarium = await VivariumFactory.merge({ userId: user.id, startedOn }).create()
+    user.timezone = 'Pacific/Pago_Pago'
+    await user.save()
+
+    const renamed = await updateVivarium(
+      client,
+      user,
+      vivarium,
+      vivariumForm({ name: 'Renamed', waterType: 'fresh', startedOn: startedOn.toISODate()! })
+    )
+    renamed.assertHeader('location', `/vivariums/${vivarium.id}`)
+    await vivarium.refresh()
+    assert.equal(vivarium.name, 'Renamed')
+
+    const moved = await updateVivarium(
+      client,
+      user,
+      vivarium,
+      vivariumForm({ waterType: 'fresh', startedOn: startedOn.plus({ days: 1 }).toISODate()! })
+    )
+    assert.deepEqual(fieldErrors(moved, 'startedOn'), ['The date cannot be in the future'])
+    await vivarium.refresh()
+    assert.equal(vivarium.startedOn.toISODate(), startedOn.toISODate())
+  })
+
   test('editing a vivarium saves the form and opens its dashboard', async ({ client, assert }) => {
     const user = await UserFactory.create()
     const vivarium = await VivariumFactory.merge({ userId: user.id }).create()

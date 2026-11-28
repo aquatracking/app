@@ -126,9 +126,14 @@ Unique (`vivarium_id`, `measure_type_id`). Accueillera plus tard `min_value`, `m
 
 Index **unique** (`vivarium_id`, `measure_type_id`, `measured_at`) : interdit deux mesures du même type au même instant sur un vivarium, et sert à la dernière valeur, à l'historique filtré et aux graphes (PostgreSQL le parcourt aussi en ordre décroissant). Les mesures manuelles ont un `measured_at` tronqué à la minute.
 
+Index (`vivarium_id`, `measured_at`) : sert aux lectures de toutes les mesures d'un vivarium par date, sans filtre de type (historique non filtré, date du dernier et du plus ancien relevé).
+
 Une mesure peut exister pour un type qui n'est plus suivi : l'historique reste consultable.
 
 ## Requêtes clés
 
-- **Dernière valeur par type** d'un vivarium : `DISTINCT ON (measure_type_id) … ORDER BY measure_type_id, measured_at DESC`, servi par l'index.
+- **Dernière et avant-dernière valeur par type** (tuiles du tableau de bord) : `tracked_measures CROSS JOIN LATERAL (… ORDER BY measured_at DESC LIMIT 2)`, qui parcourt l'index unique à rebours. Le coût dépend du nombre de mesures suivies, pas du nombre de mesures du vivarium.
+- **Date du dernier relevé** de chaque vivarium d'une liste (une sous-requête `max(measured_at)` par vivarium, en une seule requête) et **plus ancien relevé** (`min(measured_at)`) : servis par l'index (`vivarium_id`, `measured_at`), qui donne la valeur sans lire les mesures.
+- **Historique** : les instants distincts des relevés, du plus récent, 20 par page, puis leurs mesures. Non filtré, la page parcourt l'index (`vivarium_id`, `measured_at`) à rebours et s'arrête à la page ; filtré par type, elle utilise l'index unique. Le nombre total de relevés (pagination) compte encore tous les instants, en lisant l'index seul.
+- **Types mesurés** d'un vivarium (filtres de l'historique) : une semi-jointure de `measure_types` vers l'index unique, une recherche par type du catalogue.
 - **Série d'un graphe** : valeurs brutes si la plage contient ≤ `MAX_CHART_POINTS` (500) points, sinon moyenne, min et max par intervalle pour revenir sous cette limite. 500 est une heuristique : un graphe fait 300 à 1000 px de large, au-delà d'un point par pixel rien ne se voit ; la série pèse ~20 Ko et reste fluide en SVG sur téléphone. En saisie manuelle (≈ 365 mesures/an) les valeurs brutes suffisent presque toujours ; l'agrégation sert surtout aux capteurs et à la plage « tout ». À revoir avec les capteurs (nombre de points selon la largeur du graphe, ou algorithme LTTB). Les intervalles d'un jour ou plus sont calculés dans le fuseau de l'utilisateur (`date_bin(…, measured_at AT TIME ZONE :tz, …)`), pour qu'un « jour » corresponde au jour local, y compris les jours de 23 ou 25 heures au changement d'heure.

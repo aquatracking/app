@@ -3,6 +3,7 @@ import { inject } from '@adonisjs/core'
 import Measure from '#models/measure'
 import type Vivarium from '#models/vivarium'
 import db from '@adonisjs/lucid/services/db'
+import { errors as lucidErrors } from '@adonisjs/lucid'
 import MeasureType from '#models/measure_type'
 import type { Infer } from '@vinejs/vine/types'
 import type { readingValidator } from '#validators/reading'
@@ -113,6 +114,9 @@ export class ReadingService {
    * field deletes its measure, and all of them move to the new instant.
    * Moving to a minute that already has one of the types is refused; to
    * a minute with other types only, both readings become one.
+   *
+   * @throws E_ROW_NOT_FOUND when the reading no longer exists, deleted or
+   * moved since it was read: it is not created again
    */
   async update(vivarium: Vivarium, reading: Reading, data: ReadingData) {
     const measuredAt = data.measuredAt.startOf('minute')
@@ -123,6 +127,9 @@ export class ReadingService {
       const measures = await this.measuresQuery(vivarium, trx)
         .where('measured_at', reading.measuredAt.toISO()!)
         .forUpdate()
+      if (measures.length === 0) {
+        throw new lucidErrors.E_ROW_NOT_FOUND()
+      }
       if (!measuredAt.equals(reading.measuredAt)) {
         await this.assertFree(trx, vivarium, measuredAt, types)
       }

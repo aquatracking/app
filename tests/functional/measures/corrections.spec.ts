@@ -1,11 +1,15 @@
 import { test } from '@japa/runner'
+import { DateTime } from 'luxon'
 import Measure from '#models/measure'
 import app from '@adonisjs/core/services/app'
+import { errors as lucidErrors } from '@adonisjs/lucid'
 import testUtils from '@adonisjs/core/services/test_utils'
+import { ReadingService } from '#services/reading_service'
 import { TrackedMeasureService } from '#services/tracked_measure_service'
 import { MEASURE_TYPES, MeasureTypeCatalog } from '#catalog/measure_types'
 import {
   deleteReading,
+  failWritesOf,
   fieldErrors,
   measuresOf,
   putReading,
@@ -82,6 +86,58 @@ test.group('Reading corrections', (group) => {
      */
     assert.isNotNull(await Measure.find(temperature.id))
     assert.isNotNull(await Measure.find(ph.id))
+  })
+
+  test('MEA-10 a failure after the first writes cancels the whole edit', async ({ assert }) => {
+    const { vivarium } = await vivariumTracking(['temperature', 'ph', 'kh', 'no3'])
+    await storeMeasures(vivarium, '2026-01-15T18:00:00Z', { temperature: 25, ph: 7, kh: 6 })
+    await failWritesOf('no3')
+    const service = await app.container.make(ReadingService)
+    const reading = await service.find(
+      vivarium,
+      DateTime.fromISO('2026-01-15T18:00:00Z', { zone: 'utc' })
+    )
+
+    /**
+     * pH is deleted, then temperature and kH are updated and moved,
+     * before the insertion of nitrates fails.
+     */
+    await assert.rejects(
+      () =>
+        service.update(vivarium, reading!, {
+          measuredAt: DateTime.fromISO('2026-01-15T19:30:00Z', { zone: 'utc' }),
+          values: { temperature: 26, ph: null, kh: 6, no3: 10 },
+        }),
+      /measure write refused by the test/
+    )
+    assert.deepEqual(await measuresOf(vivarium), [
+      '2026-01-15T18:00:00Z kh=6',
+      '2026-01-15T18:00:00Z ph=7',
+      '2026-01-15T18:00:00Z temperature=25',
+    ])
+  })
+
+  test('MEA-25 saving a reading deleted in the meantime is refused as not found and creates nothing', async ({
+    assert,
+  }) => {
+    const { vivarium } = await vivariumTracking(['ph', 'kh'])
+    await storeMeasures(vivarium, '2026-01-15T18:00:00Z', { ph: 7 })
+    const service = await app.container.make(ReadingService)
+    const reading = await service.find(
+      vivarium,
+      DateTime.fromISO('2026-01-15T18:00:00Z', { zone: 'utc' })
+    )
+    await service.destroy(vivarium, reading!)
+
+    await assert.rejects(
+      () =>
+        service.update(vivarium, reading!, {
+          measuredAt: DateTime.fromISO('2026-01-15T18:00:00Z', { zone: 'utc' }),
+          values: { ph: 7.2, kh: 6 },
+        }),
+      lucidErrors.E_ROW_NOT_FOUND
+    )
+    assert.deepEqual(await measuresOf(vivarium), [])
   })
 
   test('MEA-10 a value out of bounds cancels the whole edit', async ({ client, assert }) => {

@@ -135,27 +135,24 @@ export class MeasureSeriesService {
     }
     const typeIds = tracked.map(({ measureTypeId }) => measureTypeId)
 
-    const lastRows: MeasureRow[] = await db
-      .from('measures')
-      .distinctOn('measure_type_id')
-      .select('measure_type_id', 'value', 'measured_at')
-      .where('vivarium_id', vivarium.id)
-      .whereIn('measure_type_id', typeIds)
-      .orderBy('measure_type_id')
-      .orderBy('measured_at', 'desc')
-
-    const previousRows: MeasureRow[] = await db
-      .from('measures as m')
-      .distinctOn('m.measure_type_id')
-      .select('m.measure_type_id', 'm.value', 'm.measured_at')
-      .where('m.vivarium_id', vivarium.id)
-      .whereIn('m.measure_type_id', typeIds)
-      .whereRaw(
-        `m.measured_at < (select max(l.measured_at) from measures l
-          where l.vivarium_id = m.vivarium_id and l.measure_type_id = m.measure_type_id)`
+    /**
+     * The last two measures of each tracked type, read backwards on the
+     * unique index: the cost depends on the number of tracked measures,
+     * not on the number of measures of the vivarium. Most recent first.
+     */
+    const recentRows: MeasureRow[] = await db
+      .from('tracked_measures as t')
+      .joinRaw(
+        `cross join lateral (
+          select m.value, m.measured_at from measures m
+          where m.vivarium_id = t.vivarium_id and m.measure_type_id = t.measure_type_id
+          order by m.measured_at desc
+          limit 2
+        ) as recent`
       )
-      .orderBy('m.measure_type_id')
-      .orderBy('m.measured_at', 'desc')
+      .select('t.measure_type_id', 'recent.value', 'recent.measured_at')
+      .where('t.vivarium_id', vivarium.id)
+      .orderBy('recent.measured_at', 'desc')
 
     const sparklineRows: MeasureRow[] = await db
       .from('measures')
@@ -168,8 +165,7 @@ export class MeasureSeriesService {
 
     return tracked.map(({ measureType }) => {
       const ofType = (row: MeasureRow) => row.measure_type_id === measureType.id
-      const last = lastRows.find(ofType)
-      const previous = previousRows.find(ofType)
+      const [last, previous] = recentRows.filter(ofType)
       const sparkline = sparklineRows.filter(ofType).map(toPoint)
       return {
         measureType,

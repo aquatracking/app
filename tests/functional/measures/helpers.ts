@@ -3,6 +3,7 @@ import type User from '#models/user'
 import Measure from '#models/measure'
 import type Vivarium from '#models/vivarium'
 import app from '@adonisjs/core/services/app'
+import db from '@adonisjs/lucid/services/db'
 import MeasureType from '#models/measure_type'
 import type { ApiClient, ApiResponse } from '@japa/api-client'
 import { UserFactory } from '#database/factories/user_factory'
@@ -47,6 +48,29 @@ export async function storeMeasures(
       measuredAt: DateTime.fromISO(measuredAt, { zone: 'utc' }),
       source: 'manual' as const,
     }))
+  )
+}
+
+/**
+ * Makes the database refuse every insertion or update of a measure of
+ * this type, to fail a change of readings after its first writes. Only
+ * within the global transaction of a test, which drops the trigger.
+ *
+ * Inside the global transaction, the "db.transaction" of the service is a
+ * savepoint: the failure rolls back to it and the test then finds the
+ * measures unchanged. Without it, the failure aborts the global
+ * transaction itself, so the test fails on its next query ("current
+ * transaction is aborted") rather than on its assertion.
+ */
+export async function failWritesOf(code: string) {
+  const type = await MeasureType.findByOrFail('code', code)
+  await db.rawQuery(
+    `create function fail_measure_write() returns trigger language plpgsql
+      as $$ begin raise exception 'measure write refused by the test'; end $$`
+  )
+  await db.rawQuery(
+    `create trigger fail_measure_write before insert or update on measures for each row
+      when (new.measure_type_id = '${type.id}') execute function fail_measure_write()`
   )
 }
 

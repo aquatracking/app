@@ -13,12 +13,14 @@ import {
 /**
  * Metadata of the vivarium validators: the time zone of the user, whose
  * local date is "today", and on update the kind of the vivarium, which
- * cannot change, and the local date of its oldest reading, with its label
- * in the language of the user (none without reading).
+ * cannot change, its stored set-up date ("YYYY-MM-DD") and the local date
+ * of its oldest reading, with its label in the language of the user (none
+ * without reading).
  */
 type Meta = {
   timezone: string
   kind?: VivariumKind
+  startedOn?: string
   firstReading?: { date: string; label: string } | null
 }
 
@@ -42,16 +44,24 @@ const allowedByKind = vine.createRule((_, allowed: (kind: VivariumKind) => boole
 })
 
 /**
- * Refuses a set-up date after the local date of the oldest reading: no
- * reading is before the set-up (docs/features/06-measures.md).
+ * Whether the submitted set-up date is the stored one, on update. The
+ * value is a Luxon date (start/validator.ts), at midnight in the zone of
+ * the process, where VineJS parses it.
+ */
+function isStoredStartedOn(field: FieldContext) {
+  const { startedOn } = field.meta as Meta
+  return !!startedOn && DateTime.isDateTime(field.value) && field.value.toISODate() === startedOn
+}
+
+/**
+ * Refuses moving the set-up date after the local date of the oldest
+ * reading: no reading is before the set-up (docs/features/06-measures.md).
+ * An unchanged date is accepted: the local date of the oldest reading
+ * moves back a day when the user changes time zone.
  */
 const notAfterFirstReading = vine.createRule((value, _, field) => {
-  const firstReading = (field.meta as Meta).firstReading
-  /**
-   * A Luxon date (start/validator.ts), at midnight in the zone of the
-   * process, where VineJS parses it.
-   */
-  if (!DateTime.isDateTime(value) || !firstReading) {
+  const { firstReading } = field.meta as Meta
+  if (!DateTime.isDateTime(value) || !firstReading || isStoredStartedOn(field)) {
     return
   }
   if (value.toISODate()! > firstReading.date) {
@@ -88,15 +98,16 @@ const fields = {
   heightCm: dimension(),
   volumeLiters: vine.number().positive().decimal([0, 1]).max(999999.9).nullable(),
   /**
-   * Not after today, in the time zone of the user.
+   * Not after today, in the time zone of the user. An unchanged date is
+   * accepted: after a change of time zone, it can be tomorrow there.
    */
   startedOn: vine
     .date({ formats: ['YYYY-MM-DD'] })
-    .beforeOrEqual((field) =>
-      DateTime.now()
-        .setZone((field.meta as Meta).timezone)
-        .toISODate()!
-    )
+    .beforeOrEqual((field) => {
+      const { timezone, startedOn } = field.meta as Meta
+      const today = DateTime.now().setZone(timezone).toISODate()!
+      return isStoredStartedOn(field) && startedOn! > today ? startedOn! : today
+    })
     .use(notAfterFirstReading()),
 }
 
@@ -111,7 +122,9 @@ export const createVivariumValidator = vine.withMetaData<Meta>().create({
  * reading.
  */
 export const updateVivariumValidator = vine
-  .withMetaData<Meta & { kind: VivariumKind; firstReading: Meta['firstReading'] }>()
+  .withMetaData<
+    Meta & { kind: VivariumKind; startedOn: string; firstReading: Meta['firstReading'] }
+  >()
   .create(fields)
 
 /**

@@ -5,6 +5,7 @@ import { SetupService } from '#services/setup_service'
 import testUtils from '@adonisjs/core/services/test_utils'
 import db from '@adonisjs/lucid/services/db'
 import limiter from '@adonisjs/limiter/services/main'
+import { waitForLockWaiters } from '#tests/helpers/locks'
 
 /**
  * A valid submission of the setup form.
@@ -28,23 +29,6 @@ function setupForm(overrides: Record<string, string> = {}) {
 function fieldErrors(response: ApiResponse, field: string): string[] {
   const errors = response.flashMessages().inputErrorsBag as Record<string, string[]> | undefined
   return errors?.[field] ?? []
-}
-
-/**
- * Waits until the given number of transactions wait for a lock on a table.
- */
-async function waitForLockWaiters(table: string, count: number) {
-  for (let attempt = 0; attempt < 100; attempt++) {
-    const { rows } = await db.rawQuery(
-      'select count(*)::int as waiting from pg_locks where relation = ?::regclass and not granted',
-      [table]
-    )
-    if (rows[0].waiting >= count) {
-      return
-    }
-    await new Promise((resolve) => setTimeout(resolve, 20))
-  }
-  throw new Error(`Expected ${count} transactions waiting for a lock on "${table}"`)
 }
 
 /**
@@ -185,7 +169,7 @@ test.group('Setup', (group) => {
         )
       )
 
-      await waitForLockWaiters('users', 2)
+      await waitForLockWaiters(2)
       await blocker.commit()
       responses = await submissions
     } finally {
