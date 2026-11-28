@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon'
 import app from '@adonisjs/core/services/app'
 import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
@@ -41,6 +42,12 @@ export default class InertiaMiddleware extends BaseInertiaMiddleware {
       locale: ctx.inertia.always(i18n?.locale ?? 'en'),
       timezone: ctx.inertia.always(auth?.user?.timezone ?? 'UTC'),
       mailEnabled: ctx.inertia.always(app.config.get<boolean>('app.mail.enabled')),
+      /**
+       * Instant of the response, in UTC: the pages compute relative times
+       * and today's date from it, so the server rendering and the
+       * hydration in the browser give the same text.
+       */
+      now: ctx.inertia.always(DateTime.utc().toISO()),
     }
   }
 

@@ -36,10 +36,12 @@ export function useDates() {
   }
 
   /**
-   * "3 days ago", "in 2 hours": the largest unit that fits.
+   * "3 days ago", "in 2 hours": the largest unit that fits. Counted from
+   * the instant of the response shared by the server, not from the clock
+   * of the browser: the server rendering and the hydration agree.
    */
   function formatRelative(iso: string): string {
-    const seconds = (new Date(iso).getTime() - Date.now()) / 1000
+    const seconds = (Date.parse(iso) - Date.parse(page.props.now)) / 1000
     const format = new Intl.RelativeTimeFormat(page.props.locale, { numeric: 'auto' })
     for (const [unit, length] of UNITS) {
       if (Math.abs(seconds) >= length) {
