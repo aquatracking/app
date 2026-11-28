@@ -52,7 +52,7 @@ Termes utilisés dans les specs, le code et l'interface. Le code est en anglais 
 
 ## Mesures
 
-**Type de mesure** (`MeasureType`) — Paramètre mesurable : température, pH, nitrites… Les types forment un **catalogue fixe** défini dans le code ; les utilisateurs ne peuvent pas en créer. Chaque type a un code stable (`temperature`, `ph`, `no2`…), une unité, une précision maximale (nombre de décimales accepté à la saisie) et des bornes de plausibilité. L'interface dit « paramètre » (en anglais « parameter ») : c'est un **libellé d'interface**, le code et les specs gardent « type de mesure » (`MeasureType`).
+**Type de mesure** (`MeasureType`) — Paramètre mesurable : température, pH, nitrites… Les types forment un **catalogue fixe** défini dans le code ; les utilisateurs ne peuvent pas en créer. Chaque type a un code stable (`temperature`, `ph`, `no2`…), une unité, une précision maximale (nombre de décimales accepté à la saisie) et des bornes de plausibilité. L'interface dit « paramètre » (en anglais « parameter ») : c'est un **libellé d'interface**, le code garde `MeasureType` et les règles, données et critères d'acceptation des specs « type de mesure ». Les objectifs et récits utilisateur des specs, écrits du point de vue de l'utilisateur, emploient les libellés d'interface (« paramètre », « bac »).
 
 **Catalogue** (`app/catalog/measure_types.ts`) — La source unique des types de mesure et des mesures suivies par défaut pour chaque profil. Synchronisé en base à chaque déploiement. Aucune entrée n'en est jamais retirée : un type qui ne doit plus être proposé y reste indéfiniment, marqué **retiré** (`retired`), et garde ses règles (bornes, décimales), qu'il ait des mesures ou non. Un code présent en base et absent du catalogue est donc toujours une erreur ([ADR 0005](adr/0005-catalogue-types-de-mesure-fixe.md)).
 
@@ -62,7 +62,7 @@ Termes utilisés dans les specs, le code et l'interface. Le code est en anglais 
 
 **Péremption** — *Hors périmètre 2.0.* Durée, propre à chaque type de mesure, au-delà de laquelle la dernière valeur n'est plus représentative de l'état du bac.
 
-**Mesure suivie** (`TrackedMeasure`) — Type de mesure que l'utilisateur suit sur un vivarium, avec sa position d'affichage. Les mesures suivies déterminent les tuiles du tableau de bord et les champs du formulaire de relevé. Ne plus suivre un type ne supprime pas ses mesures. L'interface dit « paramètre suivi » (« paramètres suivis », en anglais « tracked parameters »), comme pour le type de mesure ; le code garde `TrackedMeasure` et les specs « mesure suivie ».
+**Mesure suivie** (`TrackedMeasure`) — Type de mesure que l'utilisateur suit sur un vivarium, avec sa position d'affichage. Les mesures suivies déterminent les tuiles du tableau de bord et les champs du formulaire de relevé. Ne plus suivre un type ne supprime pas ses mesures. L'interface dit « paramètre suivi » (« paramètres suivis », en anglais « tracked parameters »), comme pour le type de mesure ; le code garde `TrackedMeasure` et les specs « mesure suivie », hors objectifs et récits utilisateur (voir Type de mesure).
 
 **Mesure** (`Measure`) — Une valeur d'un type de mesure, sur un vivarium, à un instant donné (`measuredAt`). A une source : `manual` (saisie) ou `device` (capteur, hors périmètre 2.0).
 
@@ -84,4 +84,4 @@ Termes utilisés dans les specs, le code et l'interface. Le code est en anglais 
 
 Termes réservés aux évolutions prévues dans la [vision](vision.md), à ne pas utiliser dans le code de la 2.0 :
 
-**Capteur** (`device`) — Appareil qui envoie des mesures automatiquement. **Mesure calculée** — Type dérivé d'autres mesures, calculé à la lecture. **Journal** — Événements datés d'un vivarium (maintenance, population, notes). **Partage** — Accès d'autres utilisateurs à un vivarium.
+**Capteur** (`device`) — Appareil qui envoie des mesures automatiquement. Seule exception : la valeur `device` de `measures.source`, déjà prévue pour ne pas migrer la table à l'arrivée des capteurs ([data-model](data-model.md#measures)). **Mesure calculée** — Type dérivé d'autres mesures, calculé à la lecture. **Journal** — Événements datés d'un vivarium (maintenance, population, notes). **Partage** — Accès d'autres utilisateurs à un vivarium.

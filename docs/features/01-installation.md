@@ -1,7 +1,7 @@
 # 01 — Installation
 
 ## Objectif
-Une instance fraîchement déployée doit devenir utilisable sans variable d'environnement contenant un mot de passe : la première personne qui l'ouvre crée le compte administrateur.
+Une instance fraîchement déployée doit devenir utilisable sans qu'aucune variable d'environnement ne contienne le mot de passe d'un compte de l'application : la première personne qui l'ouvre crée le compte administrateur.
 
 ## User stories
 - En tant que personne qui vient de déployer AquaTracking, je veux créer le compte administrateur depuis le navigateur pour commencer à utiliser l'instance.
@@ -14,7 +14,6 @@ Une instance fraîchement déployée doit devenir utilisable sans variable d'env
 - Après création, l'administrateur est connecté et arrive sur la page d'accueil.
 - La langue du formulaire suit le navigateur ; la langue choisie est enregistrée comme `locale`.
 - Le fuseau horaire est un champ visible : une liste avec recherche des fuseaux acceptés ([02](02-auth-profile.md#profil)), préremplie après chargement avec celui du navigateur (ou le nom de la liste qui lui correspond, `UTC` si le navigateur n'en donne pas), et enregistré comme `timezone`. Un nom hors de la liste (décalage fixe `+01:00` ou `Etc/GMT+5`, abréviation `EST`, nom inconnu) est refusé comme toute autre erreur de validation.
-- Un nom vide ou fait d'espaces est enregistré comme absent (`null`).
 
 ## Données
 Écrit dans `users` (`is_admin = true`, `locale`, `timezone`, `invited_by_id` vide). `rate_limits` via le limiter (limite de soumission).
@@ -28,7 +27,7 @@ Une instance fraîchement déployée doit devenir utilisable sans variable d'env
 Middleware global `setup` : redirige vers `/setup` si aucun utilisateur n'existe (résultat mis en cache en mémoire une fois l'installation faite, pour ne pas interroger la base à chaque requête).
 
 ## Formulaire
-Prénom (requis, 100 caractères maximum), nom (facultatif, 100 caractères maximum), email (requis, format email, 254 caractères maximum), mot de passe (requis, ≥ 8 caractères) et confirmation, langue (fr/en, préremplie depuis le navigateur), fuseau horaire (liste avec recherche, préremplie depuis le navigateur, modifiable).
+Prénom (requis, 100 caractères maximum), nom de famille (facultatif, 100 caractères maximum ; vide ou fait d'espaces, il est enregistré comme absent, `null`), email (requis, format email, 254 caractères maximum), mot de passe (requis, ≥ 8 caractères) et confirmation, langue (fr/en, préremplie depuis le navigateur), fuseau horaire (liste avec recherche, préremplie depuis le navigateur, modifiable).
 
 ## Cas d'erreur
 - Validation : messages par champ.
