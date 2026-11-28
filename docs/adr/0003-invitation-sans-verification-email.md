@@ -12,7 +12,7 @@ AquaTracking est auto-hébergé pour un petit groupe. Beaucoup d'instances n'aur
 - **Premier administrateur** créé par un écran d'installation, accessible uniquement tant qu'aucun utilisateur n'existe.
 
 ## Conséquences
-- Aucune variable d'environnement ne contient de mot de passe.
+- Aucune variable d'environnement ne contient le mot de passe d'un compte de l'application (les variables `DB_PASSWORD` et `SMTP_PASSWORD` ne concernent que les services externes).
 - Entre le démarrage et l'installation, n'importe qui accédant à l'instance peut devenir administrateur : la documentation de déploiement doit dire de terminer l'installation immédiatement.
 - Un utilisateur qui oublie son mot de passe sur une instance sans SMTP dépend d'un administrateur.
 - Si une inscription ouverte devient nécessaire, la vérification d'email reviendra avec elle.

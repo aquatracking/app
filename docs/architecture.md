@@ -55,9 +55,12 @@ Structure standard d'Adonis 7, fichiers créés avec `node ace make:*`. À l'int
 
 ```
 app/
-  catalog/measure_types.ts      # catalogue des types de mesure + mesures suivies par défaut
+  abilities/main.ts              # abilities Bouncer hors policy
+  catalog/measure_types.ts       # catalogue des types de mesure + mesures suivies par défaut
+  catalog/timezones.ts           # liste des fuseaux acceptés
   controllers/
     setup_controller.ts
+    health_checks_controller.ts  # /health/live
     auth/…                       # session, password_reset, registration
     profile_controller.ts
     admin/…                      # users, invitations
@@ -66,21 +69,32 @@ app/
     tracked_measures_controller.ts
     measures_controller.ts       # relevé, historique, correction
     charts_controller.ts
+  exceptions/                    # handler.ts, NotifiedException et une classe par erreur métier (code E_…)
+  mails/                         # invitation_notification, password_reset_notification
   models/                        # user, invitation, password_reset_token, vivarium, measure_type, tracked_measure, measure
+    mixins/                      # with_uuid_v7, with_one_time_token
   policies/                      # vivarium_policy, user_policy, invitation_policy
   transformers/                  # une classe par forme de données exposée
   validators/                    # un fichier par ressource, un validator par action
-  services/                      # opérations métier appelables hors HTTP (relevés, séries, dernières valeurs, mesures suivies par défaut)
-  middleware/
+    rules/                       # règles Vine propres au projet (fuseau, valeur de mesure…)
+  services/                      # opérations métier appelables hors HTTP, une classe par domaine :
+                                 # setup, login, registration, invitation, password_reset, profile,
+                                 # user_administration, vivarium, vivarium_image, tracked_measure,
+                                 # reading, measure_series, measure_type_catalog
+  middleware/                    # dont setup, admin, last_seen, delete_uploaded_files
 inertia/
   pages/                         # un dossier par ressource, miroir des contrôleurs
   components/ui/                 # shadcn-vue (généré)
   components/                    # composants métier
+  composables/                   # use_dates, use_i18n, use_measures, use_now, use_vivarium
+  layouts/app.vue
 database/
   migrations/
   seeders/catalog_seeder.ts
 resources/lang/{fr,en}/
+start/                           # routes, kernel (middleware), env, limiter, session, validator
 tests/functional/<feature>/…
+tests/helpers/
 ```
 
 ### Règles
@@ -96,7 +110,7 @@ tests/functional/<feature>/…
   Un service reçoit des données déjà validées (validators Vine) et l'utilisateur concerné, et non le `HttpContext`. L'autorisation reste faite par l'appelant avec les policies Bouncer, utilisables hors HTTP. Un simple CRUD sans règle (renommer un vivarium) peut rester dans le contrôleur. Pas de couche *repository* : Lucid en tient lieu.
 - **Points d'entrée** : les contrôleurs, et plus tard les outils MCP et l'API capteurs, ne font que brancher validation, autorisation, service et transformer. Aucune règle métier ne doit exister dans un seul d'entre eux.
 - **Un nom par concept** : celui de `CONTEXT.md`. Pas de synonymes dans le code ni les identifiants (`tank`, `biotope`, `setting`…). Dans l'interface, les libellés sont ceux que le glossaire donne : « bac » (fr) et « tank » (en) pour un vivarium, « paramètre » (« parameter ») pour un type de mesure ou une mesure suivie.
-- **Erreurs métier** : exceptions Adonis nommées (`E_INVITATION_EXPIRED`…) traduites, rendues en messages flash.
+- **Erreurs métier** : exceptions Adonis nommées (`E_INVALID_INVITATION`…) traduites, rendues en messages flash.
 - **Dates** : `DateTime` Luxon côté serveur, en UTC dans le code et en base. Conversion vers le **fuseau de l'utilisateur** (`user.timezone`) seulement pour l'affichage et l'interprétation des saisies. Jamais de décalage fixe : toujours un nom de zone IANA, pour que Luxon applique les changements d'heure de la date concernée.
 - **Pas de code mort** : pas d'alias d'import, de dépendance ou de colonne sans usage. Exception : les alias `#…` du champ `imports` de `package.json` (`#models/*`, `#mails/*`, `#events/*`…) sont ceux du framework, utilisés par les commandes `node ace make:*` : ils restent même si le dossier n'existe pas encore.
 
@@ -132,7 +146,7 @@ tests/functional/<feature>/…
 Guide d'installation, de mise à jour, de sauvegarde et de restauration : [deployment.md](deployment.md).
 
 - **Dev** : `compose.yml` fournit PostgreSQL et Mailpit. `node ace migration:run`, `node ace db:seed` (catalogue, à relancer quand il change), puis `node ace serve --hmr`. Les tests lancent eux-mêmes migrations et seeder.
-- **Image Docker** unique, multi-étapes, pour `linux/amd64` et `linux/arm64`. Les étapes de build tournent sur la plateforme de la machine de build (leur résultat ne dépend pas de l'architecture) ; seules les dépendances de production, qui contiennent des binaires natifs (`sharp`), sont installées pour la plateforme cible. Image de base `node:26-alpine` épinglée par le digest de son index multi-plateforme, à côté de son tag : deux builds du même commit partent de la même image (Dependabot met le digest à jour). Utilisateur non root `node` : le code de l'application (`build`, `node_modules`) appartient à `root` et n'est que lisible par `node` ; seul `storage` (`DRIVE_ROOT`) lui est modifiable. Les tests, leur lanceur (`bin/test.ts`) et les factories (`database/factories`) sont exclus du contexte de build (`.dockerignore`) : ils ne sont pas dans l'image. `HEALTHCHECK` sur `/health/live`. Au démarrage : `migration:run --force` (le flag confirme l'exécution en production, où Adonis la refuse sinon ; il ne rejoue ni ne supprime rien), puis `db:seed --files catalog_seeder`, puis le serveur. Les deux premières étapes sont idempotentes.
+- **Image Docker** unique, multi-étapes, pour `linux/amd64` et `linux/arm64`. Les étapes de build tournent sur la plateforme de la machine de build (leur résultat ne dépend pas de l'architecture) ; seules les dépendances de production, qui contiennent des binaires natifs (`sharp`), sont installées pour la plateforme cible. Image de base `node:26-alpine` épinglée par le digest de son index multi-plateforme, à côté de son tag : deux builds du même commit partent de la même image (Dependabot met le digest à jour). Utilisateur non root `node` : le code de l'application (`build`, `node_modules`) appartient à `root` et n'est que lisible par `node` ; seul `storage` (`DRIVE_ROOT`) lui est modifiable. Les tests, leur lanceur (`bin/test.ts`) et les factories (`database/factories`) sont exclus du contexte de build (`.dockerignore`) : ils ne sont pas dans l'image. `HEALTHCHECK` sur `/health/live`. Au démarrage : `migration:run --force` (le flag confirme l'exécution en production, où Adonis la refuse sinon ; il ne rejoue ni ne supprime rien), puis `db:seed --files database/seeders/catalog_seeder.js` (le seeder compilé, voir `docker/entrypoint.sh`), puis le serveur. Les deux premières étapes sont idempotentes.
 - **Migrations** : une migration fusionnée sur `main` n'est plus jamais modifiée. Tout changement de schéma passe par une nouvelle migration : le serveur d'intégration (image `main`) et les instances déjà installées ont appliqué l'ancienne au démarrage, et Adonis ne rejoue pas une migration déjà exécutée.
 - Volume à persister : `DRIVE_ROOT`.
 - **HTTPS obligatoire** : en production, les cookies de session sont `Secure` et HSTS est actif ; servie en HTTP, l'application ne garde pas la session. Déploiement prévu derrière un reverse proxy (Traefik, Nginx, Caddy…) qui termine le HTTPS, avec `TRUSTED_PROXIES` renseigné.
