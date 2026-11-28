@@ -1,9 +1,9 @@
 {
-  "title": "Mesures suivies",
-  "link": "Mesures suivies",
+  "title": "Paramètres suivis",
+  "link": "Paramètres suivis",
   "back": "Retour à {name}",
   "description": "Les paramètres suivis forment les tuiles du tableau de bord et les champs du relevé, dans cet ordre. Retirer un paramètre ne supprime aucune mesure.",
-  "archived": "Ce bac est archivé : ses mesures suivies ne peuvent pas être modifiées.",
+  "archived": "Ce bac est archivé : ses paramètres suivis ne peuvent pas être modifiés.",
   "empty": "Ce bac ne suit aucun paramètre. Ajoutez-en un pour commencer vos relevés.",
   "add": {
     "label": "Ajouter un paramètre",

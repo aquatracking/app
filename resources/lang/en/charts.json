@@ -35,6 +35,6 @@
     "decrease": "Down {value}",
     "unchanged": "Unchanged",
     "no_tracked": "This tank tracks no parameter.",
-    "add_tracked": "Choose the tracked measures"
+    "add_tracked": "Choose the tracked parameters"
   }
 }

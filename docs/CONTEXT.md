@@ -26,11 +26,11 @@ Termes utilisés dans les specs, le code et l'interface. Le code est en anglais 
 
 **Langue** (`User.locale`) — `fr` ou `en`. Toujours renseignée : préremplie depuis la langue du navigateur (`Accept-Language`, `en` à défaut) dans les formulaires d'installation et d'inscription, modifiable ensuite dans le profil. Avant connexion (pages de login, d'invitation…), l'interface suit la langue du navigateur.
 
-**Fuseau horaire** (`User.timezone`) — Fuseau dans lequel l'utilisateur voit et saisit les dates et heures. Toujours un **nom de fuseau IANA** (`Europe/Paris`, `America/Toronto`), jamais un décalage fixe (`+01:00`) : le nom porte les règles de changement d'heure (heure d'été / heure d'hiver). Choisi dans la **liste des fuseaux** : `UTC` et les zones géographiques sous leur nom IANA canonique (`Asia/Kolkata`, pas `Asia/Calcutta`), figée dans le code et reconnue par `Intl` comme par PostgreSQL ; les zones à décalage fixe (`Etc/GMT+5`) et les abréviations (`EST`, `CET`) n'en font pas partie. Toujours renseigné : liste avec recherche dans les formulaires d'installation et d'inscription, préremplie avec le fuseau du navigateur (`UTC` si le navigateur n'en donne pas), modifiable ensuite dans le profil. Un nom hors de la liste est refusé partout. Connu aussi hors requête (futurs emails d'alerte).
+**Fuseau horaire** (`User.timezone`) — Fuseau dans lequel l'utilisateur voit et saisit les dates et heures. Toujours un **nom de fuseau IANA** (`Europe/Paris`, `America/Toronto`), jamais un décalage fixe (`+01:00`) : le nom porte les règles de changement d'heure (heure d'été / heure d'hiver). Choisi dans la **liste des fuseaux** : `UTC` et une entrée par zone géographique du fichier `zone.tab` de l'IANA, sous le nom qu'il lui donne à une exception près (`America/Coral_Harbour`, voir [spec 02](features/02-auth-profile.md#profil)) : `Asia/Kolkata`, pas `Asia/Calcutta` ; ce nom peut être un lien IANA, comme `Europe/Amsterdam`. Elle est figée dans le code et reconnue par `Intl` comme par PostgreSQL ; les zones à décalage fixe (`Etc/GMT+5`) et les abréviations (`EST`, `CET`) n'en font pas partie. Toujours renseigné : liste avec recherche dans les formulaires d'installation et d'inscription, préremplie avec le fuseau du navigateur (`UTC` si le navigateur n'en donne pas), modifiable ensuite dans le profil. Un nom hors de la liste est refusé partout. Connu aussi hors requête (futurs emails d'alerte).
 
 ## Vivariums
 
-**Vivarium** (`Vivarium`) — Tout bac qui héberge du vivant et dont on suit les paramètres. Terme générique du code et du glossaire ; l'interface dit plutôt « bac » ou utilise le type. *Remplace « biotope » des versions précédentes, ambigu avec le « bac biotope » de l'aquariophilie.*
+**Vivarium** (`Vivarium`) — Tout bac qui héberge du vivant et dont on suit les paramètres. Terme générique du code et du glossaire ; l'interface dit plutôt « bac » en français et « tank » en anglais, ou utilise le type. « Bac » et « tank » sont des **libellés d'interface** seulement : jamais dans le code ni les identifiants. *Remplace « biotope » des versions précédentes, ambigu avec le « bac biotope » de l'aquariophilie.*
 
 **Type de vivarium** (`Vivarium.kind`) — `aquarium`, `terrarium` ou `paludarium` (partie aquatique et partie terrestre). Fixé à la création.
 
@@ -52,9 +52,9 @@ Termes utilisés dans les specs, le code et l'interface. Le code est en anglais 
 
 ## Mesures
 
-**Type de mesure** (`MeasureType`) — Paramètre mesurable : température, pH, nitrites… Les types forment un **catalogue fixe** défini dans le code ; les utilisateurs ne peuvent pas en créer. Chaque type a un code stable (`temperature`, `ph`, `no2`…), une unité, une précision maximale (nombre de décimales accepté à la saisie) et des bornes de plausibilité.
+**Type de mesure** (`MeasureType`) — Paramètre mesurable : température, pH, nitrites… Les types forment un **catalogue fixe** défini dans le code ; les utilisateurs ne peuvent pas en créer. Chaque type a un code stable (`temperature`, `ph`, `no2`…), une unité, une précision maximale (nombre de décimales accepté à la saisie) et des bornes de plausibilité. L'interface dit « paramètre » (en anglais « parameter ») : c'est un **libellé d'interface**, le code et les specs gardent « type de mesure » (`MeasureType`).
 
-**Catalogue** (`app/catalog/measure_types.ts`) — La source unique des types de mesure et des mesures suivies par défaut pour chaque profil. Synchronisé en base à chaque déploiement. Un type qui ne doit plus être proposé reste dans le catalogue, marqué **retiré** (`retired`), pour garder ses règles tant que des mesures l'utilisent.
+**Catalogue** (`app/catalog/measure_types.ts`) — La source unique des types de mesure et des mesures suivies par défaut pour chaque profil. Synchronisé en base à chaque déploiement. Aucune entrée n'en est jamais retirée : un type qui ne doit plus être proposé y reste indéfiniment, marqué **retiré** (`retired`), et garde ses règles (bornes, décimales), qu'il ait des mesures ou non. Un code présent en base et absent du catalogue est donc toujours une erreur ([ADR 0005](adr/0005-catalogue-types-de-mesure-fixe.md)).
 
 **Bornes de plausibilité** (`min`, `max` du catalogue) — Valeurs en dehors desquelles une saisie est forcément une erreur (pH hors de 0–14, température hors de −10–60 °C). Elles servent à la validation. Ce ne sont **pas** des seuils.
 
@@ -62,7 +62,7 @@ Termes utilisés dans les specs, le code et l'interface. Le code est en anglais 
 
 **Péremption** — *Hors périmètre 2.0.* Durée, propre à chaque type de mesure, au-delà de laquelle la dernière valeur n'est plus représentative de l'état du bac.
 
-**Mesure suivie** (`TrackedMeasure`) — Type de mesure que l'utilisateur suit sur un vivarium, avec sa position d'affichage. Les mesures suivies déterminent les tuiles du tableau de bord et les champs du formulaire de relevé. Ne plus suivre un type ne supprime pas ses mesures.
+**Mesure suivie** (`TrackedMeasure`) — Type de mesure que l'utilisateur suit sur un vivarium, avec sa position d'affichage. Les mesures suivies déterminent les tuiles du tableau de bord et les champs du formulaire de relevé. Ne plus suivre un type ne supprime pas ses mesures. L'interface dit « paramètre suivi » (« paramètres suivis », en anglais « tracked parameters »), comme pour le type de mesure ; le code garde `TrackedMeasure` et les specs « mesure suivie ».
 
 **Mesure** (`Measure`) — Une valeur d'un type de mesure, sur un vivarium, à un instant donné (`measuredAt`). A une source : `manual` (saisie) ou `device` (capteur, hors périmètre 2.0).
 

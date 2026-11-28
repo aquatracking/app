@@ -1,6 +1,11 @@
 /**
- * List of the time zones (docs/CONTEXT.md): "UTC" and the geographic IANA
- * zones, under their canonical IANA name ("Asia/Kolkata", "Europe/Kyiv").
+ * List of the time zones (docs/CONTEXT.md): "UTC" and one entry per
+ * geographic zone of the IANA zone.tab file, under the name zone.tab gives
+ * it ("Asia/Kolkata", "Europe/Kyiv"). That name is not always a primary
+ * IANA zone: many entries are links ("Europe/Amsterdam" links to
+ * "Europe/Brussels"), kept because zone.tab has one entry per country.
+ * Only exception: "America/Coral_Harbour", the CLDR name of
+ * "America/Atikokan", under which Intl lists that zone.
  *
  * Frozen here rather than read from Intl.supportedValuesOf('timeZone'),
  * which gives CLDR names ("Asia/Calcutta", "Europe/Kiev") that depend on
