@@ -58,7 +58,7 @@ export class VivariumService {
   /**
    * Archives the vivarium: it leaves the home page and becomes read-only.
    * Updating its row locks it for writing: the archiving waits for the
-   * changes under way (readings, tracked measures, form), which hold a
+   * changes under way (readings, tracked measures, form, image), which hold a
    * lock on it, and those that come after find it archived
    * (Vivarium.lockUnarchived).
    */
