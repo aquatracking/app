@@ -277,6 +277,26 @@ test.group('Vivariums', (group) => {
     )
   })
 
+  test('VIV-3 the creation and edit pages give the fields of each kind, as checked by the server', async ({
+    client,
+  }) => {
+    const user = await UserFactory.create()
+    const vivarium = await VivariumFactory.merge({ userId: user.id }).create()
+    const kinds = [
+      { kind: 'aquarium', hasWaterType: true, hasClimate: false },
+      { kind: 'terrarium', hasWaterType: false, hasClimate: true },
+      { kind: 'paludarium', hasWaterType: true, hasClimate: true },
+    ]
+
+    const creation = await client.get('/vivariums/create').withInertia().loginAs(user)
+    const edition = await client.get(`/vivariums/${vivarium.id}/edit`).withInertia().loginAs(user)
+
+    creation.assertStatus(200)
+    creation.assertInertiaPropsContains({ kinds })
+    edition.assertStatus(200)
+    edition.assertInertiaPropsContains({ kinds })
+  })
+
   test('VIV-4 a set-up date after today in the time zone of the user is refused', async ({
     client,
     assert,

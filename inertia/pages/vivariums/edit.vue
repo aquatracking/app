@@ -13,6 +13,7 @@ defineOptions({ layout: AppLayout })
 const props = defineProps<{
   vivarium: Data.Vivarium
   today: string
+  kinds: Data.VivariumKind[]
   waterTypes: NonNullable<Data.Vivarium['waterType']>[]
   climates: NonNullable<Data.Vivarium['climate']>[]
 }>()
@@ -36,6 +37,7 @@ const title = t('vivariums.form.edit_title', { name: props.vivarium.name })
         <VivariumForm
           :vivarium="props.vivarium"
           :today="props.today"
+          :kinds="props.kinds"
           :water-types="props.waterTypes"
           :climates="props.climates"
         />

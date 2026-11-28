@@ -1,5 +1,5 @@
 import { compose } from '@adonisjs/core/helpers'
-import { hasMany } from '@adonisjs/lucid/orm'
+import { hasMany, scope } from '@adonisjs/lucid/orm'
 import Measure from '#models/measure'
 import TrackedMeasure from '#models/tracked_measure'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
@@ -54,6 +54,20 @@ export default class Vivarium extends compose(VivariumSchema, withUuidV7) {
   @hasMany(() => Measure)
   declare measures: HasMany<typeof Measure>
 
+  /**
+   * Vivariums in service, shown on the home page.
+   */
+  static active = scope((query) => {
+    query.whereNull('archived_at')
+  })
+
+  /**
+   * Archived vivariums (docs/CONTEXT.md, "Archivage").
+   */
+  static archived = scope((query) => {
+    query.whereNotNull('archived_at')
+  })
+
   get profile(): VivariumProfile {
     return { kind: this.kind, waterType: this.waterType, climate: this.climate }
   }
@@ -73,7 +87,7 @@ export default class Vivarium extends compose(VivariumSchema, withUuidV7) {
    *
    * In shared mode for a change of its content (readings, tracked
    * measures), which does not write the row; for writing when the change
-   * writes it (form), so that two of them cannot deadlock.
+   * writes it (form, image), so that two of them cannot deadlock.
    *
    * @throws ArchivedVivariumException when it was archived meanwhile
    */
