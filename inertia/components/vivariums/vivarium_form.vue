@@ -53,14 +53,16 @@ const volumeLiters = ref(asText(props.vivarium?.volumeLiters))
 
 /**
  * Gross volume "L × W × H / 1000", offered while the volume is empty and
- * the three dimensions are filled, rounded to the liter's tenth.
+ * the three dimensions are filled, rounded to the liter's tenth. Not
+ * offered above the largest volume the server accepts (999,999.9 L).
  */
 const suggestedVolume = computed(() => {
   const dimensions = [lengthCm.value, widthCm.value, heightCm.value].map(Number)
   if (volumeLiters.value !== '' || dimensions.some((value) => !(value > 0))) {
     return null
   }
-  return Math.round((dimensions[0] * dimensions[1] * dimensions[2]) / 100) / 10
+  const volume = Math.round((dimensions[0] * dimensions[1] * dimensions[2]) / 100) / 10
+  return volume <= 999999.9 ? volume : null
 })
 </script>
 
