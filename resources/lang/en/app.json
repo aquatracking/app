@@ -1,6 +1,7 @@
 {
   "name": "AquaTracking",
   "back_home": "Back to home",
+  "close": "Close",
   "locales": {
     "en": "English",
     "fr": "Français"

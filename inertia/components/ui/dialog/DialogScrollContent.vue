@@ -12,6 +12,7 @@ import {
   DialogPortal,
   useForwardPropsEmits,
 } from 'reka-ui'
+import { useI18n } from '~/composables/use_i18n'
 
 defineOptions({
   inheritAttrs: false,
@@ -23,6 +24,8 @@ const emits = defineEmits<DialogContentEmits>()
 const delegatedProps = reactiveOmit(props, 'class')
 
 const forwarded = useForwardPropsEmits(delegatedProps, emits)
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -57,7 +60,7 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
           class="absolute top-4 right-4 p-0.5 transition-colors rounded-md hover:bg-secondary"
         >
           <XIcon class="w-4 h-4" />
-          <span class="sr-only">Close</span>
+          <span class="sr-only">{{ t('app.close') }}</span>
         </DialogClose>
       </DialogContent>
     </DialogOverlay>

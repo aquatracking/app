@@ -32,6 +32,16 @@ const climates = ['tropical', 'desert', 'temperate'] as const
 
 const kind = ref<VivariumKind>(props.vivarium?.kind ?? 'aquarium')
 
+/**
+ * Water types and climates are lowercase in the translations, to fit in
+ * the profile of a vivarium ("Aquarium · eau de mer"); as options of a
+ * list, they start with a capital letter, like the other lists.
+ */
+function optionLabel(key: string) {
+  const label = t(key)
+  return label.charAt(0).toLocaleUpperCase() + label.slice(1)
+}
+
 function asText(value: number | null | undefined) {
   return value === null || value === undefined ? '' : String(value)
 }
@@ -105,7 +115,7 @@ const suggestedVolume = computed(() => {
             t('vivariums.form.choose')
           }}</NativeSelectOption>
           <NativeSelectOption v-for="value in waterTypes" :key="value" :value="value">
-            {{ t(`vivariums.water_types.${value}`) }}
+            {{ optionLabel(`vivariums.water_types.${value}`) }}
           </NativeSelectOption>
         </NativeSelect>
         <FieldError :errors="[errors.waterType]" />
@@ -125,7 +135,7 @@ const suggestedVolume = computed(() => {
             t('vivariums.form.choose')
           }}</NativeSelectOption>
           <NativeSelectOption v-for="value in climates" :key="value" :value="value">
-            {{ t(`vivariums.climates.${value}`) }}
+            {{ optionLabel(`vivariums.climates.${value}`) }}
           </NativeSelectOption>
         </NativeSelect>
         <FieldError :errors="[errors.climate]" />

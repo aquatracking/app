@@ -57,13 +57,14 @@ async function copy() {
     <DialogContent v-if="link" class="sm:max-w-xl">
       <DialogHeader>
         <DialogTitle>{{ t(`admin.generated_link.${link.kind}.title`) }}</DialogTitle>
-        <DialogDescription>
+        <DialogDescription class="wrap-anywhere">
           {{ t(`admin.generated_link.${link.kind}.description`, { email: link.email }) }}
         </DialogDescription>
       </DialogHeader>
       <div ref="field" class="flex gap-2">
         <Input
           :model-value="link.url"
+          class="min-w-0"
           readonly
           :aria-label="t('admin.generated_link.url')"
           @focus="($event.target as HTMLInputElement).select()"
@@ -72,7 +73,7 @@ async function copy() {
           {{ copied ? t('admin.generated_link.copied') : t('admin.generated_link.copy') }}
         </Button>
       </div>
-      <p class="text-muted-foreground text-sm">
+      <p class="text-muted-foreground text-sm wrap-anywhere">
         {{ t('admin.generated_link.once') }}
         <template v-if="link.emailed">{{
           t('admin.generated_link.emailed', { email: link.email })

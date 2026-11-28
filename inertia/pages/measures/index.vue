@@ -157,8 +157,8 @@ function closeEdit(open: boolean) {
               <template v-else>{{
                 formatValue(measure.value, measure.measureType.decimals)
               }}</template>
-              <span v-if="measure.measureType.unit" class="text-sm text-muted-foreground">
-                {{ measure.measureType.unit }}</span
+              <span v-if="measure.measureType.unit" class="text-sm text-muted-foreground"
+                >&nbsp;{{ measure.measureType.unit }}</span
               >
             </dd>
           </div>
