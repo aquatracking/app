@@ -1,0 +1,13 @@
+version: 2
+updates:
+  # Actions are pinned by commit SHA: Dependabot updates the SHA and the
+  # version comment next to it, in a single grouped pull request
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns: ['*']
+    commit-message:
+      prefix: chore
