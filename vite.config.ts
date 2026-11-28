@@ -21,6 +21,27 @@ export default defineConfig({
     },
   },
 
+  build: {
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          /**
+           * One chunk per language for the translations, loaded on demand
+           * (inertia/composables/use_i18n.ts).
+           */
+          groups: [
+            {
+              name: (id) => {
+                const locale = /\/resources\/lang\/([a-z]+)\//.exec(id)?.[1]
+                return locale ? `lang-${locale}` : null
+              },
+            },
+          ],
+        },
+      },
+    },
+  },
+
   server: {
     watch: {
       ignored: ['**/storage/**', '**/tmp/**'],
