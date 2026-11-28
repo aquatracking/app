@@ -7,12 +7,25 @@ import { MEASURE_TYPES } from '#catalog/measure_types'
 import { TrackedMeasureService } from '#services/tracked_measure_service'
 import { storeMeasures, vivariumTracking } from '#tests/helpers/measures'
 import { daysAgo } from '#tests/helpers/dates'
+import { renderedPage, textOf } from '#tests/helpers/responses'
 
 type Tile = {
   measureType: { code: string; unit: string; decimals: number }
   last: { measuredAt: string; value: number } | null
   variation: number | null
   sparkline: { start: string; end: string; points: { measuredAt: string; value: number }[] }
+}
+
+/**
+ * Text of each tile of the dashboard as rendered by the server (SSR), by
+ * the code of its type: a tile is the link to the chart of its type.
+ */
+function renderedTiles(page: string) {
+  return Object.fromEntries(
+    [...page.matchAll(/<a[^>]*href="[^"]*\/charts\/(\w+)"[^>]*>(.*?)<\/a>/g)].map(
+      ([, code, tile]) => [code, textOf(tile)]
+    )
+  )
 }
 
 /**
@@ -68,7 +81,7 @@ test.group('Dashboard tiles', (group) => {
     assert.equal(ph.variation, 0.1)
   })
 
-  test('CHT-2 a tracked measure without any measure has no last value', async ({
+  test('CHT-2 a tracked measure without any measure shows "No measure"', async ({
     client,
     assert,
   }) => {
@@ -90,6 +103,15 @@ test.group('Dashboard tiles', (group) => {
     )
     assert.isTrue(DateTime.fromISO(start).isValid)
     assert.isTrue(DateTime.fromISO(end).isValid)
+
+    /**
+     * The tiles as rendered by the server (SSR), without the props.
+     */
+    const page = renderedPage(await client.get(`/vivariums/${vivarium.id}`).loginAs(user))
+    const tiles = renderedTiles(page)
+    assert.deepEqual(Object.keys(tiles), ['temperature', 'ph'])
+    assert.equal(tiles.ph, 'pH No measure')
+    assert.notInclude(tiles.temperature, 'No measure')
   })
 
   test('CHT-13 each tile receives the bounds of the 30d range in local days, whatever the measures', async ({
@@ -182,7 +204,10 @@ test.group('Dashboard tiles', (group) => {
     ])
   })
 
-  test('CHT-12 a vivarium that tracks no type has no tile', async ({ client, assert }) => {
+  test('CHT-12 a vivarium that tracks no type shows the invitation to add some instead of tiles', async ({
+    client,
+    assert,
+  }) => {
     const { user, vivarium } = await vivariumTracking([])
     await storeMeasures(vivarium, daysAgo(1), { ph: 7 })
 
@@ -191,5 +216,17 @@ test.group('Dashboard tiles', (group) => {
     response.assertStatus(200)
     response.assertInertiaComponent('vivariums/show')
     assert.deepEqual(response.inertiaProps.tiles, [])
+
+    /**
+     * The page as rendered by the server (SSR), without the props.
+     */
+    const page = renderedPage(await client.get(`/vivariums/${vivarium.id}`).loginAs(user))
+    assert.deepEqual(renderedTiles(page), {})
+    assert.include(textOf(page), 'This tank tracks no parameter. Choose the tracked parameters')
+    const trackedMeasures = `/vivariums/${vivarium.id}/tracked-measures`
+    const links = [...page.matchAll(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/g)].map(
+      ([, href, text]) => `${href} ${textOf(text)}`
+    )
+    assert.include(links, `${trackedMeasures} Choose the tracked parameters`)
   })
 })

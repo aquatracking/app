@@ -82,6 +82,68 @@ test.group('Profile', (group) => {
     assert.equal(user.lastName, 'Byron')
   })
 
+  test('AUTH-25 the profile refuses a missing first name, or a name of more than 100 characters')
+    .with([
+      { field: 'firstName', value: '', error: 'This field is required' },
+      { field: 'firstName', value: '   ', error: 'This field is required' },
+      { field: 'firstName', value: 'a'.repeat(101), error: 'Enter at most 100 characters' },
+      { field: 'lastName', value: 'a'.repeat(101), error: 'Enter at most 100 characters' },
+    ])
+    .run(async ({ client, assert }, { field, value, error }) => {
+      const user = await UserFactory.merge({ firstName: 'Ada', lastName: 'Lovelace' }).create()
+
+      const response = await client
+        .put('/profile')
+        .withInertia()
+        .loginAs(user)
+        .header('referer', '/profile')
+        .form(profileForm({ firstName: 'Augusta', lastName: 'Byron', [field]: value }))
+        .withCsrfToken()
+        .redirects(0)
+
+      assert.deepEqual(fieldErrors(response, field), [error])
+      await user.refresh()
+      assert.equal(user.firstName, 'Ada')
+      assert.equal(user.lastName, 'Lovelace')
+    })
+
+  test('AUTH-25 the profile accepts names of 100 characters', async ({ client, assert }) => {
+    const user = await UserFactory.create()
+
+    const response = await client
+      .put('/profile')
+      .withInertia()
+      .loginAs(user)
+      .form(profileForm({ firstName: 'a'.repeat(100), lastName: 'b'.repeat(100) }))
+      .withCsrfToken()
+      .redirects(0)
+
+    response.assertHeader('location', '/profile')
+    await user.refresh()
+    assert.equal(user.firstName, 'a'.repeat(100))
+    assert.equal(user.lastName, 'b'.repeat(100))
+  })
+
+  test('AUTH-26 the profile saves a last name made of spaces as absent', async ({
+    client,
+    assert,
+  }) => {
+    const user = await UserFactory.merge({ lastName: 'Byron' }).create()
+
+    const response = await client
+      .put('/profile')
+      .withInertia()
+      .loginAs(user)
+      .form(profileForm({ firstName: ' Augusta  ', lastName: '   ' }))
+      .withCsrfToken()
+      .redirects(0)
+
+    response.assertHeader('location', '/profile')
+    await user.refresh()
+    assert.equal(user.firstName, 'Augusta')
+    assert.isNull(user.lastName)
+  })
+
   test('AUTH-11 the profile form ignores a submitted email', async ({ client, assert }) => {
     const user = await UserFactory.merge({ email: 'ada@example.com' }).create()
 
@@ -156,6 +218,63 @@ test.group('Profile', (group) => {
       [String(currentDevice.identifier)]
     )
     assert.notEqual(String(otherDevice.identifier), String(currentDevice.identifier))
+  })
+
+  test(
+    'AUTH-28 a new password shorter than 8 characters, or with a different confirmation, is refused on the field'
+  )
+    .with([
+      {
+        password: 'short',
+        passwordConfirmation: 'short',
+        field: 'password',
+        error: 'Enter at least 8 characters',
+      },
+      {
+        password: 'new-secret-password',
+        passwordConfirmation: 'other-password',
+        field: 'passwordConfirmation',
+        error: 'The confirmation does not match',
+      },
+    ])
+    .run(async ({ client, assert }, { password, passwordConfirmation, field, error }) => {
+      const user = await UserFactory.merge({ email: 'ada@example.com' }).create()
+
+      const response = await client
+        .put('/profile/password')
+        .withInertia()
+        .loginAs(user)
+        .header('referer', '/profile')
+        .form({ currentPassword: 'secret-password', password, passwordConfirmation })
+        .withCsrfToken()
+        .redirects(0)
+
+      response.assertHeader('location', '/profile')
+      assert.deepEqual(fieldErrors(response, field), [error])
+      await User.verifyCredentials('ada@example.com', 'secret-password')
+    })
+
+  test('AUTH-28 a new password of 8 characters is accepted', async ({ client }) => {
+    const user = await UserFactory.merge({ email: 'ada@example.com' }).create()
+
+    const response = await client
+      .put('/profile/password')
+      .withInertia()
+      .loginAs(user)
+      .header('referer', '/profile')
+      .form({
+        currentPassword: 'secret-password',
+        password: 'eight-ch',
+        passwordConfirmation: 'eight-ch',
+      })
+      .withCsrfToken()
+      .redirects(0)
+
+    response.assertFlashMessage('notification', {
+      type: 'success',
+      message: 'Your password has been changed.',
+    })
+    await User.verifyCredentials('ada@example.com', 'eight-ch')
   })
 
   test('AUTH-12 choosing a language changes the language of the next page', async ({ client }) => {

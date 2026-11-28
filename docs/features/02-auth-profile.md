@@ -29,7 +29,7 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 - Ces quatre pages sont réservées aux visiteurs : un utilisateur déjà connecté qui en ouvre une est redirigé vers l'accueil avec un message.
 
 ### Champs communs
-- Mêmes règles à l'installation ([01](01-installation.md)), à l'inscription et dans le profil : prénom requis (100 caractères maximum), nom facultatif (100 caractères maximum ; vide ou fait d'espaces, il est enregistré comme absent, `null` ; absent de la requête du profil, il reste inchangé), email au format email de 254 caractères maximum (installation, mot de passe oublié, invitation de [03](03-admin.md)), mot de passe d'au moins 8 caractères avec confirmation, langue `fr` ou `en`, fuseau de la liste des fuseaux.
+- Mêmes règles à l'installation ([01](01-installation.md)), à l'inscription et dans le profil : prénom requis (100 caractères maximum ; les espaces autour sont retirés, et un prénom fait d'espaces est refusé comme un prénom vide), nom facultatif (100 caractères maximum ; vide ou fait d'espaces, il est enregistré comme absent, `null` ; absent de la requête du profil, il reste inchangé), email au format email de 254 caractères maximum (installation, mot de passe oublié, invitation de [03](03-admin.md)), mot de passe d'au moins 8 caractères avec confirmation, langue `fr` ou `en`, fuseau de la liste des fuseaux.
 
 ### Inscription par invitation
 - Le lien contient un token. S'il est inconnu ou expiré, la page affiche « invitation invalide ou expirée » et un renvoi vers la connexion.
@@ -104,3 +104,8 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 - **AUTH-22** Sans SMTP, une soumission du formulaire « mot de passe oublié » répond 404, sans envoi ni lien créé.
 - **AUTH-23** Un profil enregistré sans le champ nom garde le nom enregistré.
 - **AUTH-24** Une page protégée demandée sans connexion avec des paramètres (`?type=ph&page=2`) redirige vers `/login` sans ces paramètres ; après connexion, l'utilisateur revient à la page demandée avec ses paramètres.
+- **AUTH-25** À l'inscription et dans le profil, un prénom vide ou fait d'espaces, un prénom ou un nom de plus de 100 caractères sont refusés avec un message sur le champ, sans rien enregistrer ; un prénom et un nom de 100 caractères sont acceptés. L'installation est testée par INS-10 ([01](01-installation.md)).
+- **AUTH-26** À l'inscription et dans le profil, un nom fait d'espaces est enregistré comme absent (`null`) ; les espaces autour du prénom sont retirés. L'installation est testée par INS-11 ([01](01-installation.md)).
+- **AUTH-27** L'historique des blocages d'une clé est oublié 24 heures après la fin de son dernier blocage (et non 24 heures après son début) ; une fois oublié, un nouveau blocage dure de nouveau 15 minutes.
+- **AUTH-28** Dans le profil, un nouveau mot de passe de moins de 8 caractères ou une confirmation différente est refusé avec un message sur le champ, et le mot de passe reste inchangé ; un mot de passe de 8 caractères est accepté.
+- **AUTH-29** Sans « se souvenir de moi », le cookie de session posé à la connexion n'a ni `Max-Age` ni `Expires` : il disparaît à la fermeture du navigateur.

@@ -13,8 +13,10 @@ const bodyParserConfig = defineConfig({
    */
   form: {
     /**
-     * Normalize empty string values to null.
+     * Trim the values, then normalize empty strings to null: a field
+     * made only of spaces arrives as null (docs/features/02-auth-profile.md).
      */
+    trimWhitespaces: true,
     convertEmptyStringsToNull: true,
 
     /**
@@ -28,8 +30,10 @@ const bodyParserConfig = defineConfig({
    */
   json: {
     /**
-     * Normalize empty string values to null.
+     * Trim the values, then normalize empty strings to null: a field
+     * made only of spaces arrives as null (docs/features/02-auth-profile.md).
      */
+    trimWhitespaces: true,
     convertEmptyStringsToNull: true,
 
     /**
@@ -58,8 +62,10 @@ const bodyParserConfig = defineConfig({
     autoProcess: ['/vivariums/:id/image'],
 
     /**
-     * Normalize empty string values to null.
+     * Trim the values, then normalize empty strings to null: a field
+     * made only of spaces arrives as null (docs/features/02-auth-profile.md).
      */
+    trimWhitespaces: true,
     convertEmptyStringsToNull: true,
 
     /**

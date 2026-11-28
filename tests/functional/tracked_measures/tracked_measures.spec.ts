@@ -160,6 +160,53 @@ test.group('Tracked measures', (group) => {
     ])
   })
 
+  test('TRK-15 changing the water type or the climate leaves the tracked measures unchanged', async ({
+    client,
+    assert,
+  }) => {
+    const user = await UserFactory.create()
+    await createVivarium(
+      client,
+      user,
+      vivariumForm({ kind: 'paludarium', waterType: 'fresh', climate: 'tropical' })
+    )
+    const vivarium = await Vivarium.findByOrFail('user_id', user.id)
+
+    /**
+     * Tracked measures as "<id> <code> <position>": the same rows, at the
+     * same positions.
+     */
+    const trackedRows = async () => {
+      const rows = await TrackedMeasure.query()
+        .where('vivarium_id', vivarium.id)
+        .preload('measureType')
+        .orderBy('position')
+      return rows.map((row) => `${row.id} ${row.measureType.code} ${row.position}`)
+    }
+    const before = await trackedRows()
+    assert.lengthOf(before, 7)
+
+    for (const profile of [
+      { waterType: 'salt', climate: 'tropical' },
+      { waterType: 'salt', climate: 'desert' },
+    ]) {
+      const response = await client
+        .put(`/vivariums/${vivarium.id}`)
+        .withInertia()
+        .header('referer', `/vivariums/${vivarium.id}/edit`)
+        .form(vivariumForm(profile))
+        .withCsrfToken()
+        .loginAs(user)
+        .redirects(0)
+
+      response.assertHeader('location', `/vivariums/${vivarium.id}`)
+      await vivarium.refresh()
+      assert.equal(vivarium.waterType, profile.waterType)
+      assert.equal(vivarium.climate, profile.climate)
+      assert.deepEqual(await trackedRows(), before)
+    }
+  })
+
   test('TRK-13 the page lists the tracked measures in order and offers the other types', async ({
     client,
     assert,

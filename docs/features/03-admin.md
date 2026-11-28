@@ -65,3 +65,4 @@ Un refus d'accès (non-admin) répond 403 avec la page `errors/forbidden`, y com
 - **ADM-13** (règle dans [02](02-auth-profile.md)) La dernière activité d'un utilisateur est mise à jour quand il utilise l'application, y compris avec une session restaurée par « se souvenir de moi », et pas plus d'une fois par heure.
 - **ADM-14** Un administrateur supprimé ou privé de ses droits entre-temps ne peut plus supprimer de compte (403) ; deux administrateurs qui se suppriment l'un l'autre au même moment laissent un administrateur : une suppression aboutit, l'autre est refusée.
 - **ADM-15** Un administrateur privé de ses droits pendant que sa requête attend ne peut plus nommer ni retirer un administrateur (403), et rien n'est modifié.
+- **ADM-16** Une invitation pour un email de plus de 254 caractères est refusée avec un message sur le champ, sans invitation créée.

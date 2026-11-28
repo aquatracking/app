@@ -92,7 +92,7 @@ La 04 a été livrée avant la table `measures`. La 06 y ajoute :
 - **MEA-13** Pour un utilisateur en `Europe/Paris`, un relevé saisi le 15 janvier à 18:00 est enregistré à 17:00 UTC, et un relevé saisi le 15 juillet à 18:00 à 16:00 UTC ; les deux s'affichent à 18:00.
 - **MEA-14** Une heure inexistante dans le fuseau de l'utilisateur (ex. 2027-03-28 02:30 à Paris) est refusée ; une heure ambiguë (2027-10-31 02:30 à Paris) est enregistrée à 00:30 UTC.
 - **MEA-15** La même mesure s'affiche à des heures locales différentes pour deux utilisateurs de fuseaux différents ; l'instant stocké ne change pas.
-- **MEA-16** Une valeur avec plus de décimales que permis par le type (ex. température `25,35`) est refusée ; `10` saisi en nitrates s'affiche « 10 » et non « 10,0 ».
+- **MEA-16** Une valeur avec plus de décimales que permis par le type (ex. température `25,35`) est refusée ; `10` saisi en nitrates s'affiche « 10 » et non « 10,0 ». L'affichage est vérifié sur la page rendue par le serveur (SSR).
 - **MEA-17** Un relevé saisi à 18:42:37 est enregistré à 18:42:00 ; un second relevé saisi à « 18:42 » le même jour avec d'autres types rejoint le même groupe.
 - **MEA-18** Un nouveau relevé qui contient un type déjà mesuré à la même minute est refusé en entier, sans créer aucune mesure. Deux envois simultanés du même relevé créent ses mesures une seule fois : le second est refusé avec le message de conflit sur la date, pas par une erreur 500.
 - **MEA-19** Déplacer un relevé vers une minute qui contient déjà un des mêmes types est refusé ; vers une minute qui ne contient que d'autres types, les deux groupes fusionnent.
@@ -107,3 +107,4 @@ La 04 a été livrée avant la table `measures`. La 06 y ajoute :
 - **MEA-28** L'historique filtré par type ne propose pas « Supprimer le relevé », seulement « Modifier » ; l'historique sans filtre propose les deux. Vérifié sur la page rendue par le serveur (SSR).
 - **MEA-29** Pour un utilisateur en `Europe/Paris`, un relevé stocké à `2027-10-31T01:30Z` (seconde occurrence de 02:30, affichée « 02:30 ») et enregistré de nouveau sans changer sa date ni son heure garde son instant, au lieu de reculer à 00:30 UTC comme un nouveau relevé saisi à « 02:30 » (MEA-14).
 - **MEA-30** Un relevé (création, modification, suppression) envoyé pendant l'archivage du bac, qui attend la fin de l'archivage, est refusé avec la notification « bac archivé », et rien n'est modifié.
+- **MEA-31** Modifier un relevé applique les règles de date de la création (MEA-5, MEA-14) : une date au-delà de 5 minutes dans le futur, une date locale antérieure à la mise en service ou une heure inexistante dans le fuseau de l'utilisateur sont refusées, et le relevé reste inchangé.

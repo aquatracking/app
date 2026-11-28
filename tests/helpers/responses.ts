@@ -16,3 +16,47 @@ export function fieldErrors(response: ApiResponse, field: string): string[] {
 export function generatedLink(response: ApiResponse): GeneratedLink {
   return response.flashMessages().generatedLink as GeneratedLink
 }
+
+/**
+ * HTML of the page as rendered by the server (SSR), without the props
+ * sent along (written before it).
+ */
+export function renderedPage(response: ApiResponse): string {
+  const [, app] = response.text().split('id="app"')
+  if (app === undefined) {
+    throw new Error(
+      `No element "#app" in the response (status ${response.status()}): not an Inertia page rendered by the server`
+    )
+  }
+  const page = app.split('</body>')[0]
+  return page.slice(page.indexOf('>') + 1)
+}
+
+const NAMED_ENTITIES: Record<string, string> = {
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+  nbsp: '\u00a0',
+}
+
+/**
+ * Text of a piece of HTML as read on screen: tags replaced by spaces,
+ * the usual named entities and the numeric ones decoded, spaces
+ * collapsed. Another named entity is left as written.
+ */
+export function textOf(html: string): string {
+  return html
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&(#x[\da-f]+|#\d+|\w+);/gi, (entity, name: string) => {
+      if (name.startsWith('#')) {
+        const code =
+          name[1].toLowerCase() === 'x' ? Number.parseInt(name.slice(2), 16) : Number(name.slice(1))
+        return String.fromCodePoint(code)
+      }
+      return NAMED_ENTITIES[name.toLowerCase()] ?? entity
+    })
+    .replace(/\s+/g, ' ')
+    .trim()
+}

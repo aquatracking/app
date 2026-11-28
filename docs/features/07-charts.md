@@ -56,7 +56,7 @@ Voir d'un coup d'œil l'état actuel d'un bac et l'évolution de chaque paramèt
 
 ## Critères d'acceptation
 - **CHT-1** Le tableau de bord affiche une tuile par mesure suivie, dans l'ordre, avec la dernière valeur et la variation par rapport à la précédente.
-- **CHT-2** Une mesure suivie sans aucune mesure affiche « Aucune mesure ».
+- **CHT-2** Une mesure suivie sans aucune mesure affiche « Aucune mesure ». Vérifié sur la page rendue par le serveur (SSR).
 - **CHT-3** Le nombre de requêtes SQL du tableau de bord est le même avec 2 et avec 15 mesures suivies.
 - **CHT-4** Le graphe renvoie les valeurs brutes de la plage demandée, et seulement celles-ci, quand elles sont au plus 500.
 - **CHT-5** Avec plus de 500 mesures sur la plage, la série contient au plus 500 points, chacun avec moyenne, min et max corrects ; les statistiques (min, max, moyenne, nombre, plus grande variation) restent calculées sur les mesures brutes, et non sur les intervalles.
@@ -66,7 +66,7 @@ Voir d'un coup d'œil l'état actuel d'un bac et l'évolution de chaque paramèt
 - **CHT-9** Les routes répondent 404 pour le vivarium d'un autre utilisateur.
 - **CHT-10** Pour un utilisateur en `Europe/Paris`, des mesures du 31 octobre 2027 entre 00:00 et 23:59 heure locale (25 heures réelles) tombent dans un même intervalle journalier, et aucune mesure du 30 ou du 1er novembre n'y est comptée ; de même pour le 28 mars 2027 (23 heures réelles). Les intervalles de moins d'un jour durent le même temps réel de part et d'autre d'un changement d'heure : sur la plage `7d` qui contient le 31 octobre 2027, chaque intervalle dure 30 minutes et les deux occurrences de 02:00–02:30 sont deux intervalles.
 - **CHT-11** ([TRK-7](05-tracked-measures.md)) Retirer un type suivi conserve ses mesures ; le réajouter fait réapparaître sa tuile avec sa dernière valeur.
-- **CHT-12** ([05](05-tracked-measures.md)) Un vivarium qui ne suit aucun type affiche l'invitation à en ajouter à la place des tuiles.
+- **CHT-12** ([05](05-tracked-measures.md)) Un vivarium qui ne suit aucun type affiche l'invitation à en ajouter à la place des tuiles. Vérifié sur la page rendue par le serveur (SSR).
 - **CHT-13** Chaque tuile reçoit les bornes de la plage `30d` en jours locaux du fuseau de l'utilisateur : début à minuit local, 29 jours avant aujourd'hui, et fin à l'instant de la requête, quelles que soient les dates des mesures. La mini-courbe les prend pour axe temporel.
 - **CHT-14** Chaque plage commence à minuit local et compte sa durée aujourd'hui compris (`7d` : aujourd'hui et les 6 jours précédents ; `3m` : le lendemain de la même date 3 mois plus tôt) ; `all` commence à minuit local du jour de la première mesure.
 - **CHT-15** Une plage agrégée est découpée en au plus 500 intervalles qui partent de son début. Les intervalles de moins d'un jour sont la plus petite durée de la liste qui le permet (le 10 mars à midi : `7d` → 30 min, `30d` → 3 h, `3m` → 6 h, `6m` → 12 h) ; au-delà, le nombre de jours de la plage plus un, divisé par 500 et arrondi à l'entier supérieur (`1y` → 1 jour, `all` de 999,5 jours → 3 jours).
