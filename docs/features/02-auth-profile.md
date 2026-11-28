@@ -24,10 +24,13 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 - Pages accessibles sans connexion : connexion, inscription par invitation, mot de passe oublié, réinitialisation. Toutes les autres redirigent vers la connexion, puis vers la page demandée après connexion.
 - Ces quatre pages sont réservées aux visiteurs : un utilisateur déjà connecté qui en ouvre une est redirigé vers l'accueil avec un message.
 
+### Champs communs
+- Mêmes règles à l'installation ([01](01-installation.md)), à l'inscription et dans le profil : prénom requis (100 caractères maximum), nom facultatif (100 caractères maximum ; vide ou fait d'espaces, il est enregistré comme absent, `null`), email au format email de 254 caractères maximum (installation, mot de passe oublié), mot de passe d'au moins 8 caractères avec confirmation, langue `fr` ou `en`, fuseau de la liste des fuseaux.
+
 ### Inscription par invitation
 - Le lien contient un token. S'il est inconnu ou expiré, la page affiche « invitation invalide ou expirée » et un renvoi vers la connexion.
 - L'email est celui de l'invitation et n'est pas modifiable.
-- Champs : prénom, nom (facultatif), mot de passe et confirmation, langue (préremplie depuis le navigateur), fuseau horaire (prérempli avec celui du navigateur, `UTC` s'il n'en donne pas, modifiable ; un nom invalide est refusé).
+- Champs : prénom, nom (facultatif), mot de passe et confirmation, langue (préremplie depuis le navigateur), fuseau horaire (liste avec recherche, préremplie après chargement avec celui du navigateur, `UTC` s'il n'en donne pas, modifiable ; un nom hors de la liste est refusé, voir [Profil](#profil)).
 - À la création du compte, l'auteur de l'invitation est enregistré comme `invited_by_id` du nouvel utilisateur, puis l'invitation est supprimée et l'utilisateur est connecté.
 - Un utilisateur déjà connecté qui ouvre un lien d'invitation est redirigé vers l'accueil avec un message (comme pour les autres pages réservées aux visiteurs) ; l'invitation reste valable.
 
@@ -39,8 +42,9 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 
 ### Profil
 - Modifiable : prénom, nom, langue (fr ou en), fuseau horaire (liste IANA avec recherche, ex. « Europe/Paris »).
-- Si le fuseau du navigateur diffère du fuseau enregistré, le profil le signale avec un bouton « Utiliser Europe/Paris » (utile après un déménagement). Rien n'est changé automatiquement.
-- Un fuseau qui n'est pas un nom IANA valide est refusé. Les décalages fixes (`+01:00`, `UTC+1`) ne sont pas proposés : ils ignoreraient le changement d'heure.
+- Si le fuseau du navigateur diffère du fuseau **enregistré** (et non de la valeur en cours de saisie), le profil le signale avec un bouton « Utiliser Europe/Paris » (utile après un déménagement). Rien n'est changé automatiquement.
+- **Liste des fuseaux** : `UTC` et les zones géographiques connues du serveur (`Intl.supportedValuesOf('timeZone')`). Le navigateur peut nommer sa zone autrement que le serveur (`Asia/Kolkata` pour `Asia/Calcutta`) : le formulaire retient alors le nom de la liste qui désigne la même zone.
+- Un fuseau hors de la liste est refusé, y compris un nom IANA qui ne désigne qu'un décalage fixe (`Etc/GMT+5`) ou une abréviation (`EST`, `CET`) : ils ignoreraient le changement d'heure. Les décalages écrits (`+01:00`, `UTC+1`) sont refusés aussi. La casse est corrigée (`europe/paris` devient `Europe/Paris`).
 - L'**email n'est pas modifiable** dans le périmètre 2.0 : c'est l'identifiant de connexion, et sans SMTP on ne peut pas vérifier une nouvelle adresse. Voir la piste dans [vision](../vision.md).
 - Changer le mot de passe demande le mot de passe actuel.
 - Changer le mot de passe supprime les remember me tokens des autres appareils.
@@ -83,9 +87,9 @@ Permettre aux personnes invitées de créer leur compte, de se connecter, de ret
 - **AUTH-11** Le formulaire de profil ne permet pas de modifier l'email : un email envoyé est ignoré. Changer le mot de passe sans le bon mot de passe actuel est refusé.
 - **AUTH-12** Choisir une langue change la langue de l'interface à la page suivante ; l'inscription par invitation enregistre la langue préremplie depuis le navigateur (`en` si elle n'est ni `fr` ni `en`).
 - **AUTH-13** Une page protégée demandée sans connexion redirige vers la connexion.
-- **AUTH-14** L'inscription par invitation enregistre le fuseau soumis ; un nom de fuseau invalide est refusé avec un message sur le champ.
+- **AUTH-14** L'inscription par invitation enregistre le fuseau soumis ; un nom hors de la liste des fuseaux (`Mars/Olympus`, `+01:00`, `Etc/GMT+5`, `EST`) est refusé avec un message sur le champ.
 - **AUTH-15** Modifier le fuseau dans le profil change l'heure affichée des mesures existantes sans modifier les instants stockés.
-- **AUTH-16** Enregistrer un fuseau non IANA (`Mars/Olympus`, `+01:00`) est refusé.
+- **AUTH-16** Enregistrer dans le profil un fuseau hors de la liste des fuseaux (`Mars/Olympus`, `+01:00`, `Etc/GMT+5`, `EST`) est refusé ; la page du profil propose exactement les fuseaux acceptés.
 - **AUTH-17** Après 20 échecs depuis une même IP sur des emails différents, toute tentative depuis cette IP est refusée, y compris pour un autre compte.
 - **AUTH-18** Un deuxième blocage de la même clé dure 30 minutes, un troisième 1 heure ; la durée ne dépasse jamais 24 heures.
 - **AUTH-19** Une connexion réussie remet à zéro le compteur IP + email.

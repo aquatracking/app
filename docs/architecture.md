@@ -94,7 +94,7 @@ tests/functional/<feature>/…
 - Formulaires avec le composant `<Form>` d'Inertia et routes typées ; les erreurs de validation reviennent par session.
 - Les messages de succès ou d'erreur métier passent par un flash `notification` partagé par le middleware Inertia. Un lien à usage unique généré par un administrateur (invitation, réinitialisation) passe par un flash `generatedLink`, seul moment où il est connu.
 - Données partagées à toutes les pages (`InertiaMiddleware`) : utilisateur courant (transformé), langue, fuseau de l'utilisateur, notification, `mailEnabled`.
-- **Fuseau horaire** : stocké sur l'utilisateur. Les formulaires d'installation et d'inscription le préremplissent avec `Intl.DateTimeFormat().resolvedOptions().timeZone` ; le serveur le valide (nom IANA) et l'enregistre. Rendu SSR et client utilisent ce même fuseau partagé : pas d'écart à l'hydratation. Pas de cookie ni de détection à chaque requête.
+- **Fuseau horaire** : stocké sur l'utilisateur. Les formulaires d'installation, d'inscription et de profil le font choisir dans une liste avec recherche, fournie par le serveur (`UTC` et `Intl.supportedValuesOf('timeZone')`, la liste que le validateur accepte). L'installation et l'inscription la préremplissent après montage avec `Intl.DateTimeFormat().resolvedOptions().timeZone`, ramené au nom de la liste qui désigne la même zone ; le serveur refuse tout nom hors de la liste et l'enregistre. Rendu SSR et client utilisent ce même fuseau partagé : pas d'écart à l'hydratation. Pas de cookie ni de détection à chaque requête.
 - Interface pensée **mobile d'abord** : le relevé se fait souvent devant le bac, téléphone en main.
 
 ## Environnement

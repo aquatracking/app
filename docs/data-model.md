@@ -37,7 +37,7 @@ users 1───* vivariums 1───* tracked_measures *───1 measure_typ
 | `password` | text | hash (scrypt) |
 | `is_admin` | boolean | défaut `false` |
 | `locale` | text | requis, `CHECK in ('fr','en')`, défaut `en` |
-| `timezone` | text | requis, nom de fuseau IANA valide (validé côté application), défaut `UTC` |
+| `timezone` | text | requis, nom de la liste des fuseaux (`UTC` ou une zone de `Intl.supportedValuesOf('timeZone')`, validé côté application), défaut `UTC` |
 | `invited_by_id` | uuid | nullable, FK `users`, `on delete set null`. Qui a envoyé l'invitation utilisée ; vide pour le premier administrateur ou si l'invitant a été supprimé. Avec `created_at` (date d'inscription), c'est l'historique « qui a invité qui, et quand » |
 | `last_seen_at` | timestamptz | nullable. Dernière activité : mise à jour par un middleware sur les requêtes authentifiées, au plus une fois par heure par utilisateur |
 
