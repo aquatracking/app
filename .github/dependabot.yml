@@ -1,0 +1,56 @@
+version: 2
+updates:
+  # Actions are pinned by commit SHA: Dependabot updates the SHA and the
+  # version comment next to it, in a single grouped pull request
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns: ['*']
+    commit-message:
+      prefix: chore
+
+  # npm dependencies (pnpm-lock.yaml). Minor and patch updates are grouped so
+  # that packages released together are upgraded together; each major update
+  # gets its own pull request, since it needs a review
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore
+    groups:
+      adonisjs:
+        patterns: ['@adonisjs/*', '@vinejs/*', '@japa/*', '@tuyau/*', 'edge.js']
+        update-types: [minor, patch]
+      frontend:
+        patterns:
+          - vue
+          - '@vue/*'
+          - vue-tsc
+          - '@inertiajs/*'
+          - vite
+          - '@vitejs/*'
+          - tailwindcss
+          - '@tailwindcss/*'
+          - reka-ui
+          - '@unovis/*'
+          - '@vueuse/*'
+          - '@lucide/*'
+        update-types: [minor, patch]
+      development:
+        dependency-type: development
+        update-types: [minor, patch]
+      production:
+        dependency-type: production
+        update-types: [minor, patch]
+    ignore:
+      # Types follow the Node major in .node-version, upgraded on purpose
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
+      # Fixed versions are ESM-only and would break source-map-resolve; see
+      # "Audit des dépendances" in docs/architecture.md
+      - dependency-name: decode-uri-component

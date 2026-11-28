@@ -1,6 +1,6 @@
 {
   "name": "aquatracking",
-  "version": "2.0.0-alpha.0",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
   "license": "MIT",
@@ -113,6 +113,12 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "@swc/core"
-    ]
+    ],
+    "auditConfig": {
+      "ignoreGhsas": [
+        "GHSA-qr28-fpjm-wq7f",
+        "GHSA-vcc3-ghjq-m6fr"
+      ]
+    }
   }
 }
