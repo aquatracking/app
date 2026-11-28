@@ -29,9 +29,20 @@ export default class DeleteUploadedFilesMiddleware {
     try {
       return await next()
     } finally {
-      await Promise.all(
-        temporaryPaths(ctx.request.allFiles()).map((path) => rm(path, { force: true }))
-      )
+      /**
+       * A file that cannot be deleted is logged: it must not turn the
+       * response into an error.
+       */
+      const paths = temporaryPaths(ctx.request.allFiles())
+      const results = await Promise.allSettled(paths.map((path) => rm(path, { force: true })))
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          ctx.logger.error(
+            { err: result.reason, path: paths[index] },
+            'Cannot delete an uploaded temporary file'
+          )
+        }
+      })
     }
   }
 }

@@ -50,7 +50,7 @@ const bodyParserConfig = defineConfig({
   multipart: {
     /**
      * Only the image of a vivarium receives a file (route pattern, not a
-     * URL). It is written in the system tmp directory, then deleted once
+     * URL, whatever the method: PUT expects a file, DELETE does not). It is written in the system tmp directory, then deleted once
      * the request is handled (delete_uploaded_files_middleware). On other
      * routes, a multipart body is not read: no file is written and the
      * body is empty (docs/architecture.md, "Envois de fichiers").
@@ -68,9 +68,9 @@ const bodyParserConfig = defineConfig({
     processManually: [],
 
     /**
-     * Maximum accepted payload size for multipart requests: an image of
-     * 15 MB at most (docs/features/04-vivariums.md), with room for the
-     * rest of the body.
+     * Maximum size of all the files of a multipart request (text fields
+     * are not counted: multiparty caps them at 2 MB): an image of 15 MB at
+     * most (docs/features/04-vivariums.md), with a margin.
      */
     limit: '16mb',
 

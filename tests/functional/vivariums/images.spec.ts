@@ -1,5 +1,7 @@
 import sharp from 'sharp'
 import { join } from 'node:path'
+import { tmpdir } from 'node:os'
+import { randomUUID } from 'node:crypto'
 import { mkdir, rm, writeFile } from 'node:fs/promises'
 import app from '@adonisjs/core/services/app'
 import InvalidImageException from '#exceptions/invalid_image_exception'
@@ -444,20 +446,38 @@ test.group('Vivarium images', (group) => {
     assert.deepEqual(await uploadedFiles(), [])
   })
 
-  test('VIV-16 a multipart body sent to another route is not read, and writes no file', async ({
+  test('VIV-16 a body over the limit leaves no temporary file, even of a file already received', async ({
+    client,
+    assert,
+  }) => {
+    /**
+     * Without session nor CSRF token: the bodyparser writes the first file,
+     * then refuses the second one, before any other middleware.
+     */
+    const response = await client
+      .put(`/vivariums/${randomUUID()}/image`)
+      .file('first', Buffer.from('small'), { filename: 'first.jpg' })
+      .file('second', Buffer.alloc(17 * 1024 * 1024), { filename: 'second.jpg' })
+      .redirects(0)
+
+    response.assertStatus(413)
+    assert.deepEqual(await uploadedFiles(), [])
+  })
+
+  test('VIV-16 a multipart body sent to another route is neither read nor written to disk', async ({
     client,
     assert,
   }) => {
     const user = await UserFactory.create()
-    const jpeg = await photo()
-
-    const login = await client
-      .post('/login')
-      .fields({ email: user.email, password: 'secret-password' })
-      .file('image', jpeg, { filename: 'photo.jpg' })
-      .redirects(0)
     /**
-     * A complete form, which would create the vivarium if it were read.
+     * Files go to a directory that does not exist: writing one would fail
+     * the request with an error.
+     */
+    process.env.TMPDIR = join(tmpdir(), 'missing')
+
+    /**
+     * A complete form with its CSRF token in a header, which would create
+     * the vivarium if its body were read.
      */
     const creation = await client
       .post('/vivariums')
@@ -474,15 +494,14 @@ test.group('Vivarium images', (group) => {
         volumeLiters: '280',
         startedOn: '2025-03-14',
       })
-      .file('image', jpeg, { filename: 'photo.jpg' })
+      .file('image', await photo(), { filename: 'photo.jpg' })
       .withCsrfToken()
       .loginAs(user)
       .redirects(0)
 
-    login.assertStatus(302)
+    creation.assertStatus(302)
     creation.assertHeader('location', '/vivariums/create')
     assert.isNull(await Vivarium.findBy('user_id', user.id))
-    assert.deepEqual(await uploadedFiles(), [])
   })
 })
 
